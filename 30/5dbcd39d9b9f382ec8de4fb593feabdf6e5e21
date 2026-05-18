@@ -1,0 +1,19 @@
+index.html
+  s_1d42129a58e151::t_0fcf149c9f0851 9-669,681-691,695-698,700-701,703,705-711,713-745,747-751,753-756,758,760-761,763-765,767-775,778-781,783-785,788-792,794-796,800-803,805-807,810-814,816-818,821,823-838,840-871,873-902,904,906-915,925-949,951-961,964-1091,1094,1096-1099
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.8",
+  "base_commit_sha": "305dbcd39d9b9f382ec8de4fb593feabdf6e5e21",
+  "prompts": {},
+  "sessions": {
+    "s_1d42129a58e151": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "20fc1c1c-f68f-41cd-9f24-8dc29480a272",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Leonardo Barreto Perez <lbarretopere@internal-admins-internal-traffic-l-6ad629-1124484131.us-east-1.elb.amazonaws.com>"
+    }
+  }
+}
