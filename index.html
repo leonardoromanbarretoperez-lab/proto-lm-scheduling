@@ -6,640 +6,667 @@
 <title>Agendamiento Flota Dedicada – Last Mile</title>
 <link href="https://fonts.googleapis.com/css2?family=Balsamiq+Sans:wght@400;700&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  :root {
-    --blue:    #3483FA;
-    --blue-lt: #3dadff;
-    --dark:    #1e1e1e;
-    --gray:    #666;
-    --border:  #ededed;
-    --green:   #00a650;
-    --bg-sec:  #f5f5f5;
-    --snack:   #1a1a1a;
-    --font:    'Balsamiq Sans', cursive;
-  }
+:root {
+  --blue:   #3483FA;
+  --blue-lt:#3dadff;
+  --dark:   #1e1e1e;
+  --gray:   #666;
+  --border: #ededed;
+  --green:  #00a650;
+  --bg-sec: #f5f5f5;
+  --snack:  #1a1a1a;
+  --font:   'Balsamiq Sans', cursive;
+}
 
-  body {
-    font-family: var(--font);
-    background: #fafafa;
-    color: var(--dark);
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 0 0 80px;
-  }
+html, body { height: 100%; }
 
-  /* ── TOP NAV ── */
-  .nav {
-    width: 100%;
-    background: #fff;
-    border-bottom: 1px solid var(--border);
-    padding: 14px 24px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  .nav-logo {
-    font-weight: 700;
-    font-size: 16px;
-    color: var(--blue);
-    letter-spacing: -0.2px;
-  }
-  .nav-sep { color: var(--border); font-size: 20px; }
-  .nav-title { font-size: 14px; color: var(--gray); }
+body {
+  font-family: var(--font);
+  background: #fafafa;
+  color: var(--dark);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
 
-  /* ── PAGE WRAPPER ── */
-  .page {
-    width: 100%;
-    max-width: 900px;
-    padding: 32px 24px 0;
-  }
+/* ── NAV ── */
+.nav {
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+  z-index: 10;
+}
+.nav-logo  { font-weight: 700; font-size: 16px; color: var(--blue); }
+.nav-sep   { color: var(--border); font-size: 20px; }
+.nav-title { font-size: 14px; color: var(--gray); }
 
-  /* ── HEADER ── */
-  .page-title {
-    font-size: 24px;
-    font-weight: 700;
-    letter-spacing: -0.456px;
-    margin-bottom: 20px;
-  }
+/* ── PAGE WRAPPER ── */
+.page-wrapper {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
 
-  /* ── WEEK FILTER BAR ── */
-  .filter-bar {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 16px;
-    flex-wrap: wrap;
-    position: relative;
-  }
-  .cal-icon {
-    cursor: pointer;
-    font-size: 18px;
-    color: var(--gray);
-    transition: color 0.15s;
-    user-select: none;
-  }
-  .cal-icon:hover { color: var(--blue); }
-  .week-tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    background: var(--bg-sec);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 4px 10px;
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--dark);
-  }
-  .week-tag .close-tag {
-    cursor: pointer;
-    color: var(--gray);
-    font-size: 12px;
-    line-height: 1;
-    margin-left: 2px;
-  }
-  .week-tag .close-tag:hover { color: #e00; }
+/* ── PAGE HEADER ── */
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 28px 24px 16px;
+  background: #fafafa;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--border);
+}
 
-  /* "+2" tag — hover triggers tooltip */
-  .more-tag {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    background: var(--bg-sec);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 4px 10px;
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--blue);
-    cursor: default;
-    user-select: none;
-  }
+.header-left { display: flex; flex-direction: column; gap: 12px; }
 
-  /* Tooltip (Screen 01) */
-  .tooltip-popup {
-    display: none;
-    position: absolute;
-    top: calc(100% + 8px);
-    left: 0;
-    background: #fff;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
-    padding: 10px 12px;
-    z-index: 100;
-    white-space: nowrap;
-    min-width: 180px;
-  }
-  .tooltip-popup .tooltip-label {
-    font-size: 11px;
-    color: var(--gray);
-    margin-bottom: 6px;
-    font-weight: 400;
-  }
-  .tooltip-popup .tooltip-tags {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-  .tooltip-popup .week-tag { font-size: 12px; }
-  .more-tag:hover .tooltip-popup { display: block; }
+.page-title {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.456px;
+}
 
-  .chevron-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--gray);
-    font-size: 18px;
-    padding: 2px 4px;
-    line-height: 1;
-    transition: color 0.15s;
-  }
-  .chevron-btn:hover { color: var(--dark); }
+.filter-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.filter-label { font-size: 14px; color: var(--gray); }
+.filter-select {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid rgba(0,0,0,0.18);
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-family: var(--font);
+  font-size: 13px;
+  color: var(--dark);
+  cursor: pointer;
+  background: #fff;
+  user-select: none;
+}
+.filter-select .chev { font-size: 10px; color: var(--gray); }
 
-  /* ── FILTER ROW ── */
-  .filter-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-  }
-  .filter-label { font-size: 14px; color: var(--gray); }
-  .filter-select {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    border: 1px solid rgba(0,0,0,0.18);
-    border-radius: 6px;
-    padding: 5px 10px;
-    font-family: var(--font);
-    font-size: 14px;
-    color: var(--dark);
-    cursor: pointer;
-    background: #fff;
-    user-select: none;
-  }
-  .filter-select .chev { font-size: 10px; color: var(--gray); }
+/* ── HEADER RIGHT ── */
+.header-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+  flex-shrink: 0;
+}
 
-  /* ── TOP ACTION ROW ── */
-  .action-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 16px;
-  }
-  .count-label { font-size: 14px; color: var(--gray); }
-  .btn-primary {
-    background: var(--blue);
-    color: #fff;
-    border: none;
-    border-radius: 6px;
-    padding: 10px 20px;
-    font-family: var(--font);
-    font-size: 14px;
-    font-weight: 700;
-    letter-spacing: 0.4px;
-    cursor: pointer;
-    transition: background 0.15s, opacity 0.15s;
-  }
-  .btn-primary:hover { background: #2a6fd6; }
-  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+/* ── WEEK BAR (top-right) ── */
+.week-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.cal-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  color: var(--gray);
+  padding: 2px;
+  line-height: 1;
+  transition: color 0.15s;
+}
+.cal-btn:hover { color: var(--blue); }
 
-  /* ── FACILITY LIST ── */
-  .facility-list { display: flex; flex-direction: column; gap: 8px; }
+.week-tags { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
 
-  .facility-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: #fff;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 16px 20px;
-    transition: box-shadow 0.15s;
-    gap: 12px;
-  }
-  .facility-row:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
+.week-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--dark);
+  white-space: nowrap;
+}
+.week-tag .xt {
+  cursor: pointer;
+  color: var(--gray);
+  font-size: 11px;
+  margin-left: 2px;
+  line-height: 1;
+}
+.week-tag .xt:hover { color: #c00; }
 
-  .facility-info { flex: 1; min-width: 0; }
-  .facility-name {
-    font-size: 18px;
-    font-weight: 700;
-    margin-bottom: 4px;
-  }
-  .facility-total { font-size: 14px; color: var(--gray); margin-bottom: 2px; }
-  .facility-types { font-size: 13px; color: var(--gray); }
+.more-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--blue);
+  cursor: default;
+  user-select: none;
+  position: relative;
+}
+/* tooltip on hover for +N tag */
+.more-tag .tooltip-popup {
+  display: none;
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  padding: 10px 12px;
+  z-index: 200;
+  min-width: 160px;
+}
+.more-tag:hover .tooltip-popup { display: block; }
+.tooltip-popup .tip-label {
+  font-size: 11px;
+  color: var(--gray);
+  margin-bottom: 6px;
+  font-weight: 400;
+}
+.tooltip-popup .tip-tags { display: flex; flex-direction: column; gap: 4px; }
 
-  .facility-status {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-shrink: 0;
-  }
-  .status-dot {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-  .status-dot.pending  { background: var(--blue); }
-  .status-dot.reviewed { background: var(--green); }
-  .status-text { font-size: 12px; font-weight: 700; }
-  .status-text.pending  { color: var(--blue); }
-  .status-text.reviewed { color: var(--green); }
+.chev-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  color: var(--gray);
+  padding: 2px 4px;
+  line-height: 1;
+  transition: color 0.15s, transform 0.2s;
+}
+.chev-btn:hover { color: var(--dark); }
+.chev-btn.open { transform: rotate(180deg); }
 
-  .btn-revisar {
-    background: #fff;
-    color: var(--blue);
-    border: 1px solid var(--blue);
-    border-radius: 6px;
-    padding: 7px 16px;
-    font-family: var(--font);
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: background 0.15s, color 0.15s;
-    flex-shrink: 0;
-  }
-  .btn-revisar:hover { background: var(--blue); color: #fff; }
-  .btn-revisar.hidden { visibility: hidden; }
+/* ── WEEK PICKER DROPDOWN ── */
+.picker-dropdown {
+  display: none;
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.14);
+  padding: 18px 18px 16px;
+  width: 320px;
+  z-index: 300;
+}
+.picker-dropdown.open { display: block; }
 
-  /* ── WEEK PICKER OVERLAY (Screen 02) ── */
-  .overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    z-index: 200;
-  }
-  .overlay.active { display: block; }
-  .overlay-backdrop {
-    position: absolute;
-    inset: 0;
-    background: rgba(0,0,0,0.18);
-  }
-  .picker-card {
-    position: absolute;
-    top: 140px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #fff;
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 20px;
-    width: 340px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.14);
-    z-index: 1;
-  }
-  .picker-nav {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 16px;
-  }
-  .picker-nav button {
-    background: none;
-    border: none;
-    font-size: 18px;
-    cursor: pointer;
-    color: var(--gray);
-    padding: 2px 6px;
-    line-height: 1;
-  }
-  .picker-nav button:hover { color: var(--dark); }
-  .picker-month {
-    font-size: 15px;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    cursor: pointer;
-  }
-  .picker-month .chev { font-size: 11px; color: var(--gray); }
+.picker-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.picker-nav button {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  color: var(--gray);
+  padding: 2px 6px;
+  line-height: 1;
+  font-family: var(--font);
+}
+.picker-nav button:hover { color: var(--dark); }
+.picker-month {
+  font-size: 14px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+.picker-month .chev { font-size: 10px; color: var(--gray); }
 
-  .weekday-header {
-    display: grid;
-    grid-template-columns: 64px repeat(7, 1fr);
-    gap: 2px;
-    margin-bottom: 8px;
-  }
-  .weekday-header span {
-    font-size: 11px;
-    color: var(--gray);
-    text-align: center;
-    font-weight: 400;
-  }
-  .weekday-header .wk-label { text-align: left; padding-left: 4px; }
+.wk-grid {
+  display: grid;
+  grid-template-columns: 56px repeat(7, 1fr);
+  gap: 2px;
+}
+.wk-header { display: contents; }
+.wk-header span {
+  font-size: 10px;
+  color: var(--gray);
+  text-align: center;
+  padding-bottom: 6px;
+}
+.wk-header .lbl { text-align: left; }
 
-  .week-row {
-    display: grid;
-    grid-template-columns: 64px repeat(7, 1fr);
-    gap: 2px;
-    margin-bottom: 4px;
-    border-radius: 6px;
-    overflow: hidden;
-  }
-  .week-row-label {
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--blue);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    padding: 4px 4px;
-    border-radius: 6px 0 0 6px;
-    transition: background 0.12s;
-    user-select: none;
-  }
-  .week-row.selected .week-row-label { background: #e8f0ff; }
-  .week-row-label:hover { background: #eef4ff; }
+.wk-row { display: contents; cursor: pointer; }
+.wk-row-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--blue);
+  display: flex;
+  align-items: center;
+  padding: 4px;
+  border-radius: 4px 0 0 4px;
+  transition: background 0.12s;
+  cursor: pointer;
+  user-select: none;
+}
+.wk-row-label:hover { background: #eef4ff; }
+.wk-day {
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: var(--dark);
+  border-radius: 4px;
+}
+/* selected row highlight applied via JS */
+.wk-row.sel .wk-row-label { background: #deeaff; }
+.wk-row.sel .wk-day { background: #deeaff; color: var(--blue); font-weight: 700; }
 
-  .day-cell {
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 13px;
-    color: var(--dark);
-    border-radius: 4px;
-  }
-  .week-row.selected .day-cell { background: #e8f0ff; color: var(--blue); font-weight: 700; }
+.picker-footer {
+  margin-top: 14px;
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+}
+.btn-aplicar {
+  width: 100%;
+  background: var(--blue);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 11px;
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btn-aplicar:hover { background: #2a6fd6; }
 
-  .picker-footer {
-    margin-top: 16px;
-    border-top: 1px solid var(--border);
-    padding-top: 14px;
-  }
-  .btn-aplicar {
-    width: 100%;
-    background: var(--blue);
-    color: #fff;
-    border: none;
-    border-radius: 6px;
-    padding: 12px;
-    font-family: var(--font);
-    font-size: 14px;
-    font-weight: 700;
-    letter-spacing: 0.4px;
-    cursor: pointer;
-    transition: background 0.15s;
-  }
-  .btn-aplicar:hover { background: #2a6fd6; }
+/* ── ACTION ROW ── */
+.action-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.count-label { font-size: 14px; color: var(--gray); white-space: nowrap; }
+.btn-primary {
+  background: var(--blue);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 9px 18px;
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+.btn-primary:hover { background: #2a6fd6; }
 
-  /* ── SIDE PANEL (Screens 04 / 05) ── */
-  .panel-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    z-index: 300;
-  }
-  .panel-overlay.active { display: block; }
-  .panel-backdrop {
-    position: absolute;
-    inset: 0;
-    background: rgba(0,0,0,0.22);
-  }
-  .side-panel {
-    position: absolute;
-    top: 0;
-    right: 0;
-    height: 100%;
-    width: 420px;
-    background: #fff;
-    box-shadow: -4px 0 24px rgba(0,0,0,0.13);
-    display: flex;
-    flex-direction: column;
-    z-index: 1;
-    overflow: hidden;
-  }
-  .panel-header {
-    padding: 20px 20px 16px;
-    border-bottom: 1px solid var(--border);
-    flex-shrink: 0;
-  }
-  .panel-header-top {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 8px;
-  }
-  .panel-title { font-size: 18px; font-weight: 700; line-height: 1.3; flex: 1; }
-  .panel-close {
-    background: none;
-    border: none;
-    font-size: 20px;
-    cursor: pointer;
-    color: var(--gray);
-    line-height: 1;
-    padding: 0;
-    flex-shrink: 0;
-  }
-  .panel-close:hover { color: var(--dark); }
-  .panel-badge {
-    display: inline-block;
-    background: #e8f0ff;
-    color: var(--blue);
-    font-size: 11px;
-    font-weight: 700;
-    border-radius: 4px;
-    padding: 3px 8px;
-    letter-spacing: 0.3px;
-    margin-bottom: 6px;
-  }
-  .panel-subtitle { font-size: 14px; color: var(--gray); }
-  .panel-subtitle strong { color: var(--dark); }
+/* ── MAIN LAYOUT: split pane ── */
+.main-layout {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
 
-  .panel-body {
-    flex: 1;
-    overflow-y: auto;
-    padding: 16px 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
+/* ── LIST COLUMN ── */
+.list-col {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 24px 32px;
+  transition: flex 0.3s ease;
+  min-width: 0;
+}
+.list-col.compressed {
+  flex: 0 0 340px;
+  min-width: 280px;
+}
 
-  .vehicle-card {
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    overflow: hidden;
-  }
-  .vehicle-card-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 16px;
-    cursor: pointer;
-    user-select: none;
-    background: var(--bg-sec);
-    transition: background 0.12s;
-  }
-  .vehicle-card-header:hover { background: #ededed; }
-  .vehicle-card-name {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 15px;
-    font-weight: 700;
-  }
-  .vehicle-card-count {
-    font-size: 14px;
-    color: var(--green);
-    font-weight: 700;
-  }
-  .card-chev { font-size: 14px; color: var(--gray); transition: transform 0.2s; }
-  .vehicle-card.open .card-chev { transform: rotate(180deg); }
+.facility-list { display: flex; flex-direction: column; gap: 8px; }
 
-  .vehicle-card-body {
-    display: none;
-    padding: 14px 16px;
-    background: #fff;
-  }
-  .vehicle-card.open .vehicle-card-body { display: block; }
+.facility-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 18px;
+  gap: 10px;
+  cursor: pointer;
+  transition: box-shadow 0.15s, border-color 0.15s;
+}
+.facility-row:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+.facility-row.active-row { border-color: var(--blue); box-shadow: 0 0 0 2px rgba(52,131,250,0.2); }
 
-  .ciclo-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-bottom: 10px;
-  }
-  .ciclo-label { font-size: 13px; color: var(--gray); }
-  .ciclo-select {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 4px 8px;
-    font-family: var(--font);
-    font-size: 13px;
-    color: var(--dark);
-    cursor: pointer;
-    background: #fff;
-  }
-  .ciclo-select .chev { font-size: 10px; color: var(--gray); }
+.facility-info { flex: 1; min-width: 0; }
+.facility-name { font-size: 16px; font-weight: 700; margin-bottom: 3px; }
+.facility-meta { font-size: 12px; color: var(--gray); }
+/* hide meta when list compressed */
+.list-col.compressed .facility-meta { display: none; }
+.list-col.compressed .facility-name { font-size: 14px; margin-bottom: 0; }
+.list-col.compressed .facility-row { padding: 10px 14px; }
 
-  .day-inputs {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    flex-wrap: wrap;
-  }
-  .day-group { display: flex; flex-direction: column; align-items: center; gap: 3px; }
-  .day-group label { font-size: 10px; color: var(--gray); text-transform: uppercase; }
-  .day-group input {
-    width: 36px;
-    height: 32px;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    text-align: center;
-    font-family: var(--font);
-    font-size: 13px;
-    color: var(--dark);
-    background: var(--bg-sec);
-  }
-  .day-group input:focus { outline: none; border-color: var(--blue); background: #fff; }
+.facility-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.status-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.status-dot.pending  { background: var(--blue); }
+.status-dot.reviewed { background: var(--green); }
+.status-text { font-size: 12px; font-weight: 700; white-space: nowrap; }
+.status-text.pending  { color: var(--blue); }
+.status-text.reviewed { color: var(--green); }
 
-  .btn-add-ciclo {
-    background: none;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 6px 12px;
-    font-family: var(--font);
-    font-size: 13px;
-    color: var(--blue);
-    cursor: pointer;
-    margin-top: 8px;
-    transition: background 0.12s;
-  }
-  .btn-add-ciclo:hover { background: #eef4ff; }
+.btn-revisar {
+  background: #fff;
+  color: var(--blue);
+  border: 1px solid var(--blue);
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+.btn-revisar:hover { background: var(--blue); color: #fff; }
+/* hide "Revisar" button when panel open (card click selects instead) */
+.list-col.compressed .btn-revisar { display: none; }
 
-  .panel-footer {
-    padding: 16px 20px;
-    border-top: 1px solid var(--border);
-    flex-shrink: 0;
-  }
-  .btn-revisado {
-    width: 100%;
-    background: var(--blue);
-    color: #fff;
-    border: none;
-    border-radius: 6px;
-    padding: 13px;
-    font-family: var(--font);
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    letter-spacing: 0.3px;
-    transition: background 0.15s;
-  }
-  .btn-revisado:hover { background: #2a6fd6; }
+/* ── PANEL COLUMN ── */
+.panel-col {
+  flex: 0 0 0;
+  width: 0;
+  overflow: hidden;
+  transition: flex 0.3s ease;
+  border-left: 1px solid transparent;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+}
+.panel-col.active {
+  flex: 0 0 620px;
+  border-left-color: var(--border);
+}
 
-  /* ── SNACKBAR (Screen 05) ── */
-  .snackbar {
-    position: fixed;
-    bottom: 32px;
-    left: 50%;
-    transform: translateX(-50%) translateY(80px);
-    background: var(--snack);
-    color: #fff;
-    border-radius: 10px;
-    padding: 14px 20px;
-    width: 600px;
-    max-width: calc(100vw - 32px);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    box-shadow: 0 6px 24px rgba(0,0,0,0.28);
-    z-index: 500;
-    transition: transform 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s;
-    opacity: 0;
-    pointer-events: none;
-  }
-  .snackbar.show {
-    transform: translateX(-50%) translateY(0);
-    opacity: 1;
-    pointer-events: auto;
-  }
-  .snackbar-text { font-size: 14px; line-height: 1.4; flex: 1; }
-  .snackbar-text strong { font-weight: 700; }
-  .snackbar-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-  .btn-snack-ghost {
-    background: none;
-    border: none;
-    color: var(--blue-lt);
-    font-family: var(--font);
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    padding: 6px 10px;
-    border-radius: 4px;
-    transition: background 0.12s;
-    white-space: nowrap;
-  }
-  .btn-snack-ghost:hover { background: rgba(255,255,255,0.08); }
-  .btn-snack-filled {
-    background: var(--blue);
-    border: none;
-    color: #fff;
-    font-family: var(--font);
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    padding: 6px 14px;
-    border-radius: 6px;
-    transition: background 0.12s;
-    white-space: nowrap;
-  }
-  .btn-snack-filled:hover { background: #2a6fd6; }
+.side-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-width: 620px;
+}
 
-  /* vehicle icon placeholder */
-  .v-icon { font-size: 18px; }
+.panel-header {
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.panel-header-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+.panel-badge {
+  display: inline-block;
+  background: #e8f0ff;
+  color: var(--blue);
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 4px;
+  padding: 2px 7px;
+  letter-spacing: 0.3px;
+  margin-bottom: 5px;
+}
+.panel-title {
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+.panel-close {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: var(--gray);
+  line-height: 1;
+  padding: 0;
+  flex-shrink: 0;
+  transition: color 0.15s;
+}
+.panel-close:hover { color: var(--dark); }
+.panel-subtitle { font-size: 14px; color: var(--gray); }
+.panel-subtitle strong { color: var(--dark); }
+
+.panel-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* vehicle cards */
+.vehicle-card {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.vehicle-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: var(--bg-sec);
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.12s;
+}
+.vehicle-card-header:hover { background: #e6e6e6; }
+.vehicle-card-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 700;
+}
+.vehicle-card-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.vehicle-count { font-size: 13px; color: var(--green); font-weight: 700; }
+.card-chev { font-size: 13px; color: var(--gray); transition: transform 0.2s; }
+.vehicle-card.open .card-chev { transform: rotate(180deg); }
+
+.vehicle-card-body {
+  display: none;
+  padding: 14px 16px;
+  background: #fff;
+}
+.vehicle-card.open .vehicle-card-body { display: block; }
+
+.ciclo-section { margin-bottom: 8px; }
+.ciclo-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  background: var(--bg-sec);
+  border-radius: 6px;
+  padding: 10px 12px;
+  flex-wrap: wrap;
+}
+.ciclo-dropdown {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 110px;
+}
+.ciclo-dropdown label { font-size: 12px; color: var(--gray); }
+.ciclo-select-box {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  border: 1px solid rgba(0,0,0,0.22);
+  border-radius: 6px;
+  padding: 10px 10px;
+  font-family: var(--font);
+  font-size: 14px;
+  color: var(--dark);
+  cursor: pointer;
+  background: #fff;
+  height: 44px;
+}
+.ciclo-select-box .chev { font-size: 10px; color: var(--gray); }
+
+.day-inputs { display: flex; align-items: flex-end; gap: 8px; flex-wrap: wrap; }
+.day-group { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.day-group label { font-size: 10px; color: var(--gray); text-transform: uppercase; }
+.day-group input {
+  width: 40px;
+  height: 44px;
+  border: 1px solid rgba(0,0,0,0.22);
+  border-radius: 6px;
+  text-align: center;
+  font-family: var(--font);
+  font-size: 14px;
+  color: var(--dark);
+  background: #fff;
+}
+.day-group input:focus { outline: none; border-color: var(--blue); }
+
+.btn-add-ciclo {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 7px 14px;
+  font-family: var(--font);
+  font-size: 13px;
+  color: var(--blue);
+  cursor: pointer;
+  margin-top: 10px;
+  transition: background 0.12s;
+}
+.btn-add-ciclo:hover { background: #eef4ff; }
+
+.panel-footer {
+  padding: 14px 20px;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+  background: #fff;
+  box-shadow: 0 -2px 8px rgba(0,0,0,0.06);
+}
+.btn-revisado {
+  width: 100%;
+  background: var(--blue);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 12px;
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.3px;
+  transition: background 0.15s;
+}
+.btn-revisado:hover { background: #2a6fd6; }
+
+/* ── SNACKBAR ── */
+.snackbar {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--snack);
+  color: #fff;
+  border-radius: 10px;
+  padding: 14px 20px;
+  width: 600px;
+  max-width: calc(100vw - 32px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.28);
+  z-index: 500;
+  transition: transform 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s;
+  opacity: 0;
+  pointer-events: none;
+}
+.snackbar.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+.snackbar-text { font-size: 14px; line-height: 1.4; flex: 1; }
+.snackbar-text strong { font-weight: 700; }
+.snackbar-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.btn-snack-ghost {
+  background: none;
+  border: none;
+  color: var(--blue-lt);
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 4px;
+  transition: background 0.12s;
+  white-space: nowrap;
+}
+.btn-snack-ghost:hover { background: rgba(255,255,255,0.08); }
+.btn-snack-filled {
+  background: var(--blue);
+  border: none;
+  color: #fff;
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 6px 14px;
+  border-radius: 6px;
+  transition: background 0.12s;
+  white-space: nowrap;
+}
+.btn-snack-filled:hover { background: #2a6fd6; }
 </style>
 </head>
 <body>
@@ -651,259 +678,241 @@
   <span class="nav-title">Frota Fixa FM / LM</span>
 </nav>
 
-<!-- MAIN PAGE -->
-<div class="page">
-  <h1 class="page-title">Agendamiento flota dedicada Last Mile</h1>
+<div class="page-wrapper">
 
-  <!-- WEEK FILTER BAR -->
-  <div class="filter-bar">
-    <!-- calendar icon — click opens picker -->
-    <span class="cal-icon" id="calIcon" title="Seleccionar semanas">📅</span>
-
-    <span class="week-tag">Semana 22 <span class="close-tag">×</span></span>
-    <span class="week-tag">Semana 23 <span class="close-tag">×</span></span>
-
-    <!-- "+2" tag with tooltip on hover -->
-    <span class="more-tag" id="moreTag">
-      +2
-      <div class="tooltip-popup" id="tooltipPopup">
-        <div class="tooltip-label">Semanas adicionales seleccionadas</div>
-        <div class="tooltip-tags">
-          <span class="week-tag">Semana 24 <span class="close-tag">×</span></span>
-          <span class="week-tag">Semana 25 <span class="close-tag">×</span></span>
-        </div>
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div class="header-left">
+      <h1 class="page-title">Agendamiento flota dedicada Last Mile</h1>
+      <div class="filter-row">
+        <span class="filter-label">Filtros:</span>
+        <span class="filter-select">Región <span class="chev">▾</span></span>
+        <span class="filter-select">Facilitie <span class="chev">▾</span></span>
+        <span class="filter-select">Status <span class="chev">▾</span></span>
       </div>
-    </span>
-
-    <!-- chevron — also opens picker -->
-    <button class="chevron-btn" id="chevronBtn" title="Ver semanas">⌄</button>
-  </div>
-
-  <!-- FILTER ROW -->
-  <div class="filter-row">
-    <span class="filter-label">Filtros:</span>
-    <span class="filter-select">Región <span class="chev">▾</span></span>
-    <span class="filter-select">Facilitie <span class="chev">▾</span></span>
-    <span class="filter-select">Status <span class="chev">▾</span></span>
-  </div>
-
-  <!-- ACTION ROW -->
-  <div class="action-row">
-    <span class="count-label">Viendo 12 de 12 facilities</span>
-    <button class="btn-primary">AGENDAR VEHÍCULOS</button>
-  </div>
-
-  <!-- FACILITY LIST -->
-  <div class="facility-list" id="facilityList">
-
-    <!-- SSC05 — will change status on "Marcar como revisado" -->
-    <div class="facility-row" id="ssc05-row">
-      <div class="facility-info">
-        <div class="facility-name">SSC05</div>
-        <div class="facility-total">Total semana: 168 vehículos</div>
-        <div class="facility-types">72 Large vans · 70 Small vans · 18 Utilitarios</div>
-      </div>
-      <div class="facility-status" id="ssc05-status">
-        <span class="status-dot pending"></span>
-        <span class="status-text pending">Por revisar</span>
-      </div>
-      <button class="btn-revisar" id="ssc05-btn" onclick="openPanel('SSC05')">Revisar</button>
     </div>
 
-    <div class="facility-row">
-      <div class="facility-info">
-        <div class="facility-name">SSC04</div>
-        <div class="facility-total">Total semana: 168 vehículos</div>
-        <div class="facility-types">72 Large vans · 70 Small vans · 18 Utilitarios</div>
-      </div>
-      <div class="facility-status">
-        <span class="status-dot pending"></span>
-        <span class="status-text pending">Por revisar</span>
-      </div>
-      <button class="btn-revisar">Revisar</button>
-    </div>
+    <div class="header-right">
+      <!-- WEEK BAR (dropdown anchor) -->
+      <div class="week-bar" id="weekBar">
+        <button class="cal-btn" onclick="togglePicker(event)" title="Seleccionar semanas">📅</button>
 
-    <div class="facility-row">
-      <div class="facility-info">
-        <div class="facility-name">SSC03</div>
-        <div class="facility-total">Total semana: 168 vehículos</div>
-        <div class="facility-types">72 Large vans · 70 Small vans · 18 Utilitarios</div>
-      </div>
-      <div class="facility-status">
-        <span class="status-dot pending"></span>
-        <span class="status-text pending">Por revisar</span>
-      </div>
-      <button class="btn-revisar">Revisar</button>
-    </div>
+        <!-- dynamic week tag pills -->
+        <div class="week-tags" id="weekTags"></div>
 
-    <!-- SSC02 — also has "Revisar" but opens panel for SSC02 to demo Screen 04 -->
-    <div class="facility-row">
-      <div class="facility-info">
-        <div class="facility-name">SSC02</div>
-        <div class="facility-total">Total semana: 168 vehículos</div>
-        <div class="facility-types">72 Large vans · 70 Small vans · 18 Utilitarios</div>
-      </div>
-      <div class="facility-status">
-        <span class="status-dot pending"></span>
-        <span class="status-text pending">Por revisar</span>
-      </div>
-      <button class="btn-revisar" onclick="openPanel('SSC02')">Revisar</button>
-    </div>
+        <button class="chev-btn" id="chevBtn" onclick="togglePicker(event)">▾</button>
 
-    <div class="facility-row">
-      <div class="facility-info">
-        <div class="facility-name">SSC01</div>
-        <div class="facility-total">Total semana: 168 vehículos</div>
-        <div class="facility-types">72 Large vans · 70 Small vans · 18 Utilitarios</div>
-      </div>
-      <div class="facility-status">
-        <span class="status-dot pending"></span>
-        <span class="status-text pending">Por revisar</span>
-      </div>
-      <button class="btn-revisar">Revisar</button>
-    </div>
-
-  </div><!-- /facility-list -->
-</div><!-- /page -->
-
-
-<!-- ════════════════════════════════════════
-     WEEK PICKER OVERLAY (Screen 02)
-════════════════════════════════════════ -->
-<div class="overlay" id="pickerOverlay">
-  <div class="overlay-backdrop" onclick="closePicker()"></div>
-  <div class="picker-card">
-    <div class="picker-nav">
-      <button>‹</button>
-      <div class="picker-month">Mayo 2026 <span class="chev">▾</span></div>
-      <button>›</button>
-    </div>
-
-    <div class="weekday-header">
-      <span class="wk-label">Sem.</span>
-      <span>Lun</span><span>Mar</span><span>Mié</span>
-      <span>Jue</span><span>Vie</span><span>Sáb</span><span>Dom</span>
-    </div>
-
-    <!-- Week rows — click the "Sem XX" label to toggle selection -->
-    <div class="week-row selected" id="wk22" onclick="toggleWeek(this)">
-      <div class="week-row-label">Sem 22</div>
-      <div class="day-cell">27</div><div class="day-cell">28</div><div class="day-cell">29</div>
-      <div class="day-cell">30</div><div class="day-cell">1</div><div class="day-cell">2</div><div class="day-cell">3</div>
-    </div>
-    <div class="week-row selected" id="wk23" onclick="toggleWeek(this)">
-      <div class="week-row-label">Sem 23</div>
-      <div class="day-cell">4</div><div class="day-cell">5</div><div class="day-cell">6</div>
-      <div class="day-cell">7</div><div class="day-cell">8</div><div class="day-cell">9</div><div class="day-cell">10</div>
-    </div>
-    <div class="week-row" id="wk24" onclick="toggleWeek(this)">
-      <div class="week-row-label">Sem 24</div>
-      <div class="day-cell">11</div><div class="day-cell">12</div><div class="day-cell">13</div>
-      <div class="day-cell">14</div><div class="day-cell">15</div><div class="day-cell">16</div><div class="day-cell">17</div>
-    </div>
-    <div class="week-row" id="wk25" onclick="toggleWeek(this)">
-      <div class="week-row-label">Sem 25</div>
-      <div class="day-cell">18</div><div class="day-cell">19</div><div class="day-cell">20</div>
-      <div class="day-cell">21</div><div class="day-cell">22</div><div class="day-cell">23</div><div class="day-cell">24</div>
-    </div>
-
-    <div class="picker-footer">
-      <button class="btn-aplicar" onclick="closePicker()">APLICAR</button>
-    </div>
-  </div>
-</div>
-
-
-<!-- ════════════════════════════════════════
-     SIDE PANEL OVERLAY (Screens 04 / 05)
-════════════════════════════════════════ -->
-<div class="panel-overlay" id="panelOverlay">
-  <div class="panel-backdrop" onclick="closePanel()"></div>
-  <div class="side-panel">
-
-    <div class="panel-header">
-      <div class="panel-header-top">
-        <div>
-          <div class="panel-badge">POR REVISAR</div>
-          <div class="panel-title" id="panelTitle">Veículos da semana para SSC02</div>
-        </div>
-        <button class="panel-close" onclick="closePanel()">×</button>
-      </div>
-      <div class="panel-subtitle"><strong>168 veículos</strong></div>
-    </div>
-
-    <div class="panel-body">
-
-      <!-- Large van card -->
-      <div class="vehicle-card open" id="card-large">
-        <div class="vehicle-card-header" onclick="toggleCard('card-large')">
-          <div class="vehicle-card-name">
-            <span class="v-icon">🚐</span> Large van
+        <!-- WEEK PICKER DROPDOWN -->
+        <div class="picker-dropdown" id="pickerDropdown">
+          <div class="picker-nav">
+            <button>‹</button>
+            <div class="picker-month">Mayo 2026 <span class="chev">▾</span></div>
+            <button>›</button>
           </div>
-          <div style="display:flex;align-items:center;gap:12px">
-            <span class="vehicle-card-count">72/72 veículos</span>
-            <span class="card-chev">▲</span>
+
+          <div class="wk-grid">
+            <!-- header row -->
+            <div class="wk-header">
+              <span class="lbl">Sem.</span>
+              <span>Lun</span><span>Mar</span><span>Mié</span>
+              <span>Jue</span><span>Vie</span><span>Sáb</span><span>Dom</span>
+            </div>
+
+            <!-- week 22 -->
+            <div class="wk-row" id="row22" onclick="toggleWeek(22)">
+              <div class="wk-row-label">Sem 22</div>
+              <div class="wk-day">27</div><div class="wk-day">28</div><div class="wk-day">29</div>
+              <div class="wk-day">30</div><div class="wk-day">1</div><div class="wk-day">2</div><div class="wk-day">3</div>
+            </div>
+            <!-- week 23 -->
+            <div class="wk-row" id="row23" onclick="toggleWeek(23)">
+              <div class="wk-row-label">Sem 23</div>
+              <div class="wk-day">4</div><div class="wk-day">5</div><div class="wk-day">6</div>
+              <div class="wk-day">7</div><div class="wk-day">8</div><div class="wk-day">9</div><div class="wk-day">10</div>
+            </div>
+            <!-- week 24 -->
+            <div class="wk-row" id="row24" onclick="toggleWeek(24)">
+              <div class="wk-row-label">Sem 24</div>
+              <div class="wk-day">11</div><div class="wk-day">12</div><div class="wk-day">13</div>
+              <div class="wk-day">14</div><div class="wk-day">15</div><div class="wk-day">16</div><div class="wk-day">17</div>
+            </div>
+            <!-- week 25 -->
+            <div class="wk-row" id="row25" onclick="toggleWeek(25)">
+              <div class="wk-row-label">Sem 25</div>
+              <div class="wk-day">18</div><div class="wk-day">19</div><div class="wk-day">20</div>
+              <div class="wk-day">21</div><div class="wk-day">22</div><div class="wk-day">23</div><div class="wk-day">24</div>
+            </div>
+          </div>
+
+          <div class="picker-footer">
+            <button class="btn-aplicar" onclick="applyPicker()">APLICAR</button>
+          </div>
+        </div><!-- /picker-dropdown -->
+      </div><!-- /week-bar -->
+
+      <div class="action-row">
+        <span class="count-label">Viendo 12 de 12 facilities</span>
+        <button class="btn-primary">AGENDAR VEHÍCULOS</button>
+      </div>
+    </div>
+  </div><!-- /page-header -->
+
+  <!-- MAIN SPLIT LAYOUT -->
+  <div class="main-layout">
+
+    <!-- LEFT: Facility list -->
+    <div class="list-col" id="listCol">
+      <div class="facility-list">
+
+        <div class="facility-row" id="row-SSC05" onclick="openPanel('SSC05')">
+          <div class="facility-info">
+            <div class="facility-name">SSC05</div>
+            <div class="facility-meta">Total semana: 168 vehículos<br>72 Large vans · 70 Small vans · 18 Utilitarios</div>
+          </div>
+          <div class="facility-right">
+            <span class="status-dot pending" id="dot-SSC05"></span>
+            <span class="status-text pending" id="stxt-SSC05">Por revisar</span>
           </div>
         </div>
-        <div class="vehicle-card-body">
-          <div class="ciclo-row">
-            <span class="ciclo-label">Ciclo</span>
-            <span class="ciclo-select">AM 1 <span class="chev">▾</span></span>
+
+        <div class="facility-row" id="row-SSC04" onclick="openPanel('SSC04')">
+          <div class="facility-info">
+            <div class="facility-name">SSC04</div>
+            <div class="facility-meta">Total semana: 168 vehículos<br>72 Large vans · 70 Small vans · 18 Utilitarios</div>
           </div>
-          <div class="day-inputs">
-            <div class="day-group"><label>Seg</label><input type="number" value="6" min="0"></div>
-            <div class="day-group"><label>Ter</label><input type="number" value="6" min="0"></div>
-            <div class="day-group"><label>Qua</label><input type="number" value="6" min="0"></div>
-            <div class="day-group"><label>Qui</label><input type="number" value="6" min="0"></div>
-            <div class="day-group"><label>Sex</label><input type="number" value="6" min="0"></div>
-            <div class="day-group"><label>Sáb</label><input type="number" value="6" min="0"></div>
-            <div class="day-group"><label>Dom</label><input type="number" value="6" min="0"></div>
+          <div class="facility-right">
+            <span class="status-dot pending"></span>
+            <span class="status-text pending">Por revisar</span>
           </div>
-          <button class="btn-add-ciclo">+ Adicionar ciclo</button>
+        </div>
+
+        <div class="facility-row" id="row-SSC03" onclick="openPanel('SSC03')">
+          <div class="facility-info">
+            <div class="facility-name">SSC03</div>
+            <div class="facility-meta">Total semana: 168 vehículos<br>72 Large vans · 70 Small vans · 18 Utilitarios</div>
+          </div>
+          <div class="facility-right">
+            <span class="status-dot pending"></span>
+            <span class="status-text pending">Por revisar</span>
+          </div>
+        </div>
+
+        <div class="facility-row" id="row-SSC02" onclick="openPanel('SSC02')">
+          <div class="facility-info">
+            <div class="facility-name">SSC02</div>
+            <div class="facility-meta">Total semana: 168 vehículos<br>72 Large vans · 70 Small vans · 18 Utilitarios</div>
+          </div>
+          <div class="facility-right">
+            <span class="status-dot pending"></span>
+            <span class="status-text pending">Por revisar</span>
+          </div>
+        </div>
+
+        <div class="facility-row" id="row-SSC01" onclick="openPanel('SSC01')">
+          <div class="facility-info">
+            <div class="facility-name">SSC01</div>
+            <div class="facility-meta">Total semana: 168 vehículos<br>72 Large vans · 70 Small vans · 18 Utilitarios</div>
+          </div>
+          <div class="facility-right">
+            <span class="status-dot pending"></span>
+            <span class="status-text pending">Por revisar</span>
+          </div>
+        </div>
+
+      </div>
+    </div><!-- /list-col -->
+
+    <!-- RIGHT: Detail panel (hidden initially) -->
+    <div class="panel-col" id="panelCol">
+      <div class="side-panel">
+
+        <div class="panel-header">
+          <div class="panel-header-top">
+            <div>
+              <div class="panel-badge">POR REVISAR</div>
+              <div class="panel-title" id="panelTitle">Veículos da semana para SSC05</div>
+            </div>
+            <button class="panel-close" onclick="closePanel()">×</button>
+          </div>
+          <div class="panel-subtitle"><strong>168 veículos</strong></div>
+        </div>
+
+        <div class="panel-body">
+
+          <!-- Large van card -->
+          <div class="vehicle-card open" id="card-large">
+            <div class="vehicle-card-header" onclick="toggleCard('card-large')">
+              <div class="vehicle-card-name">🚐 Large van</div>
+              <div class="vehicle-card-right">
+                <span class="vehicle-count">72/72 veículos</span>
+                <span class="card-chev">▲</span>
+              </div>
+            </div>
+            <div class="vehicle-card-body">
+              <div class="ciclo-section">
+                <div class="ciclo-row">
+                  <div class="ciclo-dropdown">
+                    <label>Ciclo</label>
+                    <div class="ciclo-select-box">AM 1 <span class="chev">▾</span></div>
+                  </div>
+                  <div class="day-inputs">
+                    <div class="day-group"><label>Seg</label><input type="number" value="6" min="0"></div>
+                    <div class="day-group"><label>Ter</label><input type="number" value="6" min="0"></div>
+                    <div class="day-group"><label>Qua</label><input type="number" value="6" min="0"></div>
+                    <div class="day-group"><label>Qui</label><input type="number" value="6" min="0"></div>
+                    <div class="day-group"><label>Sex</label><input type="number" value="6" min="0"></div>
+                    <div class="day-group"><label>Sáb</label><input type="number" value="6" min="0"></div>
+                    <div class="day-group"><label>Dom</label><input type="number" value="6" min="0"></div>
+                  </div>
+                </div>
+              </div>
+              <button class="btn-add-ciclo">+ Adicionar ciclo</button>
+            </div>
+          </div>
+
+          <!-- Small van card -->
+          <div class="vehicle-card open" id="card-small">
+            <div class="vehicle-card-header" onclick="toggleCard('card-small')">
+              <div class="vehicle-card-name">🚗 Small van</div>
+              <div class="vehicle-card-right">
+                <span class="vehicle-count">70/70 veículos</span>
+                <span class="card-chev">▲</span>
+              </div>
+            </div>
+            <div class="vehicle-card-body">
+              <div class="ciclo-section">
+                <div class="ciclo-row">
+                  <div class="ciclo-dropdown">
+                    <label>Ciclo</label>
+                    <div class="ciclo-select-box">AM 1 <span class="chev">▾</span></div>
+                  </div>
+                  <div class="day-inputs">
+                    <div class="day-group"><label>Seg</label><input type="number" value="6" min="0"></div>
+                    <div class="day-group"><label>Ter</label><input type="number" value="6" min="0"></div>
+                    <div class="day-group"><label>Qua</label><input type="number" value="6" min="0"></div>
+                    <div class="day-group"><label>Qui</label><input type="number" value="6" min="0"></div>
+                    <div class="day-group"><label>Sex</label><input type="number" value="6" min="0"></div>
+                    <div class="day-group"><label>Sáb</label><input type="number" value="6" min="0"></div>
+                    <div class="day-group"><label>Dom</label><input type="number" value="6" min="0"></div>
+                  </div>
+                </div>
+              </div>
+              <button class="btn-add-ciclo">+ Adicionar ciclo</button>
+            </div>
+          </div>
+
+        </div><!-- /panel-body -->
+
+        <div class="panel-footer">
+          <button class="btn-revisado" onclick="markReviewed()">Marcar como revisado</button>
         </div>
       </div>
+    </div><!-- /panel-col -->
 
-      <!-- Small van card -->
-      <div class="vehicle-card open" id="card-small">
-        <div class="vehicle-card-header" onclick="toggleCard('card-small')">
-          <div class="vehicle-card-name">
-            <span class="v-icon">🚗</span> Small van
-          </div>
-          <div style="display:flex;align-items:center;gap:12px">
-            <span class="vehicle-card-count">70/70 veículos</span>
-            <span class="card-chev">▲</span>
-          </div>
-        </div>
-        <div class="vehicle-card-body">
-          <div class="ciclo-row">
-            <span class="ciclo-label">Ciclo</span>
-            <span class="ciclo-select">AM 1 <span class="chev">▾</span></span>
-          </div>
-          <div class="day-inputs">
-            <div class="day-group"><label>Seg</label><input type="number" value="6" min="0"></div>
-            <div class="day-group"><label>Ter</label><input type="number" value="6" min="0"></div>
-            <div class="day-group"><label>Qua</label><input type="number" value="6" min="0"></div>
-            <div class="day-group"><label>Qui</label><input type="number" value="6" min="0"></div>
-            <div class="day-group"><label>Sex</label><input type="number" value="6" min="0"></div>
-            <div class="day-group"><label>Sáb</label><input type="number" value="6" min="0"></div>
-            <div class="day-group"><label>Dom</label><input type="number" value="6" min="0"></div>
-          </div>
-          <button class="btn-add-ciclo">+ Adicionar ciclo</button>
-        </div>
-      </div>
+  </div><!-- /main-layout -->
+</div><!-- /page-wrapper -->
 
-    </div><!-- /panel-body -->
-
-    <div class="panel-footer">
-      <button class="btn-revisado" id="btnRevisado" onclick="markReviewed()">Marcar como revisado</button>
-    </div>
-  </div>
-</div>
-
-
-<!-- ════════════════════════════════════════
-     SNACKBAR (Screen 05)
-════════════════════════════════════════ -->
+<!-- SNACKBAR -->
 <div class="snackbar" id="snackbar">
   <span class="snackbar-text">Frota de <strong id="snackFacility">SSC05</strong> revisada e pronta para agendamento.</span>
   <div class="snackbar-actions">
@@ -912,83 +921,182 @@
   </div>
 </div>
 
-
 <script>
-  // ── state ──────────────────────────────────────────
-  let activeFacility = null;
+// ══════════════════════════════════════════
+// WEEK STATE + TAGS RENDERING
+// ══════════════════════════════════════════
+const WEEKS = [22, 23, 24, 25];
+const weekLabels = { 22:'Semana 22', 23:'Semana 23', 24:'Semana 24', 25:'Semana 25' };
+// Initial state: all 4 selected
+const weekSel = { 22: true, 23: true, 24: true, 25: true };
 
-  // ── week picker ─────────────────────────────────────
-  function openPicker() {
-    document.getElementById('pickerOverlay').classList.add('active');
-  }
-  function closePicker() {
-    document.getElementById('pickerOverlay').classList.remove('active');
-  }
-  function toggleWeek(row) {
-    row.classList.toggle('selected');
-  }
+function renderTags() {
+  const selected = WEEKS.filter(w => weekSel[w]);
+  const tagsEl = document.getElementById('weekTags');
+  tagsEl.innerHTML = '';
 
-  // calendar icon + chevron both open picker
-  document.getElementById('calIcon').addEventListener('click', openPicker);
-  document.getElementById('chevronBtn').addEventListener('click', openPicker);
+  if (selected.length === 0) return;
 
-  // ── side panel ──────────────────────────────────────
-  function openPanel(facility) {
-    activeFacility = facility;
-    document.getElementById('panelTitle').textContent = 'Veículos da semana para ' + facility;
-    document.getElementById('panelOverlay').classList.add('active');
-    document.body.style.overflow = 'hidden';
-  }
-  function closePanel() {
-    document.getElementById('panelOverlay').classList.remove('active');
-    document.body.style.overflow = '';
-    activeFacility = null;
-  }
-  function toggleCard(id) {
-    document.getElementById(id).classList.toggle('open');
-  }
+  // First 2 as individual pills
+  const visible = selected.slice(0, 2);
+  const hidden  = selected.slice(2);
 
-  // ── mark as reviewed (Screen 04 → 05) ───────────────
-  function markReviewed() {
-    if (!activeFacility) return;
-    const fac = activeFacility;
-
-    // Close panel
-    closePanel();
-
-    // Update SSC05 row status (only SSC05 is wired; others are decorative)
-    if (fac === 'SSC05') {
-      const statusEl = document.getElementById('ssc05-status');
-      statusEl.innerHTML =
-        '<span class="status-dot reviewed"></span>' +
-        '<span class="status-text reviewed">Pronto para agendar</span>';
-      document.getElementById('ssc05-btn').classList.add('hidden');
-    }
-
-    // Show snackbar
-    document.getElementById('snackFacility').textContent = fac;
-    const snack = document.getElementById('snackbar');
-    snack.classList.add('show');
-    setTimeout(() => snack.classList.remove('show'), 6000);
-  }
-
-  // ── undo review (snackbar "Voltar a revisar") ────────
-  function undoReview() {
-    const statusEl = document.getElementById('ssc05-status');
-    statusEl.innerHTML =
-      '<span class="status-dot pending"></span>' +
-      '<span class="status-text pending">Por revisar</span>';
-    document.getElementById('ssc05-btn').classList.remove('hidden');
-    document.getElementById('snackbar').classList.remove('show');
-  }
-
-  // close picker on Escape
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-      closePicker();
-      closePanel();
-    }
+  visible.forEach(w => {
+    const tag = document.createElement('span');
+    tag.className = 'week-tag';
+    tag.innerHTML = `${weekLabels[w]} <span class="xt" onclick="removeWeek(${w},event)">×</span>`;
+    tagsEl.appendChild(tag);
   });
+
+  if (hidden.length > 0) {
+    const more = document.createElement('span');
+    more.className = 'more-tag';
+    more.innerHTML = `+${hidden.length}
+      <div class="tooltip-popup">
+        <div class="tip-label">Semanas adicionales</div>
+        <div class="tip-tags">
+          ${hidden.map(w => `<span class="week-tag">${weekLabels[w]} <span class="xt" onclick="removeWeek(${w},event)">×</span></span>`).join('')}
+        </div>
+      </div>`;
+    tagsEl.appendChild(more);
+  }
+
+  // sync picker rows
+  WEEKS.forEach(w => {
+    const row = document.getElementById('row' + w);
+    if (row) row.classList.toggle('sel', weekSel[w]);
+  });
+}
+
+function removeWeek(w, evt) {
+  evt.stopPropagation();
+  weekSel[w] = false;
+  renderTags();
+}
+
+function toggleWeek(w) {
+  weekSel[w] = !weekSel[w];
+  renderTags();
+}
+
+// ══════════════════════════════════════════
+// WEEK PICKER OPEN / CLOSE
+// ══════════════════════════════════════════
+let pickerOpen = false;
+
+function togglePicker(evt) {
+  evt && evt.stopPropagation();
+  pickerOpen = !pickerOpen;
+  document.getElementById('pickerDropdown').classList.toggle('open', pickerOpen);
+  document.getElementById('chevBtn').classList.toggle('open', pickerOpen);
+}
+
+function closePicker() {
+  pickerOpen = false;
+  document.getElementById('pickerDropdown').classList.remove('open');
+  document.getElementById('chevBtn').classList.remove('open');
+}
+
+function applyPicker() {
+  renderTags();
+  closePicker();
+}
+
+// close picker when clicking outside
+document.addEventListener('click', function(e) {
+  const bar = document.getElementById('weekBar');
+  if (!bar.contains(e.target)) closePicker();
+});
+
+// ══════════════════════════════════════════
+// PANEL OPEN / CLOSE
+// ══════════════════════════════════════════
+let activeFacility = null;
+let reviewedFacility = null;
+
+function openPanel(facility) {
+  activeFacility = facility;
+
+  // update panel title
+  document.getElementById('panelTitle').textContent = 'Veículos da semana para ' + facility;
+
+  // expand panel col, compress list
+  document.getElementById('listCol').classList.add('compressed');
+  document.getElementById('panelCol').classList.add('active');
+
+  // highlight active row
+  document.querySelectorAll('.facility-row').forEach(r => r.classList.remove('active-row'));
+  const activeRow = document.getElementById('row-' + facility);
+  if (activeRow) activeRow.classList.add('active-row');
+
+  closePicker();
+}
+
+function closePanel() {
+  document.getElementById('listCol').classList.remove('compressed');
+  document.getElementById('panelCol').classList.remove('active');
+  document.querySelectorAll('.facility-row').forEach(r => r.classList.remove('active-row'));
+  activeFacility = null;
+}
+
+function toggleCard(id) {
+  document.getElementById(id).classList.toggle('open');
+}
+
+// ══════════════════════════════════════════
+// MARK AS REVIEWED (Screen 04 → 05)
+// ══════════════════════════════════════════
+function markReviewed() {
+  if (!activeFacility) return;
+  const fac = activeFacility;
+  reviewedFacility = fac;
+
+  closePanel();
+
+  // Update status for the reviewed facility (wired for SSC05 and generic)
+  const dot  = document.getElementById('dot-' + fac);
+  const stxt = document.getElementById('stxt-' + fac);
+  if (dot && stxt) {
+    dot.className  = 'status-dot reviewed';
+    stxt.className = 'status-text reviewed';
+    stxt.textContent = 'Pronto para agendar';
+  }
+
+  // Show snackbar
+  document.getElementById('snackFacility').textContent = fac;
+  const snack = document.getElementById('snackbar');
+  snack.classList.add('show');
+  setTimeout(() => snack.classList.remove('show'), 6000);
+}
+
+function undoReview() {
+  if (!reviewedFacility) return;
+  const fac = reviewedFacility;
+  const dot  = document.getElementById('dot-' + fac);
+  const stxt = document.getElementById('stxt-' + fac);
+  if (dot && stxt) {
+    dot.className  = 'status-dot pending';
+    stxt.className = 'status-text pending';
+    stxt.textContent = 'Por revisar';
+  }
+  reviewedFacility = null;
+  document.getElementById('snackbar').classList.remove('show');
+}
+
+// ══════════════════════════════════════════
+// KEYBOARD
+// ══════════════════════════════════════════
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    closePicker();
+    closePanel();
+  }
+});
+
+// ══════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════
+renderTags();
 </script>
 </body>
 </html>
