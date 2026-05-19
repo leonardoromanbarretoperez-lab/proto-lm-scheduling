@@ -1,0 +1,36 @@
+proto-01e/index.html
+  s_1d42129a58e151::t_3260757c0ac3da 6
+  s_1d42129a58e151::t_de1aa674d03ffc 1188
+  s_1d42129a58e151::t_96a5410e1e87ad 944-991
+  s_1d42129a58e151::t_73e14afc618acd 1174
+  s_1d42129a58e151::t_241fb9fd678d90 1381
+  s_1d42129a58e151::t_dbbb3c0a8bce10 1661-1786
+proto-01d/index.html
+  s_1d42129a58e151::t_425f2a73728b65 944-991
+  s_1d42129a58e151::t_1b2fc52ed17f99 1661-1694
+  s_1d42129a58e151::t_35a5e89bde69d8 1188
+  s_1d42129a58e151::t_77486b00811a6e 6
+  s_1d42129a58e151::t_b2a6f27e35b8a3 1174
+  s_1d42129a58e151::t_095e93eee2a8f6 1381
+proto-01b/index.html
+  s_1d42129a58e151::t_2a9503745df137 1112-1118
+  s_1d42129a58e151::t_38111412cc1392 1667-1778
+  s_1d42129a58e151::t_308df1822e2e7f 619-664
+  s_1d42129a58e151::t_e3e0fe30caa4b6 1382-1388
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.11",
+  "base_commit_sha": "58695aae0e8e4882f9c7781688fde4b3d1c57c7c",
+  "prompts": {},
+  "sessions": {
+    "s_1d42129a58e151": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "20fc1c1c-f68f-41cd-9f24-8dc29480a272",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "leonardoromanbarretoperez-lab <leonardoroman.barretoperez@mercadolibre.com>"
+    }
+  }
+}
