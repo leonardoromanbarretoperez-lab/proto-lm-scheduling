@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Proto 01H — Un form + variaciones inline</title>
+<link href="https://fonts.googleapis.com/css2?family=Balsamiq+Sans:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --blue:   #3483FA;
+  --dark:   #1e1e1e;
+  --gray:   #666;
+  --border: #ededed;
+  --green:  #00a650;
+  --bg-sec: #f5f5f5;
+  --snack:  #1a1a1a;
+  --font:   'Balsamiq Sans', cursive;
+}
+html, body { height: 100%; }
+body { font-family: var(--font); background: #fafafa; color: var(--dark); display: flex; flex-direction: column; min-height: 100vh; }
+
+/* ── NAV ── */
+.nav { background: #fff; border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.nav-logo  { font-weight: 700; font-size: 16px; color: var(--blue); }
+.nav-sep   { color: var(--border); font-size: 20px; }
+.nav-title { font-size: 14px; color: var(--gray); }
+
+.page-wrapper { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+
+/* ── PAGE HEADER ── */
+.page-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; padding: 28px 24px 16px; background: #fafafa; flex-shrink: 0; border-bottom: 1px solid var(--border); }
+.header-left { display: flex; flex-direction: column; gap: 12px; }
+.page-title { font-size: 24px; font-weight: 700; letter-spacing: -0.456px; }
+.filter-row { display: flex; align-items: center; gap: 8px; }
+.filter-label { font-size: 14px; color: var(--gray); }
+.filter-select { display: inline-flex; align-items: center; gap: 4px; border: 1px solid rgba(0,0,0,0.18); border-radius: 6px; padding: 5px 10px; font-family: var(--font); font-size: 13px; color: var(--dark); cursor: pointer; background: #fff; user-select: none; }
+.filter-select .chev { font-size: 10px; color: var(--gray); }
+.header-right { display: flex; flex-direction: column; align-items: flex-end; gap: 12px; flex-shrink: 0; }
+
+/* ── WEEK BAR ── */
+.week-bar { position: relative; display: flex; align-items: center; gap: 6px; }
+.cal-btn { background: none; border: none; cursor: pointer; font-size: 18px; color: var(--gray); padding: 2px; line-height: 1; transition: color 0.15s; }
+.cal-btn:hover { color: var(--blue); }
+.week-tags { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.week-tag { display: inline-flex; align-items: center; gap: 4px; background: #fff; border: 1px solid var(--border); border-radius: 20px; padding: 4px 10px; font-size: 12px; font-weight: 700; color: var(--dark); white-space: nowrap; }
+.week-tag .xt { cursor: pointer; color: var(--gray); font-size: 11px; margin-left: 2px; }
+.week-tag .xt:hover { color: #c00; }
+.more-tag { display: inline-flex; align-items: center; gap: 4px; background: #fff; border: 1px solid var(--border); border-radius: 20px; padding: 4px 10px; font-size: 12px; font-weight: 700; color: var(--blue); cursor: default; user-select: none; position: relative; }
+.more-tag .tooltip-popup { display: none; position: absolute; top: calc(100% + 6px); right: 0; background: #fff; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.12); padding: 10px 12px; z-index: 200; min-width: 160px; }
+.more-tag:hover .tooltip-popup { display: block; }
+.tooltip-popup .tip-label { font-size: 11px; color: var(--gray); margin-bottom: 6px; font-weight: 400; }
+.tooltip-popup .tip-tags { display: flex; flex-direction: column; gap: 4px; }
+.chev-btn { background: none; border: none; cursor: pointer; font-size: 16px; color: var(--gray); padding: 2px 4px; line-height: 1; transition: color 0.15s, transform 0.2s; }
+.chev-btn:hover { color: var(--dark); }
+.chev-btn.open { transform: rotate(180deg); }
+.picker-dropdown { display: none; position: absolute; top: calc(100% + 10px); right: 0; background: #fff; border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.14); padding: 18px 18px 16px; width: 320px; z-index: 300; }
+.picker-dropdown.open { display: block; }
+.picker-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.picker-nav button { background: none; border: none; font-size: 18px; cursor: pointer; color: var(--gray); padding: 2px 6px; line-height: 1; font-family: var(--font); }
+.picker-nav button:hover { color: var(--dark); }
+.picker-month { font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 4px; cursor: pointer; }
+.picker-month .chev { font-size: 10px; color: var(--gray); }
+.wk-grid { display: grid; grid-template-columns: 56px repeat(7, 1fr); gap: 2px; }
+.wk-header { display: contents; }
+.wk-header span { font-size: 10px; color: var(--gray); text-align: center; padding-bottom: 6px; }
+.wk-header .lbl { text-align: left; }
+.wk-row { display: contents; cursor: pointer; }
+.wk-row-label { font-size: 12px; font-weight: 700; color: var(--blue); display: flex; align-items: center; padding: 4px; border-radius: 4px 0 0 4px; transition: background 0.12s; cursor: pointer; user-select: none; }
+.wk-row-label:hover { background: #eef4ff; }
+.wk-day { height: 28px; display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--dark); border-radius: 4px; }
+.wk-row.sel .wk-row-label { background: #deeaff; }
+.wk-row.sel .wk-day { background: #deeaff; color: var(--blue); font-weight: 700; }
+.picker-footer { margin-top: 14px; border-top: 1px solid var(--border); padding-top: 12px; }
+.btn-aplicar { width: 100%; background: var(--blue); color: #fff; border: none; border-radius: 6px; padding: 11px; font-family: var(--font); font-size: 14px; font-weight: 700; cursor: pointer; transition: background 0.15s; }
+.btn-aplicar:hover { background: #2a6fd6; }
+
+.action-row { display: flex; align-items: center; gap: 16px; }
+.count-label { font-size: 14px; color: var(--gray); white-space: nowrap; }
+.btn-primary { background: var(--blue); color: #fff; border: none; border-radius: 6px; padding: 9px 18px; font-family: var(--font); font-size: 14px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: background 0.15s; }
+.btn-primary:hover:not(:disabled) { background: #2a6fd6; }
+.btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ── LAYOUT ── */
+.main-layout { display: flex; flex: 1; overflow: hidden; }
+.list-col { flex: 1; overflow-y: auto; padding: 16px 24px 32px; transition: flex 0.3s ease; min-width: 0; }
+.list-col.compressed { flex: 0 0 340px; min-width: 280px; }
+.facility-list { display: flex; flex-direction: column; gap: 8px; }
+.facility-row { display: flex; align-items: center; justify-content: space-between; background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 14px 18px; gap: 10px; cursor: pointer; transition: box-shadow 0.15s, border-color 0.15s; }
+.facility-row:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+.facility-row.active-row { border-color: var(--blue); box-shadow: 0 0 0 2px rgba(52,131,250,0.2); }
+.facility-row.disabled { cursor: default; pointer-events: none; }
+.facility-info { flex: 1; min-width: 0; }
+.facility-name { font-size: 16px; font-weight: 700; margin-bottom: 3px; }
+.facility-meta { font-size: 12px; color: var(--gray); }
+.list-col.compressed .facility-meta { display: none; }
+.list-col.compressed .facility-name { font-size: 14px; margin-bottom: 0; }
+.list-col.compressed .facility-row { padding: 10px 14px; }
+.facility-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.status-dot.pending   { background: var(--blue); }
+.status-dot.reviewed  { background: var(--green); }
+.status-dot.scheduled { background: #007a3d; }
+.status-text { font-size: 12px; font-weight: 700; white-space: nowrap; }
+.status-text.pending   { color: var(--blue); }
+.status-text.reviewed  { color: var(--green); }
+.status-text.scheduled { color: #007a3d; }
+.list-col.compressed .btn-revisar { display: none; }
+
+/* ── PANEL ── */
+.panel-col { flex: 0 0 0; width: 0; overflow: hidden; transition: flex 0.3s ease; border-left: 1px solid transparent; background: #fff; display: flex; flex-direction: column; }
+.panel-col.active { flex: 0 0 620px; border-left-color: var(--border); }
+.side-panel { display: flex; flex-direction: column; height: 100%; min-width: 620px; }
+.panel-header { padding: 18px 20px 14px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.panel-header-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 6px; }
+.panel-badge { display: inline-block; background: #e8f0ff; color: var(--blue); font-size: 11px; font-weight: 700; border-radius: 4px; padding: 2px 7px; letter-spacing: 0.3px; margin-bottom: 5px; }
+.panel-title { font-size: 18px; font-weight: 700; line-height: 1.3; }
+.panel-close { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--gray); line-height: 1; padding: 0; flex-shrink: 0; transition: color 0.15s; }
+.panel-close:hover { color: var(--dark); }
+.panel-subtitle { font-size: 14px; color: var(--gray); }
+.panel-subtitle strong { color: var(--dark); }
+.panel-body { flex: 1; overflow-y: auto; padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; }
+
+/* ── VEHICLE CARDS ── */
+.vehicle-card { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; flex-shrink: 0; }
+.vehicle-card-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: var(--bg-sec); cursor: pointer; user-select: none; transition: background 0.12s; }
+.vehicle-card-header:hover { background: #e6e6e6; }
+.vehicle-card-name { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 700; }
+.vehicle-card-right { display: flex; align-items: center; gap: 12px; }
+.vehicle-count { font-size: 13px; color: var(--green); font-weight: 700; }
+.card-chev { font-size: 13px; color: var(--gray); transition: transform 0.2s; }
+.vehicle-card.open .card-chev { transform: rotate(180deg); }
+.vehicle-card-body { display: none; background: #fff; }
+.vehicle-card.open .vehicle-card-body { display: block; }
+
+/* ── MAIN FORM ── */
+.main-form { padding: 14px 16px 0; }
+
+.form-row {
+  display: flex; align-items: flex-end; gap: 8px;
+  background: var(--bg-sec); border-radius: 6px; padding: 10px 12px;
+  overflow-x: auto;
+}
+.form-group { display: flex; flex-direction: column; gap: 3px; flex-shrink: 0; }
+.form-group label { font-size: 11px; color: var(--gray); }
+.form-select {
+  height: 36px; border: 1px solid rgba(0,0,0,0.22); border-radius: 6px;
+  padding: 0 8px; font-family: var(--font); font-size: 13px;
+  color: var(--dark); cursor: pointer; background: #fff; min-width: 84px;
+}
+.form-select:focus { outline: none; border-color: var(--blue); }
+.form-input-time {
+  width: 90px; height: 36px; border: 1px solid rgba(0,0,0,0.22);
+  border-radius: 6px; padding: 0 10px; font-family: var(--font);
+  font-size: 13px; color: var(--dark); background: #fff;
+}
+.form-input-time:focus { outline: none; border-color: var(--blue); }
+.day-inputs { display: flex; align-items: flex-end; gap: 4px; }
+.day-group { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.day-group label { font-size: 10px; color: var(--gray); text-transform: uppercase; }
+.day-group input {
+  width: 34px; height: 36px; border: 1px solid rgba(0,0,0,0.22);
+  border-radius: 6px; text-align: center; font-family: var(--font);
+  font-size: 13px; color: var(--dark); background: #fff;
+}
+.day-group input:focus { outline: none; border-color: var(--blue); }
+
+/* ── APPLIES-TO FOOTER + VARIATION TOGGLE ── */
+.form-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 16px 0;
+  gap: 8px;
+}
+.applies-label {
+  font-size: 11px; color: var(--gray);
+  display: flex; align-items: center; gap: 5px;
+}
+.applies-label .week-pills-sm {
+  display: flex; gap: 3px;
+}
+.week-pill-sm {
+  background: #eef4ff; color: var(--blue);
+  font-size: 10px; font-weight: 700; border-radius: 4px;
+  padding: 1px 5px;
+}
+
+.btn-vary {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: none; border: none; border-radius: 6px;
+  font-family: var(--font); font-size: 12px; font-weight: 700;
+  color: var(--blue); cursor: pointer; padding: 4px 8px;
+  transition: background 0.15s;
+  white-space: nowrap; flex-shrink: 0;
+}
+.btn-vary:hover { background: #eef4ff; }
+.btn-vary .vary-chev { font-size: 10px; transition: transform 0.2s; }
+.btn-vary.open .vary-chev { transform: rotate(180deg); }
+.var-count-badge {
+  display: none;
+  background: var(--blue); color: #fff;
+  font-size: 10px; font-weight: 700; border-radius: 10px;
+  padding: 1px 6px; line-height: 1.4;
+}
+.var-count-badge.visible { display: inline-block; }
+
+/* ── VARIATION TABLE ── */
+.variation-wrap {
+  display: none;
+  padding: 10px 16px 14px;
+  animation: fadeIn 0.18s ease;
+}
+.variation-wrap.open { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+
+.vt-scroll { overflow-x: auto; border: 1px solid var(--border); border-radius: 8px; }
+
+table.vt {
+  width: 100%; border-collapse: collapse;
+  font-family: var(--font);
+}
+table.vt thead th {
+  background: #f0f4ff; padding: 7px 10px;
+  font-size: 11px; font-weight: 700; color: var(--blue);
+  text-align: center; white-space: nowrap;
+  border-bottom: 1px solid var(--border);
+}
+table.vt thead th:first-child { text-align: left; background: #fafafa; color: var(--gray); min-width: 52px; }
+table.vt tbody td {
+  padding: 5px 8px; border-bottom: 1px solid var(--border);
+  text-align: center; background: #fff;
+}
+table.vt tbody tr:last-child td { border-bottom: none; }
+table.vt tbody td:first-child {
+  font-size: 11px; color: var(--gray); text-align: left;
+  background: #fafafa; font-weight: 700; white-space: nowrap; padding-left: 12px;
+}
+
+/* inputs inside the table */
+table.vt select {
+  height: 30px; border: 1px solid var(--border); border-radius: 5px;
+  padding: 0 6px; font-family: var(--font); font-size: 11px;
+  color: var(--dark); background: #fff; width: 100%; min-width: 70px;
+  cursor: pointer;
+}
+table.vt input[type=time] {
+  height: 30px; border: 1px solid var(--border); border-radius: 5px;
+  padding: 0 6px; font-family: var(--font); font-size: 11px;
+  color: var(--dark); background: #fff; width: 80px; text-align: center;
+}
+table.vt input[type=number] {
+  height: 30px; width: 40px; border: 1px solid var(--border); border-radius: 5px;
+  text-align: center; font-family: var(--font); font-size: 12px; color: var(--dark); background: #fff;
+}
+table.vt select:focus,
+table.vt input:focus { outline: none; border-color: var(--blue); }
+
+/* diff highlight */
+table.vt .has-diff {
+  border-color: var(--blue) !important;
+  background: #eef4ff !important;
+  color: var(--blue); font-weight: 700;
+  border-radius: 5px;
+}
+
+.vt-hint {
+  font-size: 11px; color: var(--gray); margin-top: 8px;
+  display: flex; align-items: center; gap: 5px;
+}
+.vt-hint .dot { width: 8px; height: 8px; border-radius: 2px; background: #eef4ff; border: 1.5px solid var(--blue); flex-shrink: 0; }
+
+/* ── PANEL FOOTER ── */
+.panel-footer { padding: 14px 20px; border-top: 1px solid var(--border); flex-shrink: 0; background: #fff; box-shadow: 0 -2px 8px rgba(0,0,0,0.06); display: flex; align-items: center; gap: 10px; }
+.btn-revisado { flex: 1; background: var(--blue); color: #fff; border: none; border-radius: 6px; padding: 12px; font-family: var(--font); font-size: 14px; font-weight: 700; cursor: pointer; letter-spacing: 0.3px; transition: background 0.15s; }
+.btn-revisado:hover { background: #2a6fd6; }
+.btn-voltar { flex: 0 0 auto; background: #fff; color: var(--blue); border: 1px solid var(--blue); border-radius: 6px; padding: 12px 16px; font-family: var(--font); font-size: 14px; font-weight: 700; cursor: pointer; letter-spacing: 0.3px; transition: background 0.15s, color 0.15s; display: none; white-space: nowrap; }
+.btn-voltar:hover { background: #eef4ff; }
+.panel-footer.reviewed .btn-voltar { display: block; }
+
+/* ── MODAL ── */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 600; align-items: center; justify-content: center; }
+.modal-overlay.open { display: flex; }
+.modal-dialog { background: #fff; border-radius: 8px; box-shadow: 0 6px 32px rgba(0,0,0,0.18); width: 525px; max-width: calc(100vw - 32px); padding: 44px 48px 40px; display: flex; flex-direction: column; gap: 16px; }
+.modal-title { font-size: 24px; font-weight: 700; color: rgba(0,0,0,0.9); line-height: 1.25; font-family: var(--font); }
+.modal-subtitle { font-size: 16px; color: rgba(0,0,0,0.9); line-height: 1.4; margin-top: -8px; font-family: var(--font); }
+.modal-weeks-field { display: flex; align-items: center; gap: 6px; border: 1px solid rgba(0,0,0,0.25); border-radius: 6px; padding: 10px 12px; background: #fff; flex-wrap: wrap; cursor: pointer; min-height: 48px; }
+.modal-weeks-field .cal-icon-sm { font-size: 16px; color: var(--gray); flex-shrink: 0; }
+.modal-week-pill { display: inline-flex; align-items: center; gap: 4px; background: #fff; border: 1px solid var(--border); border-radius: 20px; padding: 2px 8px; font-size: 12px; font-weight: 700; color: var(--dark); white-space: nowrap; font-family: var(--font); }
+.modal-week-pill .xt { cursor: pointer; color: var(--gray); font-size: 11px; margin-left: 1px; }
+.modal-week-pill .xt:hover { color: #c00; }
+.modal-weeks-field .chev-sm { margin-left: auto; font-size: 12px; color: var(--gray); flex-shrink: 0; }
+.modal-summary { background: var(--bg-sec); border-radius: 6px; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.modal-summary-left { display: flex; flex-direction: column; gap: 2px; }
+.modal-summary-label { font-size: 13px; font-weight: 700; color: rgba(0,0,0,0.55); letter-spacing: 0.3px; text-transform: uppercase; font-family: var(--font); }
+.modal-summary-count { font-size: 16px; font-weight: 700; color: #000; font-family: var(--font); }
+.modal-summary-count span { font-weight: 400; font-size: 12px; color: #000; }
+.modal-fac-sep { margin: 0 4px; color: var(--gray); font-weight: 400; }
+.modal-date-range { font-size: 12px; color: #000; white-space: nowrap; font-family: var(--font); }
+.modal-picker-wrap { position: relative; }
+.modal-picker-dropdown { display: none; position: absolute; top: calc(100% + 8px); left: 0; background: #fff; border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.14); padding: 16px 16px 14px; width: 320px; z-index: 700; }
+.modal-picker-dropdown.open { display: block; }
+.modal-actions { display: flex; align-items: center; gap: 16px; margin-top: 8px; }
+.btn-modal-primary { background: var(--blue); color: #fff; border: none; border-radius: 6px; padding: 12px 24px; font-family: var(--font); font-size: 16px; font-weight: 700; cursor: pointer; transition: background 0.15s; }
+.btn-modal-primary:hover { background: #2a6fd6; }
+.btn-modal-cancel { background: none; border: none; color: var(--blue); font-family: var(--font); font-size: 16px; font-weight: 700; cursor: pointer; padding: 12px 8px; transition: opacity 0.15s; }
+.btn-modal-cancel:hover { opacity: 0.7; }
+
+/* ── SNACKBAR ── */
+.snackbar { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--snack); color: #fff; border-radius: 10px; padding: 14px 20px; width: 600px; max-width: calc(100vw - 32px); display: flex; align-items: center; justify-content: space-between; gap: 16px; box-shadow: 0 6px 24px rgba(0,0,0,0.28); z-index: 500; transition: transform 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s; opacity: 0; pointer-events: none; }
+.snackbar.green { background: var(--green); }
+.snackbar.show { transform: translateX(-50%) translateY(0); opacity: 1; pointer-events: auto; }
+.snackbar-text { font-size: 14px; line-height: 1.4; flex: 1; }
+.snackbar-text strong { font-weight: 700; }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <span class="nav-logo">Mercado Libre</span>
+  <span class="nav-sep">|</span>
+  <span class="nav-title">Flota fija FM / LM</span>
+</nav>
+
+<div class="page-wrapper">
+  <div class="page-header">
+    <div class="header-left">
+      <h1 class="page-title">Agendamiento flota dedicada Last Mile</h1>
+      <div class="filter-row">
+        <span class="filter-label">Filtros:</span>
+        <span class="filter-select">Región <span class="chev">▾</span></span>
+        <span class="filter-select">Facilitie <span class="chev">▾</span></span>
+        <span class="filter-select">Status <span class="chev">▾</span></span>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="week-bar" id="weekBar">
+        <button class="cal-btn" onclick="togglePicker(event)">📅</button>
+        <div class="week-tags" id="weekTags"></div>
+        <button class="chev-btn" id="chevBtn" onclick="togglePicker(event)">▾</button>
+        <div class="picker-dropdown" id="pickerDropdown">
+          <div class="picker-nav"><button>‹</button><div class="picker-month">Mayo 2026 <span class="chev">▾</span></div><button>›</button></div>
+          <div class="wk-grid">
+            <div class="wk-header"><span class="lbl">Sem.</span><span>Lun</span><span>Mar</span><span>Mié</span><span>Jue</span><span>Vie</span><span>Sáb</span><span>Dom</span></div>
+            <div class="wk-row" id="row22" onclick="toggleWeek(22)"><div class="wk-row-label">Sem 22</div><div class="wk-day">27</div><div class="wk-day">28</div><div class="wk-day">29</div><div class="wk-day">30</div><div class="wk-day">1</div><div class="wk-day">2</div><div class="wk-day">3</div></div>
+            <div class="wk-row" id="row23" onclick="toggleWeek(23)"><div class="wk-row-label">Sem 23</div><div class="wk-day">4</div><div class="wk-day">5</div><div class="wk-day">6</div><div class="wk-day">7</div><div class="wk-day">8</div><div class="wk-day">9</div><div class="wk-day">10</div></div>
+            <div class="wk-row" id="row24" onclick="toggleWeek(24)"><div class="wk-row-label">Sem 24</div><div class="wk-day">11</div><div class="wk-day">12</div><div class="wk-day">13</div><div class="wk-day">14</div><div class="wk-day">15</div><div class="wk-day">16</div><div class="wk-day">17</div></div>
+            <div class="wk-row" id="row25" onclick="toggleWeek(25)"><div class="wk-row-label">Sem 25</div><div class="wk-day">18</div><div class="wk-day">19</div><div class="wk-day">20</div><div class="wk-day">21</div><div class="wk-day">22</div><div class="wk-day">23</div><div class="wk-day">24</div></div>
+          </div>
+          <div class="picker-footer"><button class="btn-aplicar" onclick="applyPicker()">APLICAR</button></div>
+        </div>
+      </div>
+      <div class="action-row">
+        <span class="count-label">Viendo 12 de 12 facilities</span>
+        <button class="btn-primary" id="btnHeaderAgendar" disabled onclick="openModal()">Agendar vehículos</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="main-layout">
+    <div class="list-col" id="listCol">
+      <div class="facility-list">
+        <div class="facility-row" id="row-SSC05" onclick="openPanel('SSC05')">
+          <div class="facility-info"><div class="facility-name">SSC05</div><div class="facility-meta">Total semana: 168 vehículos<br>72 Large vans · 70 Small vans · 18 Utilitarios</div></div>
+          <div class="facility-right"><span class="status-dot pending" id="dot-SSC05"></span><span class="status-text pending" id="stxt-SSC05">Por revisar</span></div>
+        </div>
+        <div class="facility-row" id="row-SSC04" onclick="openPanel('SSC04')">
+          <div class="facility-info"><div class="facility-name">SSC04</div><div class="facility-meta">Total semana: 168 vehículos<br>72 Large vans · 70 Small vans · 18 Utilitarios</div></div>
+          <div class="facility-right"><span class="status-dot pending" id="dot-SSC04"></span><span class="status-text pending" id="stxt-SSC04">Por revisar</span></div>
+        </div>
+        <div class="facility-row disabled"><div class="facility-info"><div class="facility-name">SSC03</div><div class="facility-meta">Total semana: 168 vehículos</div></div><div class="facility-right"><span class="status-dot pending"></span><span class="status-text pending">Por revisar</span></div></div>
+        <div class="facility-row disabled"><div class="facility-info"><div class="facility-name">SSC02</div><div class="facility-meta">Total semana: 168 vehículos</div></div><div class="facility-right"><span class="status-dot pending"></span><span class="status-text pending">Por revisar</span></div></div>
+        <div class="facility-row disabled"><div class="facility-info"><div class="facility-name">SSC01</div><div class="facility-meta">Total semana: 168 vehículos</div></div><div class="facility-right"><span class="status-dot pending"></span><span class="status-text pending">Por revisar</span></div></div>
+      </div>
+    </div>
+
+    <div class="panel-col" id="panelCol">
+      <div class="side-panel">
+        <div class="panel-header">
+          <div class="panel-header-top">
+            <div>
+              <div class="panel-badge">POR REVISAR</div>
+              <div class="panel-title" id="panelTitle">Vehículos de la semana para SSC05</div>
+            </div>
+            <button class="panel-close" onclick="closePanel()">×</button>
+          </div>
+          <div class="panel-subtitle"><strong>168 vehículos</strong></div>
+        </div>
+
+        <div class="panel-body">
+
+          <!-- Large van -->
+          <div class="vehicle-card open" id="card-large">
+            <div class="vehicle-card-header" onclick="toggleCard('card-large')">
+              <div class="vehicle-card-name">🚐 Large van</div>
+              <div class="vehicle-card-right"><span class="vehicle-count">72/72 vehículos</span><span class="card-chev">▲</span></div>
+            </div>
+            <div class="vehicle-card-body">
+              <!-- Main form -->
+              <div class="main-form" id="form-large">
+                <div class="form-row">
+                  <div class="form-group"><label>Ciclo</label><select class="form-select"><option>AM 1</option><option>AM 2</option><option>PM 1</option><option>PM 2</option><option>NOON</option></select></div>
+                  <div class="form-group"><label>ETA</label><input type="time" class="form-input-time" value="06:00"></div>
+                  <div class="day-inputs">
+                    <div class="day-group"><label>Lun</label><input type="number" value="6" min="0" max="99"></div>
+                    <div class="day-group"><label>Mar</label><input type="number" value="6" min="0" max="99"></div>
+                    <div class="day-group"><label>Mié</label><input type="number" value="6" min="0" max="99"></div>
+                    <div class="day-group"><label>Jue</label><input type="number" value="6" min="0" max="99"></div>
+                    <div class="day-group"><label>Vie</label><input type="number" value="6" min="0" max="99"></div>
+                    <div class="day-group"><label>Sáb</label><input type="number" value="6" min="0" max="99"></div>
+                    <div class="day-group"><label>Dom</label><input type="number" value="6" min="0" max="99"></div>
+                  </div>
+                </div>
+              </div>
+              <!-- Footer row -->
+              <div class="form-footer">
+                <div class="applies-label">
+                  Aplica igual a <div class="week-pills-sm" id="pills-large"></div>
+                </div>
+                <button class="btn-vary" id="btn-vary-large" onclick="toggleVariation('large')">
+                  <span class="vary-text">¿Alguna semana es diferente?</span>
+                  <span class="var-count-badge" id="badge-large"></span>
+                  <span class="vary-chev">▾</span>
+                </button>
+              </div>
+              <!-- Variation table (hidden by default) -->
+              <div class="variation-wrap" id="vwrap-large">
+                <div class="vt-scroll">
+                  <table class="vt" id="vt-large"></table>
+                </div>
+                <div class="vt-hint"><span class="dot"></span> Los valores resaltados difieren de la configuración base</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Small van -->
+          <div class="vehicle-card open" id="card-small">
+            <div class="vehicle-card-header" onclick="toggleCard('card-small')">
+              <div class="vehicle-card-name">🚗 Small van</div>
+              <div class="vehicle-card-right"><span class="vehicle-count">70/70 vehículos</span><span class="card-chev">▲</span></div>
+            </div>
+            <div class="vehicle-card-body">
+              <div class="main-form" id="form-small">
+                <div class="form-row">
+                  <div class="form-group"><label>Ciclo</label><select class="form-select"><option>AM 1</option><option>AM 2</option><option>PM 1</option><option>PM 2</option><option>NOON</option></select></div>
+                  <div class="form-group"><label>ETA</label><input type="time" class="form-input-time" value="06:00"></div>
+                  <div class="day-inputs">
+                    <div class="day-group"><label>Lun</label><input type="number" value="6" min="0" max="99"></div>
+                    <div class="day-group"><label>Mar</label><input type="number" value="6" min="0" max="99"></div>
+                    <div class="day-group"><label>Mié</label><input type="number" value="6" min="0" max="99"></div>
+                    <div class="day-group"><label>Jue</label><input type="number" value="6" min="0" max="99"></div>
+                    <div class="day-group"><label>Vie</label><input type="number" value="6" min="0" max="99"></div>
+                    <div class="day-group"><label>Sáb</label><input type="number" value="6" min="0" max="99"></div>
+                    <div class="day-group"><label>Dom</label><input type="number" value="6" min="0" max="99"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="form-footer">
+                <div class="applies-label">
+                  Aplica igual a <div class="week-pills-sm" id="pills-small"></div>
+                </div>
+                <button class="btn-vary" id="btn-vary-small" onclick="toggleVariation('small')">
+                  <span class="vary-text">¿Alguna semana es diferente?</span>
+                  <span class="var-count-badge" id="badge-small"></span>
+                  <span class="vary-chev">▾</span>
+                </button>
+              </div>
+              <div class="variation-wrap" id="vwrap-small">
+                <div class="vt-scroll">
+                  <table class="vt" id="vt-small"></table>
+                </div>
+                <div class="vt-hint"><span class="dot"></span> Los valores resaltados difieren de la configuración base</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="panel-footer" id="panelFooter">
+          <button class="btn-voltar" onclick="undoReview()">Volver a revisar</button>
+          <button class="btn-revisado" id="btnRevisado" onclick="markReviewed()">Marcar como revisado</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-dialog">
+    <div class="modal-title">Agendar vehículos</div>
+    <div class="modal-subtitle">Revisa las semanas a agendar antes de continuar.</div>
+    <div class="modal-picker-wrap">
+      <div class="modal-weeks-field" id="modalWeeksField" onclick="toggleModalPicker(event)">
+        <span class="cal-icon-sm">📅</span><div id="modalWeekPills"></div><span class="chev-sm" id="modalChev">▾</span>
+      </div>
+      <div class="modal-picker-dropdown" id="modalPickerDropdown">
+        <div class="picker-nav"><button>‹</button><div class="picker-month">Mayo 2026 <span class="chev">▾</span></div><button>›</button></div>
+        <div class="wk-grid">
+          <div class="wk-header"><span class="lbl">Sem.</span><span>Lun</span><span>Mar</span><span>Mié</span><span>Jue</span><span>Vie</span><span>Sáb</span><span>Dom</span></div>
+          <div class="wk-row" id="mrow22" onclick="toggleWeekModal(22)"><div class="wk-row-label">Sem 22</div><div class="wk-day">27</div><div class="wk-day">28</div><div class="wk-day">29</div><div class="wk-day">30</div><div class="wk-day">1</div><div class="wk-day">2</div><div class="wk-day">3</div></div>
+          <div class="wk-row" id="mrow23" onclick="toggleWeekModal(23)"><div class="wk-row-label">Sem 23</div><div class="wk-day">4</div><div class="wk-day">5</div><div class="wk-day">6</div><div class="wk-day">7</div><div class="wk-day">8</div><div class="wk-day">9</div><div class="wk-day">10</div></div>
+          <div class="wk-row" id="mrow24" onclick="toggleWeekModal(24)"><div class="wk-row-label">Sem 24</div><div class="wk-day">11</div><div class="wk-day">12</div><div class="wk-day">13</div><div class="wk-day">14</div><div class="wk-day">15</div><div class="wk-day">16</div><div class="wk-day">17</div></div>
+          <div class="wk-row" id="mrow25" onclick="toggleWeekModal(25)"><div class="wk-row-label">Sem 25</div><div class="wk-day">18</div><div class="wk-day">19</div><div class="wk-day">20</div><div class="wk-day">21</div><div class="wk-day">22</div><div class="wk-day">23</div><div class="wk-day">24</div></div>
+        </div>
+        <div class="picker-footer"><button class="btn-aplicar" onclick="applyModalPicker(event)">APLICAR</button></div>
+      </div>
+    </div>
+    <div class="modal-summary">
+      <div class="modal-summary-left"><div class="modal-summary-label">Total a agendar</div><div class="modal-summary-count"><span id="modalViajes">32</span> viajes <span class="modal-fac-sep">·</span> <span id="modalFacilities">1</span> <span id="modalFacLabel">Facilitie</span></div></div>
+      <div class="modal-date-range" id="modalDateRange">18 de mayo al 14 de junio</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-modal-primary" onclick="confirmModal()">Agendar</button>
+      <button class="btn-modal-cancel" onclick="closeModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<div class="snackbar" id="snackbar">
+  <span class="snackbar-text">Flota de <strong id="snackFacility">SSC05</strong> revisada y lista para agendar.</span>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+// WEEK STATE
+// ══════════════════════════════════════════
+const WEEKS = [22, 23, 24, 25];
+const weekLabels = { 22:'Sem 22', 23:'Sem 23', 24:'Sem 24', 25:'Sem 25' };
+const weekSel = { 22:true, 23:true, 24:true, 25:true };
+
+function renderTags() {
+  const sel = WEEKS.filter(w => weekSel[w]);
+  const tagsEl = document.getElementById('weekTags');
+  tagsEl.innerHTML = '';
+  sel.slice(0,2).forEach(w => {
+    const t = document.createElement('span'); t.className='week-tag';
+    t.innerHTML=`${weekLabels[w]} <span class="xt" onclick="removeWeek(${w},event)">×</span>`;
+    tagsEl.appendChild(t);
+  });
+  const hid = sel.slice(2);
+  if (hid.length) {
+    const m = document.createElement('span'); m.className='more-tag';
+    m.innerHTML=`+${hid.length}<div class="tooltip-popup"><div class="tip-label">Semanas adicionales</div><div class="tip-tags">${hid.map(w=>`<span class="week-tag">${weekLabels[w]} <span class="xt" onclick="removeWeek(${w},event)">×</span></span>`).join('')}</div></div>`;
+    tagsEl.appendChild(m);
+  }
+  WEEKS.forEach(w => { const r=document.getElementById('row'+w); if(r) r.classList.toggle('sel',weekSel[w]); });
+  updatePills();
+}
+function removeWeek(w,e) { e.stopPropagation(); weekSel[w]=false; renderTags(); }
+function toggleWeek(w) { weekSel[w]=!weekSel[w]; renderTags(); }
+
+function updatePills() {
+  const sel = WEEKS.filter(w => weekSel[w]);
+  ['large','small'].forEach(type => {
+    const el = document.getElementById('pills-' + type);
+    if (!el) return;
+    el.innerHTML = sel.map(w => `<span class="week-pill-sm">${weekLabels[w]}</span>`).join('');
+  });
+}
+
+let pickerOpen = false;
+function togglePicker(e) { e&&e.stopPropagation(); pickerOpen=!pickerOpen; document.getElementById('pickerDropdown').classList.toggle('open',pickerOpen); document.getElementById('chevBtn').classList.toggle('open',pickerOpen); }
+function closePicker() { pickerOpen=false; document.getElementById('pickerDropdown').classList.remove('open'); document.getElementById('chevBtn').classList.remove('open'); }
+function applyPicker() { renderTags(); closePicker(); }
+document.addEventListener('click', e => { if (!document.getElementById('weekBar').contains(e.target)) closePicker(); });
+
+// ══════════════════════════════════════════
+// VARIATION TABLE
+// ══════════════════════════════════════════
+const FIELDS = [
+  { key:'ciclo', label:'Ciclo',  type:'select', opts:['AM 1','AM 2','PM 1','PM 2','NOON'] },
+  { key:'eta',   label:'ETA',    type:'time' },
+  { key:'lun',   label:'Lun',    type:'number' },
+  { key:'mar',   label:'Mar',    type:'number' },
+  { key:'mie',   label:'Mié',    type:'number' },
+  { key:'jue',   label:'Jue',    type:'number' },
+  { key:'vie',   label:'Vie',    type:'number' },
+  { key:'sab',   label:'Sáb',    type:'number' },
+  { key:'dom',   label:'Dom',    type:'number' },
+];
+
+function getBaseVals(type) {
+  const form = document.getElementById('form-' + type);
+  if (!form) return {};
+  const inputs = [...form.querySelectorAll('select, input[type=time], input[type=number]')];
+  const vals = {};
+  FIELDS.forEach((f, i) => { if (inputs[i]) vals[f.key] = inputs[i].value; });
+  return vals;
+}
+
+function buildVariationTable(type) {
+  const table = document.getElementById('vt-' + type);
+  if (!table) return;
+  const sel = WEEKS.filter(w => weekSel[w]);
+  const base = getBaseVals(type);
+
+  // Head
+  let thead = '<thead><tr><th>Campo</th>' + sel.map(w => `<th>${weekLabels[w]}</th>`).join('') + '</tr></thead>';
+
+  // Body
+  let tbody = '<tbody>';
+  FIELDS.forEach(f => {
+    tbody += `<tr><td>${f.label}</td>`;
+    sel.forEach(w => {
+      const id = `vt-${type}-${f.key}-${w}`;
+      const val = base[f.key] || '';
+      if (f.type === 'select') {
+        const opts = f.opts.map(o => `<option${o===val?' selected':''}>${o}</option>`).join('');
+        tbody += `<td><select id="${id}" onchange="recheckVT('${type}')">${opts}</select></td>`;
+      } else if (f.type === 'time') {
+        tbody += `<td><input type="time" id="${id}" value="${val}" oninput="recheckVT('${type}')"></td>`;
+      } else {
+        tbody += `<td><input type="number" id="${id}" value="${val}" min="0" max="99" oninput="recheckVT('${type}')"></td>`;
+      }
+    });
+    tbody += '</tr>';
+  });
+  tbody += '</tbody>';
+
+  table.innerHTML = thead + tbody;
+}
+
+function recheckVT(type) {
+  const sel = WEEKS.filter(w => weekSel[w]);
+  const base = getBaseVals(type);
+  let diffCount = 0;
+
+  FIELDS.forEach(f => {
+    sel.forEach(w => {
+      const el = document.getElementById(`vt-${type}-${f.key}-${w}`);
+      if (!el) return;
+      const diff = el.value !== (base[f.key] || '');
+      el.classList.toggle('has-diff', diff);
+      if (diff) diffCount++;
+    });
+  });
+
+  const badge = document.getElementById('badge-' + type);
+  if (badge) {
+    badge.textContent = diffCount > 0 ? diffCount : '';
+    badge.classList.toggle('visible', diffCount > 0);
+  }
+  const btn = document.getElementById('btn-vary-' + type);
+  if (btn) {
+    const varyText = btn.querySelector('.vary-text');
+    if (varyText) varyText.textContent = diffCount > 0 ? 'Variaciones activas' : '¿Alguna semana es diferente?';
+  }
+}
+
+const varyOpen = { large: false, small: false };
+
+function toggleVariation(type) {
+  varyOpen[type] = !varyOpen[type];
+  const wrap = document.getElementById('vwrap-' + type);
+  const btn  = document.getElementById('btn-vary-' + type);
+  if (wrap) wrap.classList.toggle('open', varyOpen[type]);
+  if (btn)  btn.classList.toggle('open', varyOpen[type]);
+  if (varyOpen[type]) buildVariationTable(type);
+}
+
+function buildAllForms() {
+  ['large', 'small'].forEach(type => {
+    varyOpen[type] = false;
+    const wrap = document.getElementById('vwrap-' + type);
+    const btn  = document.getElementById('btn-vary-' + type);
+    if (wrap) wrap.classList.remove('open');
+    if (btn)  { btn.classList.remove('open'); const vt=btn.querySelector('.vary-text'); if(vt) vt.textContent='¿Alguna semana es diferente?'; }
+    const badge = document.getElementById('badge-' + type);
+    if (badge) { badge.textContent=''; badge.classList.remove('visible'); }
+  });
+  updatePills();
+}
+
+// ══════════════════════════════════════════
+// PANEL
+// ══════════════════════════════════════════
+const reviewedSet = new Set();
+let activeFacility = null, reviewedFacility = null;
+function checkAllReviewed() { document.getElementById('btnHeaderAgendar').disabled = reviewedSet.size === 0; }
+
+function openPanel(facility) {
+  activeFacility = facility;
+  buildAllForms();
+  document.getElementById('panelTitle').textContent = 'Vehículos de la semana para ' + facility;
+  const footer = document.getElementById('panelFooter');
+  const btn    = document.getElementById('btnRevisado');
+  if (reviewedSet.has(facility)) {
+    footer.classList.add('reviewed'); btn.textContent='Agendar vehículos'; btn.onclick=openModal;
+  } else {
+    footer.classList.remove('reviewed'); btn.textContent='Marcar como revisado'; btn.onclick=markReviewed;
+  }
+  document.getElementById('listCol').classList.add('compressed');
+  document.getElementById('panelCol').classList.add('active');
+  document.querySelectorAll('.facility-row').forEach(r => r.classList.remove('active-row'));
+  const row = document.getElementById('row-' + facility);
+  if (row) row.classList.add('active-row');
+  closePicker();
+}
+
+function closePanel() {
+  document.getElementById('listCol').classList.remove('compressed');
+  document.getElementById('panelCol').classList.remove('active');
+  document.querySelectorAll('.facility-row').forEach(r => r.classList.remove('active-row'));
+  activeFacility = null;
+}
+
+function toggleCard(id) { document.getElementById(id).classList.toggle('open'); }
+
+function markReviewed() {
+  if (!activeFacility) return;
+  const fac = activeFacility;
+  reviewedFacility = fac; reviewedSet.add(fac);
+  const dot=document.getElementById('dot-'+fac), stxt=document.getElementById('stxt-'+fac);
+  if(dot&&stxt){dot.className='status-dot reviewed';stxt.className='status-text reviewed';stxt.textContent='Listo para agendar';}
+  checkAllReviewed();
+  document.getElementById('panelFooter').classList.add('reviewed');
+  const btn=document.getElementById('btnRevisado'); btn.textContent='Agendar vehículos'; btn.onclick=openModal;
+  document.getElementById('snackFacility').textContent=fac;
+  const snack=document.getElementById('snackbar'); snack.classList.add('show');
+  setTimeout(()=>snack.classList.remove('show'),4000);
+}
+
+function undoReview() {
+  if (!reviewedFacility) return;
+  const fac=reviewedFacility;
+  const dot=document.getElementById('dot-'+fac), stxt=document.getElementById('stxt-'+fac);
+  if(dot&&stxt){dot.className='status-dot pending';stxt.className='status-text pending';stxt.textContent='Por revisar';}
+  document.getElementById('panelFooter').classList.remove('reviewed');
+  const btn=document.getElementById('btnRevisado'); btn.textContent='Marcar como revisado'; btn.onclick=markReviewed;
+  reviewedSet.delete(fac); reviewedFacility=null; checkAllReviewed();
+  document.getElementById('snackbar').classList.remove('show');
+}
+
+// ══════════════════════════════════════════
+// MODAL
+// ══════════════════════════════════════════
+const VIAJES_PER_WEEK = 8;
+const weekDates = { 22:{start:'27 de mayo',end:'2 de junio'}, 23:{start:'4 de junio',end:'10 de junio'}, 24:{start:'11 de junio',end:'17 de junio'}, 25:{start:'18 de junio',end:'24 de junio'} };
+
+function renderModalWeeks() {
+  const sel=WEEKS.filter(w=>weekSel[w]);
+  const pe=document.getElementById('modalWeekPills'); pe.innerHTML='';
+  sel.forEach(w=>{const p=document.createElement('span');p.className='modal-week-pill';p.innerHTML=`Semana ${w} <span class="xt" onclick="removeWeekModal(${w},event)">×</span>`;pe.appendChild(p);});
+  const fc=reviewedSet.size||1;
+  document.getElementById('modalViajes').textContent=sel.length*VIAJES_PER_WEEK*fc;
+  document.getElementById('modalFacilities').textContent=fc;
+  document.getElementById('modalFacLabel').textContent=fc===1?'Facilitie':'Facilities';
+  const de=document.getElementById('modalDateRange');
+  if(!sel.length){de.textContent='—';return;}
+  de.textContent=weekDates[Math.min(...sel)].start+' al '+weekDates[Math.max(...sel)].end;
+  WEEKS.forEach(w=>{const r=document.getElementById('mrow'+w);if(r)r.classList.toggle('sel',weekSel[w]);});
+}
+
+let modalPickerOpen=false;
+function toggleModalPicker(e){e&&e.stopPropagation();modalPickerOpen=!modalPickerOpen;document.getElementById('modalPickerDropdown').classList.toggle('open',modalPickerOpen);document.getElementById('modalChev').textContent=modalPickerOpen?'▴':'▾';}
+function closeModalPicker(){modalPickerOpen=false;document.getElementById('modalPickerDropdown').classList.remove('open');document.getElementById('modalChev').textContent='▾';}
+function toggleWeekModal(w){weekSel[w]=!weekSel[w];renderTags();renderModalWeeks();}
+function applyModalPicker(e){e&&e.stopPropagation();closeModalPicker();}
+function removeWeekModal(w,e){e.stopPropagation();weekSel[w]=false;renderTags();renderModalWeeks();}
+function openModal(){renderModalWeeks();document.getElementById('modalOverlay').classList.add('open');}
+function closeModal(){closeModalPicker();document.getElementById('modalOverlay').classList.remove('open');}
+
+function confirmModal() {
+  const v=document.getElementById('modalViajes').textContent, fc=reviewedSet.size, fl=fc===1?'facilite':'facilites';
+  closeModal();
+  reviewedSet.forEach(fac=>{const d=document.getElementById('dot-'+fac),s=document.getElementById('stxt-'+fac);if(d&&s){d.className='status-dot scheduled';s.className='status-text scheduled';s.textContent='Agendado';}});
+  reviewedSet.clear(); checkAllReviewed();
+  const sn=document.getElementById('snackbar'); sn.classList.add('green');
+  sn.querySelector('.snackbar-text').innerHTML=`<strong>${fc} ${fl}</strong> con una flota de <strong>${v} viajes</strong> fue agendado.`;
+  sn.classList.add('show'); setTimeout(()=>{sn.classList.remove('show');sn.classList.remove('green');},5000);
+}
+
+document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)closeModal();});
+document.addEventListener('click',e=>{const w=document.querySelector('.modal-picker-wrap');if(w&&!w.contains(e.target))closeModalPicker();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModalPicker();closeModal();closePicker();closePanel();}});
+
+renderTags();
+</script>
+</body>
+</html>
