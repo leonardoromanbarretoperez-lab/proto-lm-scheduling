@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Variantes — Configuración por semana</title>
+<link href="https://fonts.googleapis.com/css2?family=Balsamiq+Sans:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --blue:   #3483FA;
+  --blue-dk:#2968c8;
+  --green:  #00a650;
+  --dark:   #1e1e1e;
+  --gray:   #666;
+  --border: #ededed;
+  --bg:     #f5f5f5;
+  --font:   'Balsamiq Sans', cursive;
+}
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Top bar ── */
+.topbar {
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+  padding: 0 48px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+}
+.back-link {
+  display: flex; align-items: center; gap: 6px;
+  text-decoration: none; font-size: 13px; color: var(--gray);
+}
+.back-link:hover { color: var(--blue); }
+.back-link svg { width: 14px; height: 14px; }
+.topbar-sep { width: 1px; height: 18px; background: var(--border); }
+.topbar-title { font-size: 13px; color: var(--dark); font-weight: 700; }
+
+/* ── Hero ── */
+.hero {
+  text-align: center;
+  padding: 52px 24px 36px;
+}
+.hero-eyebrow {
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 1px; text-transform: uppercase;
+  color: var(--blue); margin-bottom: 12px;
+}
+.hero h1 { font-size: 26px; color: var(--dark); margin-bottom: 10px; line-height: 1.2; }
+.hero p { font-size: 14px; color: var(--gray); max-width: 480px; margin: 0 auto; line-height: 1.6; }
+
+.problem-chip {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: #fff7e6; border: 1px solid #ffd980;
+  border-radius: 20px; padding: 5px 14px;
+  font-size: 12px; color: #996600; margin-top: 16px;
+}
+.problem-chip svg { width: 13px; height: 13px; }
+
+/* ── Cards ── */
+.cards {
+  display: flex; gap: 20px;
+  justify-content: center;
+  padding: 0 40px 56px;
+  flex-wrap: wrap;
+}
+
+.card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  width: 340px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0,0,0,.05);
+  display: flex; flex-direction: column;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+.card:hover {
+  box-shadow: 0 8px 24px rgba(52,131,250,.13);
+  transform: translateY(-2px);
+}
+
+/* ── Preview illustrations ── */
+.preview {
+  height: 180px;
+  background: #f0f4ff;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  padding: 16px; overflow: hidden;
+}
+
+/* Shared mock styles */
+.mock {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  width: 100%; height: 100%;
+  display: flex; flex-direction: column;
+  font-size: 0;
+}
+.mock-hdr {
+  background: var(--bg); padding: 6px 10px;
+  border-bottom: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.mock-hbar { height: 7px; border-radius: 3px; background: #b8cfff; width: 55%; }
+.mock-btns { display: flex; gap: 4px; }
+.mock-btn { height: 7px; border-radius: 3px; }
+
+/* Option B — tabs */
+.b-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); }
+.b-tab {
+  padding: 5px 9px; font-size: 10px; font-family: var(--font);
+  color: var(--gray); border-bottom: 2px solid transparent;
+}
+.b-tab.on { color: var(--blue); border-bottom-color: var(--blue); font-weight: 700; }
+.b-rows { padding: 8px 10px; display: flex; flex-direction: column; gap: 5px; }
+.b-row { display: flex; gap: 4px; align-items: center; }
+.b-lbl { width: 26px; height: 7px; border-radius: 3px; background: var(--border); flex-shrink: 0; }
+.b-inp { flex: 1; height: 18px; border: 1px solid var(--border); border-radius: 4px; }
+.b-days { display: flex; gap: 2px; }
+.b-day { width: 16px; height: 18px; border: 1px solid var(--border); border-radius: 3px; }
+.mock-toggle {
+  display: flex; align-items: center; gap: 6px;
+  padding: 5px 10px; border-top: 1px solid var(--border);
+  margin-top: auto;
+}
+.toggle-pill { width: 24px; height: 13px; border-radius: 10px; background: var(--blue); position: relative; }
+.toggle-pill::after { content: ''; position: absolute; right: 2px; top: 2px; width: 9px; height: 9px; background: #fff; border-radius: 50%; }
+.mock-toggle-lbl { height: 6px; border-radius: 3px; background: var(--border); width: 90px; }
+
+/* Option D — comparison table */
+.d-table {
+  display: grid;
+  grid-template-columns: 34px repeat(4, 1fr);
+  gap: 1px; background: var(--border);
+  margin: 8px; border-radius: 5px; overflow: hidden; flex: 1;
+}
+.d-th { background: var(--bg); padding: 4px 3px; }
+.d-th-bar { height: 6px; border-radius: 2px; background: var(--blue); opacity: 0.6; width: 80%; }
+.d-lbl-cell { background: #fafafa; padding: 5px 3px; }
+.d-lbl-bar { height: 5px; border-radius: 2px; background: var(--border); width: 70%; }
+.d-val { background: #fff; padding: 3px; display: flex; align-items: center; justify-content: center; }
+.d-inp { width: 100%; height: 16px; border: 1px solid var(--border); border-radius: 3px; }
+
+/* Option E — copy + diff */
+.e-sections { padding: 8px; display: flex; flex-direction: column; gap: 5px; flex: 1; }
+.e-sec { border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+.e-sec-hdr { padding: 5px 8px; font-size: 10px; font-family: var(--font); font-weight: 700; }
+.e-sec-hdr.base { background: var(--bg); color: var(--blue); }
+.e-sec-hdr.active { background: #eef4ff; color: var(--blue); }
+.e-sec-body { padding: 5px 8px; display: flex; gap: 3px; }
+.e-inp { width: 30px; height: 16px; border: 1px solid var(--border); border-radius: 3px; }
+.e-inp.diff { border-color: var(--blue); background: #eef4ff; }
+.e-inp-wide { flex: 1; height: 16px; border: 1px solid var(--border); border-radius: 3px; }
+.e-inactive { padding: 7px 8px; background: #fafafa; display: flex; justify-content: space-between; align-items: center; }
+.e-inactive-lbl { height: 6px; border-radius: 3px; background: var(--border); width: 55%; }
+.e-btn { height: 16px; width: 52px; border: 1px solid var(--border); border-radius: 4px; background: #fff; }
+
+/* ── Card body ── */
+.card-body {
+  padding: 20px 22px;
+  flex: 1; display: flex; flex-direction: column;
+}
+.card-variant {
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 0.8px; text-transform: uppercase;
+  color: var(--blue); margin-bottom: 7px;
+}
+.card-title { font-size: 17px; font-weight: 700; color: var(--dark); margin-bottom: 7px; }
+.card-desc { font-size: 12px; color: var(--gray); line-height: 1.6; flex: 1; }
+
+.card-pros {
+  margin: 12px 0 14px;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.pro, .con {
+  font-size: 11px; display: flex; align-items: flex-start; gap: 6px; line-height: 1.4;
+}
+.pro { color: #2a7a50; }
+.con { color: #886600; }
+.pro::before { content: '✓'; font-weight: 700; flex-shrink: 0; }
+.con::before { content: '△'; font-weight: 700; flex-shrink: 0; }
+
+.card-cta {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--blue); color: #fff;
+  text-decoration: none; padding: 10px 18px;
+  border-radius: 8px; font-family: var(--font);
+  font-size: 13px; font-weight: 700;
+  transition: background 0.15s; align-self: flex-start;
+}
+.card-cta:hover { background: var(--blue-dk); }
+.card-cta svg { width: 14px; height: 14px; }
+
+/* ── Footer ── */
+footer {
+  margin-top: auto;
+  border-top: 1px solid var(--border);
+  background: #fff;
+  padding: 14px 48px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.footer-l { font-size: 12px; color: var(--gray); }
+.footer-r { font-size: 12px; color: #bbb; }
+</style>
+</head>
+<body>
+
+<!-- Top bar -->
+<div class="topbar">
+  <a class="back-link" href="../launcher/index.html">
+    <svg viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Volver a la portada
+  </a>
+  <div class="topbar-sep"></div>
+  <span class="topbar-title">Proto 01 — Variantes de configuración por semana</span>
+</div>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-eyebrow">Exploración UX · Proto 01</div>
+  <h1>¿Cómo configurar semanas<br>de forma independiente?</h1>
+  <p>Tres alternativas para resolver la variabilidad de configuración entre semanas en el panel de revisión de vehículos.</p>
+  <div class="problem-chip">
+    <svg viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.5"/><path d="M7 4.5v3M7 9.5v.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    Problema: con 4 semanas seleccionadas, todas comparten la misma configuración
+  </div>
+</div>
+
+<!-- Cards -->
+<div class="cards">
+
+  <!-- Opción B -->
+  <div class="card">
+    <div class="preview">
+      <div class="mock">
+        <div class="mock-hdr">
+          <div class="mock-hbar"></div>
+        </div>
+        <div class="b-tabs">
+          <div class="b-tab on">Sem 22</div>
+          <div class="b-tab">Sem 23</div>
+          <div class="b-tab">Sem 24</div>
+          <div class="b-tab">Sem 25</div>
+        </div>
+        <div class="b-rows">
+          <div class="b-row">
+            <div class="b-lbl"></div>
+            <div class="b-inp"></div>
+            <div class="b-days">
+              <div class="b-day"></div><div class="b-day"></div><div class="b-day"></div>
+              <div class="b-day"></div><div class="b-day"></div>
+            </div>
+          </div>
+          <div class="b-row">
+            <div class="b-lbl"></div>
+            <div class="b-inp"></div>
+            <div class="b-days">
+              <div class="b-day"></div><div class="b-day"></div><div class="b-day"></div>
+              <div class="b-day"></div><div class="b-day"></div>
+            </div>
+          </div>
+        </div>
+        <div class="mock-toggle">
+          <div class="toggle-pill"></div>
+          <div class="mock-toggle-lbl"></div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-variant">Variante B</div>
+      <div class="card-title">Toggle + tabs por semana</div>
+      <div class="card-desc">Un switch "Configurar por semana" activa tabs independientes dentro de cada card de vehículo. Por defecto, una sola config para todas las semanas.</div>
+      <div class="card-pros">
+        <div class="pro">Flujo simple por defecto</div>
+        <div class="pro">Flexible cuando se necesita</div>
+        <div class="con">Más clicks para llegar a la variabilidad</div>
+      </div>
+      <a class="card-cta" href="../proto-01b/index.html" target="_blank">
+        Abrir variante B
+        <svg viewBox="0 0 14 14" fill="none"><path d="M2 7h10M8 3l4 4-4 4" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+    </div>
+  </div>
+
+  <!-- Opción D -->
+  <div class="card">
+    <div class="preview">
+      <div class="mock">
+        <div class="mock-hdr">
+          <div class="mock-hbar"></div>
+        </div>
+        <div class="d-table">
+          <div class="d-th"></div>
+          <div class="d-th"><div class="d-th-bar"></div></div>
+          <div class="d-th"><div class="d-th-bar"></div></div>
+          <div class="d-th"><div class="d-th-bar"></div></div>
+          <div class="d-th"><div class="d-th-bar"></div></div>
+
+          <div class="d-lbl-cell"><div class="d-lbl-bar"></div></div>
+          <div class="d-val"><div class="d-inp"></div></div>
+          <div class="d-val"><div class="d-inp"></div></div>
+          <div class="d-val"><div class="d-inp"></div></div>
+          <div class="d-val"><div class="d-inp"></div></div>
+
+          <div class="d-lbl-cell"><div class="d-lbl-bar"></div></div>
+          <div class="d-val"><div class="d-inp"></div></div>
+          <div class="d-val"><div class="d-inp"></div></div>
+          <div class="d-val"><div class="d-inp"></div></div>
+          <div class="d-val"><div class="d-inp"></div></div>
+
+          <div class="d-lbl-cell"><div class="d-lbl-bar"></div></div>
+          <div class="d-val"><div class="d-inp"></div></div>
+          <div class="d-val"><div class="d-inp"></div></div>
+          <div class="d-val"><div class="d-inp"></div></div>
+          <div class="d-val"><div class="d-inp"></div></div>
+
+          <div class="d-lbl-cell"><div class="d-lbl-bar"></div></div>
+          <div class="d-val"><div class="d-inp"></div></div>
+          <div class="d-val"><div class="d-inp"></div></div>
+          <div class="d-val"><div class="d-inp"></div></div>
+          <div class="d-val"><div class="d-inp"></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-variant">Variante D</div>
+      <div class="card-title">Columnas comparativas</div>
+      <div class="card-desc">Cada semana es una columna dentro del card de vehículo. Ciclo, ETA y días de cada semana visibles y editables al mismo tiempo.</div>
+      <div class="card-pros">
+        <div class="pro">Comparación inmediata entre semanas</div>
+        <div class="pro">Cero clicks extra para editar</div>
+        <div class="con">Densidad visual alta con 4 semanas</div>
+      </div>
+      <a class="card-cta" href="../proto-01d/index.html" target="_blank">
+        Abrir variante D
+        <svg viewBox="0 0 14 14" fill="none"><path d="M2 7h10M8 3l4 4-4 4" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+    </div>
+  </div>
+
+  <!-- Opción E -->
+  <div class="card">
+    <div class="preview">
+      <div class="mock">
+        <div class="mock-hdr">
+          <div class="mock-hbar"></div>
+        </div>
+        <div class="e-sections">
+          <div class="e-sec">
+            <div class="e-sec-hdr base">Sem 22 — referencia</div>
+            <div class="e-sec-body">
+              <div class="e-inp-wide"></div>
+              <div class="e-inp"></div>
+              <div class="e-inp"></div>
+              <div class="e-inp"></div>
+            </div>
+          </div>
+          <div class="e-sec">
+            <div class="e-sec-hdr active">Sem 23</div>
+            <div class="e-sec-body">
+              <div class="e-inp-wide"></div>
+              <div class="e-inp diff"></div>
+              <div class="e-inp"></div>
+              <div class="e-inp diff"></div>
+            </div>
+          </div>
+          <div class="e-sec">
+            <div class="e-inactive">
+              <div class="e-inactive-lbl"></div>
+              <div class="e-btn"></div>
+            </div>
+          </div>
+          <div class="e-sec">
+            <div class="e-inactive">
+              <div class="e-inactive-lbl"></div>
+              <div class="e-btn"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-variant">Variante E</div>
+      <div class="card-title">Copiar + diff visual</div>
+      <div class="card-desc">La primera semana es la referencia. Las demás arrancan como "igual a Sem anterior" y se activan con "Personalizar". Los campos que difieren se resaltan en azul.</div>
+      <div class="card-pros">
+        <div class="pro">Ideal cuando las semanas son casi iguales</div>
+        <div class="pro">Diff visual muestra cambios de un vistazo</div>
+        <div class="con">Flujo más largo si todas las semanas varían</div>
+      </div>
+      <a class="card-cta" href="../proto-01e/index.html" target="_blank">
+        Abrir variante E
+        <svg viewBox="0 0 14 14" fill="none"><path d="M2 7h10M8 3l4 4-4 4" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+    </div>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer>
+  <div class="footer-l">Proto 01 — Variantes de configuración por semana</div>
+  <div class="footer-r">Flota Fixa FM / LM · Q4.2025</div>
+</footer>
+
+</body>
+</html>
