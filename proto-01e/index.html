@@ -491,6 +491,7 @@ body {
   border: 1px solid var(--border);
   border-radius: 8px;
   overflow: hidden;
+  flex-shrink: 0;
 }
 .vehicle-card-header {
   display: flex;
@@ -980,7 +981,7 @@ body {
 }
 .btn-ws-reset:hover { color: var(--dark); }
 
-.ws-body { padding: 8px 12px 10px; }
+.ws-body { padding: 8px 12px 10px; overflow-x: auto; }
 
 /* diff highlight */
 .has-diff {
