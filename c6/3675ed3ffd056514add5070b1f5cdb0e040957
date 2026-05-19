@@ -1,0 +1,20 @@
+proto-01e/index.html
+  s_1d42129a58e151::t_9bfc573ef61663 984
+  s_1d42129a58e151::t_8f47b91d7734de 494
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.11",
+  "base_commit_sha": "c63675ed3ffd056514add5070b1f5cdb0e040957",
+  "prompts": {},
+  "sessions": {
+    "s_1d42129a58e151": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "20fc1c1c-f68f-41cd-9f24-8dc29480a272",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "leonardoromanbarretoperez-lab <leonardoroman.barretoperez@mercadolibre.com>"
+    }
+  }
+}
