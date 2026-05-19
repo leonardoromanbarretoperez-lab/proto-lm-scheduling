@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agendamiento Flota Last Mile — Prototipos</title>
+<link href="https://fonts.googleapis.com/css2?family=Balsamiq+Sans:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --blue:   #3483FA;
+  --blue-dk:#2968c8;
+  --green:  #00a650;
+  --dark:   #1e1e1e;
+  --gray:   #666;
+  --border: #ededed;
+  --bg:     #f5f5f5;
+  --font:   'Balsamiq Sans', cursive;
+}
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Top bar ── */
+.topbar {
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+  padding: 0 48px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.ml-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+.ml-icon {
+  width: 36px; height: 36px;
+  background: var(--blue);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+}
+.ml-icon svg { width: 22px; height: 22px; }
+.ml-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--dark);
+}
+.topbar-sep {
+  width: 1px; height: 20px; background: var(--border); margin: 0 4px;
+}
+.topbar-tag {
+  font-size: 12px;
+  color: var(--gray);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 3px 10px;
+}
+
+/* ── Hero ── */
+.hero {
+  text-align: center;
+  padding: 64px 24px 48px;
+}
+.hero-eyebrow {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--blue);
+  margin-bottom: 14px;
+}
+.hero h1 {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--dark);
+  margin-bottom: 12px;
+  line-height: 1.2;
+}
+.hero p {
+  font-size: 15px;
+  color: var(--gray);
+  max-width: 520px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 5px 14px;
+  font-size: 12px;
+  color: var(--gray);
+  margin-top: 18px;
+}
+.hero-badge-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--green); flex-shrink: 0;
+}
+
+/* ── Cards grid ── */
+.cards {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  padding: 0 48px 64px;
+  flex-wrap: wrap;
+}
+
+.card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  width: 460px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0,0,0,.06);
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+.card:hover {
+  box-shadow: 0 8px 28px rgba(52,131,250,.15);
+  transform: translateY(-2px);
+}
+
+/* ── Card preview area ── */
+.preview {
+  height: 220px;
+  background: #f0f4ff;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  overflow: hidden;
+}
+
+/* Proto 01 preview — list + side panel */
+.p1-wrap {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  gap: 6px;
+  font-size: 0;
+}
+.p1-list {
+  flex: 1;
+  background: #fff;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.p1-list-header {
+  background: var(--bg);
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.p1-lh-dot { width: 28px; height: 7px; background: var(--blue); border-radius: 3px; }
+.p1-lh-btn { width: 38px; height: 11px; background: var(--blue); border-radius: 3px; opacity: 0.5; }
+.p1-row {
+  padding: 7px 8px;
+  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.p1-row.active { background: #f0f4ff; border-left: 3px solid var(--blue); }
+.p1-row-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--blue); flex-shrink: 0; }
+.p1-row-bar { height: 6px; border-radius: 3px; background: var(--border); flex: 1; }
+.p1-row-bar.active-bar { background: #b8cfff; }
+.p1-panel {
+  width: 140px;
+  background: #fff;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.p1-panel-header {
+  background: var(--bg);
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--border);
+}
+.p1-ph-bar { height: 7px; border-radius: 3px; background: #b8cfff; width: 80%; }
+.p1-ph-sub { height: 5px; border-radius: 3px; background: var(--border); width: 50%; margin-top: 4px; }
+.p1-vcard {
+  margin: 6px 6px 0;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 5px 6px;
+}
+.p1-vc-title { height: 5px; border-radius: 3px; background: var(--dark); width: 60%; opacity: 0.4; }
+.p1-vc-row { display: flex; gap: 3px; margin-top: 4px; }
+.p1-vc-input { width: 14px; height: 10px; border-radius: 2px; background: var(--border); }
+.p1-panel-btn {
+  margin: 6px;
+  background: var(--blue);
+  border-radius: 4px;
+  height: 14px;
+  margin-top: auto;
+}
+
+/* Proto 02 preview — grid/matrix */
+.p2-wrap {
+  width: 100%;
+  height: 100%;
+  background: #fff;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.p2-header {
+  background: var(--bg);
+  padding: 7px 10px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.p2-hbar { height: 8px; border-radius: 3px; background: #b8cfff; width: 42%; }
+.p2-hbtn { width: 50px; height: 13px; border-radius: 3px; background: var(--blue); opacity: 0.7; }
+.p2-filters {
+  padding: 5px 10px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  gap: 8px;
+}
+.p2-fchip { width: 36px; height: 8px; border-radius: 3px; background: var(--border); }
+.p2-table { flex: 1; overflow: hidden; }
+.p2-thead {
+  display: flex;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+.p2-th {
+  flex: 1;
+  padding: 5px 6px;
+}
+.p2-th:first-child { flex: 0 0 80px; }
+.p2-th-bar { height: 6px; border-radius: 3px; background: var(--border); width: 70%; }
+.p2-th-sub { height: 4px; border-radius: 3px; background: #ddd; width: 50%; margin-top: 3px; }
+.p2-row {
+  display: flex;
+  border-bottom: 1px solid #f0f0f0;
+  align-items: center;
+}
+.p2-cell {
+  flex: 1;
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.p2-cell:first-child { flex: 0 0 80px; }
+.p2-cdot { width: 6px; height: 6px; border-radius: 50%; background: var(--blue); flex-shrink: 0; }
+.p2-cdot.green { background: var(--green); }
+.p2-cdot.gray  { background: #888; }
+.p2-cbar { height: 5px; border-radius: 3px; background: var(--border); flex: 1; }
+.p2-cchev { width: 5px; height: 8px; border-radius: 1px; background: var(--blue); opacity: 0.4; }
+
+/* ── Card body ── */
+.card-body {
+  padding: 24px 28px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.card-proto-num {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--blue);
+  margin-bottom: 8px;
+}
+.card-title {
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--dark);
+  margin-bottom: 8px;
+}
+.card-desc {
+  font-size: 13px;
+  color: var(--gray);
+  line-height: 1.6;
+  flex: 1;
+}
+.card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 14px 0;
+}
+.tag {
+  font-size: 11px;
+  padding: 3px 9px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  color: var(--gray);
+  background: var(--bg);
+}
+.card-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--blue);
+  color: #fff;
+  text-decoration: none;
+  padding: 11px 20px;
+  border-radius: 8px;
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 700;
+  transition: background 0.15s;
+  margin-top: 4px;
+  align-self: flex-start;
+}
+.card-cta:hover { background: var(--blue-dk); }
+.card-cta svg { width: 16px; height: 16px; }
+
+/* ── Footer ── */
+footer {
+  margin-top: auto;
+  border-top: 1px solid var(--border);
+  background: #fff;
+  padding: 16px 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.footer-left { font-size: 12px; color: var(--gray); }
+.footer-right { font-size: 12px; color: #bbb; }
+</style>
+</head>
+<body>
+
+<!-- Top bar -->
+<div class="topbar">
+  <a class="ml-logo" href="#">
+    <div class="ml-icon">
+      <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M16 4C9.373 4 4 9.373 4 16s5.373 12 12 12 12-5.373 12-12S22.627 4 16 4z" fill="#FFDB00"/>
+        <path d="M11 13.5l3.5 5 2.5-3.5 2.5 3.5 3.5-5" stroke="#333" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <span class="ml-name">Mercado Libre</span>
+  </a>
+  <div class="topbar-sep"></div>
+  <span class="topbar-tag">Last Mile — LM Scheduling Q4.2025</span>
+</div>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-eyebrow">Investigación de usuarios · Week +4</div>
+  <h1>Agendamiento de flota<br>dedicada Last Mile</h1>
+  <p>Dos variantes de prototipo para testear con usuarios. Seleccioná el prototipo que querés explorar.</p>
+  <div class="hero-badge">
+    <span class="hero-badge-dot"></span>
+    Testing Week +4 · 4 semanas · 5 facilities
+  </div>
+</div>
+
+<!-- Cards -->
+<div class="cards">
+
+  <!-- Proto 01 -->
+  <div class="card">
+    <div class="preview">
+      <!-- Mini illustration: list + side panel -->
+      <div class="p1-wrap">
+        <div class="p1-list">
+          <div class="p1-list-header">
+            <div class="p1-lh-dot"></div>
+            <div class="p1-lh-btn"></div>
+          </div>
+          <div class="p1-row active">
+            <div class="p1-row-dot"></div>
+            <div class="p1-row-bar active-bar"></div>
+          </div>
+          <div class="p1-row">
+            <div class="p1-row-dot"></div>
+            <div class="p1-row-bar"></div>
+          </div>
+          <div class="p1-row">
+            <div class="p1-row-dot"></div>
+            <div class="p1-row-bar"></div>
+          </div>
+          <div class="p1-row">
+            <div class="p1-row-dot"></div>
+            <div class="p1-row-bar"></div>
+          </div>
+          <div class="p1-row">
+            <div class="p1-row-dot"></div>
+            <div class="p1-row-bar"></div>
+          </div>
+        </div>
+        <div class="p1-panel">
+          <div class="p1-panel-header">
+            <div class="p1-ph-bar"></div>
+            <div class="p1-ph-sub"></div>
+          </div>
+          <div class="p1-vcard">
+            <div class="p1-vc-title"></div>
+            <div class="p1-vc-row">
+              <div class="p1-vc-input"></div>
+              <div class="p1-vc-input"></div>
+              <div class="p1-vc-input"></div>
+              <div class="p1-vc-input"></div>
+            </div>
+          </div>
+          <div class="p1-vcard">
+            <div class="p1-vc-title"></div>
+            <div class="p1-vc-row">
+              <div class="p1-vc-input"></div>
+              <div class="p1-vc-input"></div>
+              <div class="p1-vc-input"></div>
+              <div class="p1-vc-input"></div>
+            </div>
+          </div>
+          <div class="p1-panel-btn"></div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-proto-num">Prototipo 01</div>
+      <div class="card-title">Vista de lista con panel lateral</div>
+      <div class="card-desc">Listado de facilities con selector de semanas. Al revisar una facility, un panel lateral deslizable muestra el detalle de vehículos para editar ciclos y confirmar el agendamiento.</div>
+      <div class="card-tags">
+        <span class="tag">Lista + panel</span>
+        <span class="tag">Semanas múltiples</span>
+        <span class="tag">Ciclos por vehículo</span>
+      </div>
+      <a class="card-cta" href="../index.html" target="_blank">
+        Abrir prototipo
+        <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M3 8h10M9 4l4 4-4 4" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+    </div>
+  </div>
+
+  <!-- Proto 02 -->
+  <div class="card">
+    <div class="preview">
+      <!-- Mini illustration: grid/matrix -->
+      <div class="p2-wrap">
+        <div class="p2-header">
+          <div class="p2-hbar"></div>
+          <div class="p2-hbtn"></div>
+        </div>
+        <div class="p2-filters">
+          <div class="p2-fchip"></div>
+          <div class="p2-fchip"></div>
+          <div class="p2-fchip"></div>
+        </div>
+        <div class="p2-table">
+          <div class="p2-thead">
+            <div class="p2-th" style="flex:0 0 68px"><div class="p2-th-bar"></div></div>
+            <div class="p2-th"><div class="p2-th-bar"></div><div class="p2-th-sub"></div></div>
+            <div class="p2-th"><div class="p2-th-bar"></div><div class="p2-th-sub"></div></div>
+            <div class="p2-th"><div class="p2-th-bar"></div><div class="p2-th-sub"></div></div>
+            <div class="p2-th"><div class="p2-th-bar"></div><div class="p2-th-sub"></div></div>
+          </div>
+          <!-- row 1 -->
+          <div class="p2-row">
+            <div class="p2-cell" style="flex:0 0 68px"><div class="p2-cbar" style="background:#b8cfff"></div></div>
+            <div class="p2-cell"><span class="p2-cdot gray"></span><div class="p2-cbar"></div><span class="p2-cchev"></span></div>
+            <div class="p2-cell"><span class="p2-cdot"></span><div class="p2-cbar"></div><span class="p2-cchev"></span></div>
+            <div class="p2-cell"><span class="p2-cdot"></span><div class="p2-cbar"></div><span class="p2-cchev"></span></div>
+            <div class="p2-cell"><span class="p2-cdot"></span><div class="p2-cbar"></div><span class="p2-cchev"></span></div>
+          </div>
+          <!-- row 2 -->
+          <div class="p2-row">
+            <div class="p2-cell" style="flex:0 0 68px"><div class="p2-cbar" style="background:#b8cfff"></div></div>
+            <div class="p2-cell"><span class="p2-cdot green"></span><div class="p2-cbar"></div><span class="p2-cchev"></span></div>
+            <div class="p2-cell"><span class="p2-cdot"></span><div class="p2-cbar"></div><span class="p2-cchev"></span></div>
+            <div class="p2-cell"><span class="p2-cdot"></span><div class="p2-cbar"></div><span class="p2-cchev"></span></div>
+            <div class="p2-cell"><span class="p2-cdot"></span><div class="p2-cbar"></div><span class="p2-cchev"></span></div>
+          </div>
+          <!-- row 3 -->
+          <div class="p2-row">
+            <div class="p2-cell" style="flex:0 0 68px"><div class="p2-cbar" style="background:#b8cfff"></div></div>
+            <div class="p2-cell"><span class="p2-cdot"></span><div class="p2-cbar"></div><span class="p2-cchev"></span></div>
+            <div class="p2-cell"><span class="p2-cdot"></span><div class="p2-cbar"></div><span class="p2-cchev"></span></div>
+            <div class="p2-cell"><span class="p2-cdot"></span><div class="p2-cbar"></div><span class="p2-cchev"></span></div>
+            <div class="p2-cell"><span class="p2-cdot"></span><div class="p2-cbar"></div><span class="p2-cchev"></span></div>
+          </div>
+          <!-- row 4 -->
+          <div class="p2-row">
+            <div class="p2-cell" style="flex:0 0 68px"><div class="p2-cbar" style="background:#b8cfff"></div></div>
+            <div class="p2-cell"><span class="p2-cdot"></span><div class="p2-cbar"></div><span class="p2-cchev"></span></div>
+            <div class="p2-cell"><span class="p2-cdot"></span><div class="p2-cbar"></div><span class="p2-cchev"></span></div>
+            <div class="p2-cell"><span class="p2-cdot green"></span><div class="p2-cbar"></div><span class="p2-cchev"></span></div>
+            <div class="p2-cell"><span class="p2-cdot"></span><div class="p2-cbar"></div><span class="p2-cchev"></span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-proto-num">Prototipo 02</div>
+      <div class="card-title">Vista de matriz por semana</div>
+      <div class="card-desc">Grid de facilities × semanas que muestra el estado de cada combinación de un vistazo. Al hacer clic en una celda, se despliega el panel de revisión filtrado a esa semana específica.</div>
+      <div class="card-tags">
+        <span class="tag">Matriz facilities × semanas</span>
+        <span class="tag">Filtros</span>
+        <span class="tag">Modal de confirmación</span>
+      </div>
+      <a class="card-cta" href="../proto-02/index.html" target="_blank">
+        Abrir prototipo
+        <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M3 8h10M9 4l4 4-4 4" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+    </div>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer>
+  <div class="footer-left">Flota Fixa FM / LM · LM_Scheduling_Q4.2025</div>
+  <div class="footer-right">Testing Week +4</div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Proto 02 — Agendamiento Flota Dedicada Last Mile</title>
+<link href="https://fonts.googleapis.com/css2?family=Balsamiq+Sans:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --blue:   #3483FA;
+  --green:  #00a650;
+  --gray:   #666;
+  --dark:   #1e1e1e;
+  --border: #ededed;
+  --bg:     #f5f5f5;
+  --font:   'Balsamiq Sans', cursive;
+}
+
+body {
+  font-family: var(--font);
+  background: #d0d0d0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* browser chrome mock */
+.chrome { height: 28px; background: #c0c0c0; border-bottom: 1px solid #aaa; flex-shrink: 0; }
+
+.page {
+  flex: 1;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ── Header ── */
+.ph {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 32px 12px;
+  flex-shrink: 0;
+}
+.ph h1 { font-size: 21px; color: var(--dark); }
+
+.btn-all {
+  background: var(--blue);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 9px 20px;
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.4px;
+  transition: opacity 0.2s;
+}
+.btn-all:disabled { opacity: 0.35; cursor: default; }
+.btn-all:not(:disabled):hover { opacity: 0.88; }
+
+/* ── Filters ── */
+.fbar {
+  display: flex;
+  align-items: center;
+  padding: 0 32px 10px;
+  flex-shrink: 0;
+  gap: 2px;
+}
+.fdrop { position: relative; }
+.fdrop > button {
+  background: none; border: none;
+  font-family: var(--font); font-size: 13px; color: var(--dark);
+  cursor: pointer; padding: 5px 10px 5px 0;
+  display: flex; align-items: center; gap: 4px;
+}
+.fdrop > button:hover, .fdrop.open > button { color: var(--blue); }
+.fmenu {
+  display: none;
+  position: absolute; top: calc(100% + 4px); left: 0;
+  background: #fff; border: 1px solid var(--border);
+  border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,.1);
+  z-index: 200; min-width: 175px; padding: 6px 0;
+}
+.fdrop.open .fmenu { display: block; }
+.fmenu label {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 14px; font-size: 13px; cursor: pointer;
+}
+.fmenu label:hover { background: var(--bg); }
+.fmenu input { accent-color: var(--blue); cursor: pointer; }
+.fsep { width: 1px; height: 16px; background: var(--border); margin: 0 6px; }
+
+/* ── Main ── */
+.main {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  border-top: 1px solid var(--border);
+}
+
+/* ── Grid wrapper ── */
+.gwrap {
+  flex: 1;
+  overflow: auto;
+  transition: flex 0.3s ease;
+  min-width: 0;
+}
+.gwrap.compressed {
+  flex: 0 0 460px;
+  min-width: 320px;
+  overflow: hidden;
+}
+
+.tblwrap { padding: 16px; min-width: 700px; }
+.gwrap.compressed .tblwrap { min-width: 0; padding: 12px; }
+
+table.grid {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+table.grid thead tr {
+  background: var(--bg);
+}
+table.grid th {
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--dark);
+  border-bottom: 2px solid var(--border);
+  white-space: nowrap;
+}
+table.grid th small {
+  display: block;
+  font-weight: 400;
+  font-size: 11px;
+  color: var(--gray);
+  margin-top: 2px;
+}
+.th-fac { width: 185px; min-width: 155px; }
+
+/* panel mode: hide non-active week columns */
+table.grid.pmode .th-w:not(.aw),
+table.grid.pmode td.tw:not(.aw) { display: none; }
+
+table.grid tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background 0.12s;
+}
+table.grid tbody tr:last-child { border-bottom: none; }
+table.grid tbody tr:hover { background: #fafafa; }
+table.grid tbody tr.active-row { box-shadow: inset 0 0 0 2px var(--blue); }
+
+table.grid td { padding: 13px 16px; vertical-align: middle; }
+
+.td-fac .fn { font-size: 15px; font-weight: 700; color: var(--dark); display: block; }
+.td-fac .fv { font-size: 12px; color: var(--gray); margin-top: 2px; display: block; }
+
+td.tw { cursor: pointer; }
+
+.spill {
+  display: flex; align-items: center; gap: 8px;
+  padding: 5px 7px; border-radius: 6px;
+  transition: background 0.12s;
+}
+td.tw:hover .spill { background: #f0f4ff; }
+
+.sdot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.stxt { font-size: 13px; flex: 1; }
+.schev { color: var(--blue); font-size: 14px; margin-left: auto; }
+
+/* ── Panel ── */
+.panel {
+  flex: 0 0 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid transparent;
+  transition: flex 0.3s ease, border-color 0.3s;
+  background: #fff;
+}
+.panel.open {
+  flex: 1;
+  border-left-color: var(--border);
+  min-width: 580px;
+}
+
+.phdr {
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.phdr-top {
+  display: flex; align-items: flex-start;
+  justify-content: space-between; gap: 12px;
+}
+.phdr-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.phdr-left h2 { font-size: 17px; color: var(--dark); }
+.badge {
+  font-size: 10px; font-weight: 700;
+  padding: 3px 7px; border-radius: 4px;
+  letter-spacing: 0.3px; white-space: nowrap;
+}
+.b-rev { background: #e8f0fe; color: var(--blue); }
+.b-lst { background: #e6f4ec; color: var(--green); }
+.b-age { background: #f0f0f0; color: var(--gray); }
+
+.btnx {
+  background: none; border: none; font-size: 20px;
+  cursor: pointer; color: var(--gray); padding: 0 4px; line-height: 1; flex-shrink: 0;
+}
+.btnx:hover { color: var(--dark); }
+.psub { font-size: 13px; color: var(--gray); margin-top: 6px; }
+
+.pbody { flex: 1; overflow-y: auto; padding: 14px 20px; }
+
+/* vehicle groups */
+.vg { border: 1px solid var(--border); border-radius: 8px; margin-bottom: 12px; overflow: hidden; }
+.vgh {
+  display: flex; align-items: center;
+  padding: 11px 14px; cursor: pointer; user-select: none;
+  background: #fff;
+}
+.vgh:hover { background: #fafafa; }
+.vgch {
+  font-size: 13px; margin-right: 8px; color: var(--gray);
+  display: inline-block; transition: transform 0.2s;
+}
+.vgh.col .vgch { transform: rotate(-90deg); }
+.vgn { font-size: 14px; font-weight: 700; flex: 1; }
+.vgc { font-size: 12px; color: var(--green); font-weight: 700; }
+
+.vgb { border-top: 1px solid var(--border); padding: 8px 14px 12px; }
+.vgb.hid { display: none; }
+
+/* ciclo rows */
+.crow {
+  display: flex; align-items: flex-end; gap: 8px;
+  padding: 6px 0; position: relative;
+}
+.crow.removable { padding-right: 28px; }
+.cf label, .dfield label {
+  font-size: 10px; color: var(--gray); display: block; margin-bottom: 3px;
+}
+.cf select {
+  height: 34px; width: 90px;
+  border: 1px solid var(--border); border-radius: 6px;
+  font-family: var(--font); font-size: 12px; padding: 0 7px; cursor: pointer;
+  background: #fff;
+}
+.dfield input {
+  width: 34px; height: 34px;
+  border: 1px solid var(--border); border-radius: 6px;
+  text-align: center; font-family: var(--font); font-size: 12px; padding: 0;
+}
+.dgrp { display: flex; gap: 4px; }
+.btnrm {
+  position: absolute; right: 0; top: 50%; transform: translateY(-50%);
+  background: none; border: none; font-size: 16px; cursor: pointer;
+  color: #bbb; padding: 4px;
+}
+.btnrm:hover { color: #c00; }
+.btn-add {
+  background: none; border: none; color: var(--blue);
+  font-family: var(--font); font-size: 13px;
+  cursor: pointer; padding: 3px 0; margin-top: 4px;
+  display: inline-flex; align-items: center; gap: 4px;
+}
+.btn-add:hover { opacity: 0.7; }
+
+/* panel footer */
+.pfooter {
+  padding: 12px 20px; border-top: 1px solid var(--border);
+  display: flex; justify-content: flex-end; gap: 10px; flex-shrink: 0;
+}
+.btn-sec {
+  background: none; border: 1px solid var(--border); border-radius: 6px;
+  padding: 9px 16px; font-family: var(--font); font-size: 13px;
+  cursor: pointer; color: var(--dark);
+}
+.btn-sec:hover { background: var(--bg); }
+.btn-pri {
+  background: var(--blue); border: none; border-radius: 6px;
+  padding: 9px 16px; font-family: var(--font); font-size: 13px;
+  color: #fff; font-weight: 700; cursor: pointer;
+}
+.btn-pri:hover { opacity: 0.88; }
+
+/* ── Modal ── */
+.modal-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.45);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 300;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.2s;
+}
+.modal-backdrop.show { opacity: 1; pointer-events: all; }
+
+.modal {
+  background: #fff;
+  border-radius: 12px;
+  width: 520px;
+  max-width: 92vw;
+  box-shadow: 0 12px 40px rgba(0,0,0,.18);
+  transform: translateY(12px);
+  transition: transform 0.22s ease;
+  overflow: hidden;
+}
+.modal-backdrop.show .modal { transform: translateY(0); }
+
+.mhdr {
+  padding: 20px 24px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.mhdr h2 { font-size: 17px; color: var(--dark); }
+.mhdr p { font-size: 13px; color: var(--gray); margin-top: 4px; }
+
+.mbody { padding: 18px 24px; }
+
+.msummary {
+  display: flex; gap: 20px;
+  background: var(--bg);
+  border-radius: 8px;
+  padding: 14px 18px;
+  margin-bottom: 18px;
+}
+.mstat { flex: 1; }
+.mstat .val {
+  font-size: 26px; font-weight: 700; color: var(--blue); line-height: 1;
+}
+.mstat .lbl { font-size: 12px; color: var(--gray); margin-top: 3px; }
+
+.mweeks-title {
+  font-size: 12px; font-weight: 700; color: var(--gray);
+  text-transform: uppercase; letter-spacing: 0.4px;
+  margin-bottom: 8px;
+}
+.mweek-row {
+  display: flex; align-items: center;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 6px;
+  gap: 12px;
+}
+.mweek-row:last-child { margin-bottom: 0; }
+.mweek-name { font-size: 13px; font-weight: 700; flex: 1; }
+.mweek-date { font-size: 11px; color: var(--gray); }
+.mweek-stats { display: flex; gap: 16px; }
+.mweek-stat { font-size: 12px; color: var(--dark); white-space: nowrap; }
+.mweek-stat strong { color: var(--blue); }
+
+.mfooter {
+  padding: 14px 24px;
+  border-top: 1px solid var(--border);
+  display: flex; justify-content: flex-end; gap: 10px;
+}
+
+/* ── Snackbar ── */
+.snack {
+  position: fixed; bottom: 24px; left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: #1a1a1a; color: #fff;
+  padding: 13px 22px; border-radius: 8px;
+  font-size: 14px; z-index: 400;
+  transition: transform 0.3s ease;
+  pointer-events: none; white-space: nowrap;
+}
+.snack.show { transform: translateX(-50%) translateY(0); }
+.snack strong { font-weight: 700; }
+</style>
+</head>
+<body>
+
+<div class="chrome"></div>
+<div class="page">
+
+  <!-- Header -->
+  <div class="ph">
+    <h1>Agendamiento flota dedicada Last Mile</h1>
+    <button class="btn-all" id="btnAll" disabled onclick="showScheduleModal()">AGENDAR VEHÍCULOS</button>
+  </div>
+
+  <!-- Filters -->
+  <div class="fbar">
+    <div class="fdrop" id="dr0">
+      <button onclick="toggleDrop('dr0')">Región <span>˅</span></button>
+      <div class="fmenu">
+        <label><input type="checkbox" value="CDMX" checked onchange="applyFilters()"> CDMX</label>
+        <label><input type="checkbox" value="MTY"  checked onchange="applyFilters()"> MTY</label>
+        <label><input type="checkbox" value="GDL"  checked onchange="applyFilters()"> GDL</label>
+      </div>
+    </div>
+    <div class="fsep"></div>
+    <div class="fdrop" id="dr1">
+      <button onclick="toggleDrop('dr1')">Facilitie <span>˅</span></button>
+      <div class="fmenu" id="facMenu"></div>
+    </div>
+    <div class="fsep"></div>
+    <div class="fdrop" id="dr2">
+      <button onclick="toggleDrop('dr2')">Status: <span>˅</span></button>
+      <div class="fmenu">
+        <label><input type="radio" name="sf" value=""           checked onchange="applyFilters()"> Todos</label>
+        <label><input type="radio" name="sf" value="rev"               onchange="applyFilters()"> Por revisar</label>
+        <label><input type="radio" name="sf" value="listo"             onchange="applyFilters()"> Listo para agendar</label>
+        <label><input type="radio" name="sf" value="age"               onchange="applyFilters()"> Agendado</label>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+
+    <!-- Grid -->
+    <div class="gwrap" id="gw">
+      <div class="tblwrap">
+        <table class="grid" id="gtbl">
+          <thead>
+            <tr>
+              <th class="th-fac">Facilities</th>
+              <th class="th-w" data-w="22">Semana 22 <small>18 al 24 de mayo</small></th>
+              <th class="th-w" data-w="23">Semana 23 <small>25 al 31 de mayo</small></th>
+              <th class="th-w" data-w="24">Semana 24 <small>01 al 07 de junio</small></th>
+              <th class="th-w" data-w="25">Semana 25 <small>08 al 14 de junio</small></th>
+            </tr>
+          </thead>
+          <tbody id="gbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Panel -->
+    <div class="panel" id="panel">
+      <div class="phdr">
+        <div class="phdr-top">
+          <div class="phdr-left">
+            <h2 id="ptitle">—</h2>
+            <span class="badge b-rev" id="pbadge">POR REVISAR</span>
+          </div>
+          <button class="btnx" onclick="closePanel()">×</button>
+        </div>
+        <div class="psub" id="psub">168 veículos</div>
+      </div>
+
+      <div class="pbody">
+        <div class="vg">
+          <div class="vgh" onclick="toggleVg(this)">
+            <span class="vgch">∧</span>
+            <span class="vgn">Large van</span>
+            <span class="vgc">72/72 veículos</span>
+          </div>
+          <div class="vgb" id="vgbL">
+            <div class="crows" id="crL"></div>
+            <button class="btn-add" onclick="addCiclo('crL')">+ Adicionar ciclo</button>
+          </div>
+        </div>
+        <div class="vg">
+          <div class="vgh" onclick="toggleVg(this)">
+            <span class="vgch">∧</span>
+            <span class="vgn">Small van</span>
+            <span class="vgc">72/72 veículos</span>
+          </div>
+          <div class="vgb" id="vgbS">
+            <div class="crows" id="crS"></div>
+            <button class="btn-add" onclick="addCiclo('crS')">+ Adicionar ciclo</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="pfooter" id="pfooter"></div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /page -->
+
+<!-- Modal -->
+<div class="modal-backdrop" id="modalBackdrop" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="mhdr">
+      <h2>Confirmar agendamiento</h2>
+      <p id="mSubtitle">Revisá el resumen antes de confirmar.</p>
+    </div>
+    <div class="mbody">
+      <div class="msummary">
+        <div class="mstat">
+          <div class="val" id="mTotalViajes">—</div>
+          <div class="lbl">Viajes totales</div>
+        </div>
+        <div class="mstat">
+          <div class="val" id="mTotalFacs">—</div>
+          <div class="lbl">Facilities</div>
+        </div>
+      </div>
+      <div class="mweeks-title">Resumen por semana</div>
+      <div id="mWeeksList"></div>
+    </div>
+    <div class="mfooter">
+      <button class="btn-sec" onclick="closeModal()">Cancelar</button>
+      <button class="btn-pri" onclick="confirmModal()">Confirmar agendamiento</button>
+    </div>
+  </div>
+</div>
+
+<div class="snack" id="snack"></div>
+
+<script>
+const FACS = [
+  { id:'SSC05', region:'CDMX', v:168 },
+  { id:'SSC04', region:'CDMX', v:168 },
+  { id:'SSC03', region:'MTY',  v:205 },
+  { id:'SSC02', region:'MTY',  v:168 },
+  { id:'SSC01', region:'GDL',  v:150 },
+  { id:'BRU01', region:'GDL',  v:190 },
+  { id:'BRU02', region:'CDMX', v:168 },
+  { id:'BRU03', region:'MTY',  v:175 },
+];
+const WEEKS = [
+  { n:22, d:'18 al 24 de mayo' },
+  { n:23, d:'25 al 31 de mayo' },
+  { n:24, d:'01 al 07 de junio' },
+  { n:25, d:'08 al 14 de junio' },
+];
+const CICLOS = ['AM 1','AM 2','PM 1','PM 2','NOON'];
+const DAYS   = ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
+
+// Cell state: 'rev' | 'listo' | 'age'
+const S = {};
+FACS.forEach(f => WEEKS.forEach(w => { S[`${f.id}_${w.n}`] = 'rev'; }));
+
+let active = null; // { fac, week }
+let filt = {
+  regions: new Set(FACS.map(f => f.region)),
+  facs:    new Set(FACS.map(f => f.id)),
+  status:  ''
+};
+let snackT;
+
+// ── Status config ──
+function cfg(s) {
+  if (s === 'listo') return { dot:'#00a650', txt:'Listo para agendar', bcls:'b-lst', btxt:'LISTO PARA AGENDAR' };
+  if (s === 'age')   return { dot:'#888',    txt:'Agendado',           bcls:'b-age', btxt:'AGENDADO' };
+  return                    { dot:'#3483FA', txt:'Por revisar',        bcls:'b-rev', btxt:'POR REVISAR' };
+}
+
+// ── Ciclo row builder ──
+function makeCrow(removable) {
+  const d = document.createElement('div');
+  d.className = 'crow' + (removable ? ' removable' : '');
+  d.innerHTML = `
+    <div class="cf">
+      <label>Ciclo</label>
+      <select>${CICLOS.map(c => `<option>${c}</option>`).join('')}</select>
+    </div>
+    <div class="dgrp">
+      ${DAYS.map(day => `<div class="dfield"><label>${day}</label><input type="number" value="6" min="0" max="99"></div>`).join('')}
+    </div>
+    ${removable ? `<button class="btnrm" onclick="this.closest('.crow').remove()" title="Remover">×</button>` : ''}
+  `;
+  return d;
+}
+
+function resetCiclos() {
+  ['crL','crS'].forEach(id => {
+    const c = document.getElementById(id);
+    c.innerHTML = '';
+    c.appendChild(makeCrow(false));
+  });
+}
+
+function addCiclo(id) {
+  document.getElementById(id).appendChild(makeCrow(true));
+}
+
+function toggleVg(hdr) {
+  hdr.classList.toggle('col');
+  hdr.nextElementSibling.classList.toggle('hid');
+}
+
+// ── Grid render ──
+function renderGrid() {
+  const tbody = document.getElementById('gbody');
+  tbody.innerHTML = '';
+  const pmode = !!active;
+  const aw = active ? active.week : null;
+
+  FACS.forEach(fac => {
+    if (!filt.regions.has(fac.region)) return;
+    if (!filt.facs.has(fac.id)) return;
+    if (filt.status) {
+      const hasMatch = WEEKS.some(w => S[`${fac.id}_${w.n}`] === filt.status);
+      if (!hasMatch) return;
+    }
+
+    const tr = document.createElement('tr');
+    if (active && active.fac === fac.id) tr.classList.add('active-row');
+
+    // Facility cell
+    const tf = document.createElement('td');
+    tf.className = 'td-fac';
+    tf.innerHTML = `<span class="fn">${fac.id}</span><span class="fv">${fac.v} vehículos</span>`;
+    tr.appendChild(tf);
+
+    // Week cells
+    WEEKS.forEach(w => {
+      const st = S[`${fac.id}_${w.n}`];
+      const c = cfg(st);
+      const td = document.createElement('td');
+      td.className = 'tw' + (aw === w.n ? ' aw' : '');
+      td.innerHTML = `
+        <div class="spill">
+          <span class="sdot" style="background:${c.dot}"></span>
+          <span class="stxt">${c.txt}</span>
+          <span class="schev">›</span>
+        </div>`;
+      td.onclick = () => openPanel(fac.id, w.n);
+      tr.appendChild(td);
+    });
+
+    tbody.appendChild(tr);
+  });
+
+  // Sync table panel-mode class and active-week header
+  const tbl = document.getElementById('gtbl');
+  tbl.classList.toggle('pmode', pmode);
+  document.querySelectorAll('.th-w').forEach(th => {
+    th.classList.toggle('aw', pmode && parseInt(th.dataset.w) === aw);
+  });
+}
+
+// ── Panel ──
+function openPanel(facId, weekNum) {
+  active = { fac: facId, week: weekNum };
+  const fac = FACS.find(f => f.id === facId);
+  const st = S[`${facId}_${weekNum}`];
+  const c = cfg(st);
+
+  document.getElementById('ptitle').textContent = `Veículos da semana para ${facId}`;
+  document.getElementById('psub').textContent = `${fac.v} veículos`;
+
+  const badge = document.getElementById('pbadge');
+  badge.textContent = c.btxt;
+  badge.className = `badge ${c.bcls}`;
+
+  resetCiclos();
+  renderFooter(st);
+
+  document.getElementById('gw').classList.add('compressed');
+  document.getElementById('panel').classList.add('open');
+  renderGrid();
+}
+
+function closePanel() {
+  active = null;
+  document.getElementById('gw').classList.remove('compressed');
+  document.getElementById('panel').classList.remove('open');
+  renderGrid();
+}
+
+function renderFooter(st) {
+  const f = document.getElementById('pfooter');
+  if (st === 'listo' || st === 'age') {
+    f.innerHTML = `
+      <button class="btn-sec" onclick="markUnrev()">Voltar a revisar</button>
+      <button class="btn-pri" onclick="schedCell()">Agendar vehículos</button>`;
+  } else {
+    f.innerHTML = `<button class="btn-pri" onclick="markRev()">Marcar como revisado</button>`;
+  }
+}
+
+function markRev() {
+  if (!active) return;
+  S[`${active.fac}_${active.week}`] = 'listo';
+  refreshPanelState('listo');
+  renderGrid();
+  checkBtn();
+  snackMsg(`Frota de <strong>${active.fac}</strong> revisada e pronta para agendamento.`);
+}
+
+function markUnrev() {
+  if (!active) return;
+  S[`${active.fac}_${active.week}`] = 'rev';
+  refreshPanelState('rev');
+  renderGrid();
+  checkBtn();
+}
+
+function refreshPanelState(st) {
+  const c = cfg(st);
+  const badge = document.getElementById('pbadge');
+  badge.textContent = c.btxt;
+  badge.className = `badge ${c.bcls}`;
+  renderFooter(st);
+}
+
+function schedCell() {
+  if (!active) return;
+  S[`${active.fac}_${active.week}`] = 'age';
+  closePanel();
+  checkBtn();
+}
+
+const VIAJES_PER_FAC_WEEK = 8;
+
+function showScheduleModal() {
+  // Gather all 'listo' cells grouped by week
+  const byWeek = {};
+  WEEKS.forEach(w => { byWeek[w.n] = { facs: new Set(), viajes: 0, dates: w.d }; });
+
+  Object.keys(S).forEach(k => {
+    if (S[k] !== 'listo') return;
+    const [facId, weekStr] = k.split('_');
+    const wn = parseInt(weekStr);
+    byWeek[wn].facs.add(facId);
+    byWeek[wn].viajes += VIAJES_PER_FAC_WEEK;
+  });
+
+  const allFacs = new Set(Object.keys(S).filter(k => S[k] === 'listo').map(k => k.split('_')[0]));
+  const totalViajes = Object.values(byWeek).reduce((a, w) => a + w.viajes, 0);
+
+  document.getElementById('mTotalViajes').textContent = totalViajes;
+  document.getElementById('mTotalFacs').textContent = allFacs.size;
+  document.getElementById('mSubtitle').textContent =
+    `${allFacs.size} facilitie${allFacs.size !== 1 ? 's' : ''} con ${totalViajes} viajes en total.`;
+
+  const activeWeeks = WEEKS.filter(w => byWeek[w.n].facs.size > 0);
+  document.getElementById('mWeeksList').innerHTML = activeWeeks.map(w => {
+    const wd = byWeek[w.n];
+    return `
+      <div class="mweek-row">
+        <div>
+          <div class="mweek-name">Semana ${w.n}</div>
+          <div class="mweek-date">${wd.dates}</div>
+        </div>
+        <div class="mweek-stats">
+          <div class="mweek-stat"><strong>${wd.facs.size}</strong> facilitie${wd.facs.size !== 1 ? 's' : ''}</div>
+          <div class="mweek-stat"><strong>${wd.viajes}</strong> viajes</div>
+        </div>
+      </div>`;
+  }).join('');
+
+  document.getElementById('modalBackdrop').classList.add('show');
+}
+
+function closeModal() {
+  document.getElementById('modalBackdrop').classList.remove('show');
+}
+
+function confirmModal() {
+  closeModal();
+  scheduleAll();
+}
+
+function scheduleAll() {
+  const listoFacs = new Set();
+  Object.keys(S).forEach(k => {
+    if (S[k] === 'listo') {
+      S[k] = 'age';
+      listoFacs.add(k.split('_')[0]);
+    }
+  });
+  if (active) { active = null; document.getElementById('gw').classList.remove('compressed'); document.getElementById('panel').classList.remove('open'); }
+  renderGrid();
+  checkBtn();
+  const n = listoFacs.size;
+  snackMsg(`<strong>${n}</strong> facilitie${n !== 1 ? 's' : ''} agendado${n !== 1 ? 's' : ''} con éxito.`);
+}
+
+function checkBtn() {
+  const has = Object.values(S).some(v => v === 'listo');
+  document.getElementById('btnAll').disabled = !has;
+}
+
+// ── Filters ──
+function toggleDrop(id) {
+  const el = document.getElementById(id);
+  const wasOpen = el.classList.contains('open');
+  document.querySelectorAll('.fdrop').forEach(d => d.classList.remove('open'));
+  if (!wasOpen) el.classList.add('open');
+}
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('.fdrop')) {
+    document.querySelectorAll('.fdrop').forEach(d => d.classList.remove('open'));
+  }
+});
+
+function applyFilters() {
+  const sr = document.querySelector('input[name="sf"]:checked');
+  filt.status = sr ? sr.value : '';
+
+  filt.regions = new Set();
+  document.querySelectorAll('#dr0 input[type=checkbox]:checked').forEach(cb => filt.regions.add(cb.value));
+
+  filt.facs = new Set();
+  document.querySelectorAll('#facMenu input[type=checkbox]:checked').forEach(cb => filt.facs.add(cb.value));
+
+  renderGrid();
+}
+
+function buildFacMenu() {
+  document.getElementById('facMenu').innerHTML = FACS.map(f =>
+    `<label><input type="checkbox" value="${f.id}" checked onchange="applyFilters()"> ${f.id}</label>`
+  ).join('');
+}
+
+// ── Snackbar ──
+function snackMsg(html) {
+  const s = document.getElementById('snack');
+  s.innerHTML = html;
+  s.classList.add('show');
+  clearTimeout(snackT);
+  snackT = setTimeout(() => s.classList.remove('show'), 4000);
+}
+
+// ── Init ──
+buildFacMenu();
+renderGrid();
+resetCiclos();
+</script>
+</body>
+</html>
