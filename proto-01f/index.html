@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Proto 01F — Chips de semana</title>
+<link href="https://fonts.googleapis.com/css2?family=Balsamiq+Sans:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --blue:   #3483FA;
+  --blue-lt:#3dadff;
+  --dark:   #1e1e1e;
+  --gray:   #666;
+  --border: #ededed;
+  --green:  #00a650;
+  --bg-sec: #f5f5f5;
+  --snack:  #1a1a1a;
+  --font:   'Balsamiq Sans', cursive;
+}
+
+html, body { height: 100%; }
+body {
+  font-family: var(--font);
+  background: #fafafa;
+  color: var(--dark);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* ── NAV ── */
+.nav {
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+  z-index: 10;
+}
+.nav-logo  { font-weight: 700; font-size: 16px; color: var(--blue); }
+.nav-sep   { color: var(--border); font-size: 20px; }
+.nav-title { font-size: 14px; color: var(--gray); }
+
+/* ── PAGE WRAPPER ── */
+.page-wrapper {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ── PAGE HEADER ── */
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 28px 24px 16px;
+  background: #fafafa;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--border);
+}
+.header-left { display: flex; flex-direction: column; gap: 12px; }
+.page-title { font-size: 24px; font-weight: 700; letter-spacing: -0.456px; }
+.filter-row { display: flex; align-items: center; gap: 8px; }
+.filter-label { font-size: 14px; color: var(--gray); }
+.filter-select {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid rgba(0,0,0,0.18);
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-family: var(--font);
+  font-size: 13px;
+  color: var(--dark);
+  cursor: pointer;
+  background: #fff;
+  user-select: none;
+}
+.filter-select .chev { font-size: 10px; color: var(--gray); }
+
+/* ── HEADER RIGHT ── */
+.header-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+/* ── WEEK BAR ── */
+.week-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.cal-btn {
+  background: none; border: none; cursor: pointer;
+  font-size: 18px; color: var(--gray); padding: 2px; line-height: 1;
+  transition: color 0.15s;
+}
+.cal-btn:hover { color: var(--blue); }
+.week-tags { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.week-tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: #fff; border: 1px solid var(--border); border-radius: 20px;
+  padding: 4px 10px; font-size: 12px; font-weight: 700; color: var(--dark); white-space: nowrap;
+}
+.week-tag .xt { cursor: pointer; color: var(--gray); font-size: 11px; margin-left: 2px; line-height: 1; }
+.week-tag .xt:hover { color: #c00; }
+.more-tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: #fff; border: 1px solid var(--border); border-radius: 20px;
+  padding: 4px 10px; font-size: 12px; font-weight: 700; color: var(--blue);
+  cursor: default; user-select: none; position: relative;
+}
+.more-tag .tooltip-popup {
+  display: none; position: absolute; top: calc(100% + 6px); right: 0;
+  background: #fff; border: 1px solid var(--border); border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12); padding: 10px 12px; z-index: 200; min-width: 160px;
+}
+.more-tag:hover .tooltip-popup { display: block; }
+.tooltip-popup .tip-label { font-size: 11px; color: var(--gray); margin-bottom: 6px; font-weight: 400; }
+.tooltip-popup .tip-tags { display: flex; flex-direction: column; gap: 4px; }
+.chev-btn {
+  background: none; border: none; cursor: pointer;
+  font-size: 16px; color: var(--gray); padding: 2px 4px; line-height: 1;
+  transition: color 0.15s, transform 0.2s;
+}
+.chev-btn:hover { color: var(--dark); }
+.chev-btn.open { transform: rotate(180deg); }
+
+/* ── WEEK PICKER DROPDOWN ── */
+.picker-dropdown {
+  display: none; position: absolute; top: calc(100% + 10px); right: 0;
+  background: #fff; border: 1px solid var(--border); border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.14); padding: 18px 18px 16px; width: 320px; z-index: 300;
+}
+.picker-dropdown.open { display: block; }
+.picker-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.picker-nav button {
+  background: none; border: none; font-size: 18px; cursor: pointer;
+  color: var(--gray); padding: 2px 6px; line-height: 1; font-family: var(--font);
+}
+.picker-nav button:hover { color: var(--dark); }
+.picker-month { font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 4px; cursor: pointer; }
+.picker-month .chev { font-size: 10px; color: var(--gray); }
+.wk-grid { display: grid; grid-template-columns: 56px repeat(7, 1fr); gap: 2px; }
+.wk-header { display: contents; }
+.wk-header span { font-size: 10px; color: var(--gray); text-align: center; padding-bottom: 6px; }
+.wk-header .lbl { text-align: left; }
+.wk-row { display: contents; cursor: pointer; }
+.wk-row-label {
+  font-size: 12px; font-weight: 700; color: var(--blue);
+  display: flex; align-items: center; padding: 4px; border-radius: 4px 0 0 4px;
+  transition: background 0.12s; cursor: pointer; user-select: none;
+}
+.wk-row-label:hover { background: #eef4ff; }
+.wk-day { height: 28px; display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--dark); border-radius: 4px; }
+.wk-row.sel .wk-row-label { background: #deeaff; }
+.wk-row.sel .wk-day { background: #deeaff; color: var(--blue); font-weight: 700; }
+.picker-footer { margin-top: 14px; border-top: 1px solid var(--border); padding-top: 12px; }
+.btn-aplicar {
+  width: 100%; background: var(--blue); color: #fff; border: none; border-radius: 6px;
+  padding: 11px; font-family: var(--font); font-size: 14px; font-weight: 700;
+  letter-spacing: 0.4px; cursor: pointer; transition: background 0.15s;
+}
+.btn-aplicar:hover { background: #2a6fd6; }
+
+/* ── ACTION ROW ── */
+.action-row { display: flex; align-items: center; gap: 16px; }
+.count-label { font-size: 14px; color: var(--gray); white-space: nowrap; }
+.btn-primary {
+  background: var(--blue); color: #fff; border: none; border-radius: 6px;
+  padding: 9px 18px; font-family: var(--font); font-size: 14px; font-weight: 700;
+  letter-spacing: 0.4px; cursor: pointer; white-space: nowrap; transition: background 0.15s;
+}
+.btn-primary:hover:not(:disabled) { background: #2a6fd6; }
+.btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ── MAIN LAYOUT ── */
+.main-layout { display: flex; flex: 1; overflow: hidden; }
+
+/* ── LIST COLUMN ── */
+.list-col {
+  flex: 1; overflow-y: auto; padding: 16px 24px 32px;
+  transition: flex 0.3s ease; min-width: 0;
+}
+.list-col.compressed { flex: 0 0 340px; min-width: 280px; }
+.facility-list { display: flex; flex-direction: column; gap: 8px; }
+.facility-row {
+  display: flex; align-items: center; justify-content: space-between;
+  background: #fff; border: 1px solid var(--border); border-radius: 8px;
+  padding: 14px 18px; gap: 10px; cursor: pointer;
+  transition: box-shadow 0.15s, border-color 0.15s;
+}
+.facility-row:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+.facility-row.active-row { border-color: var(--blue); box-shadow: 0 0 0 2px rgba(52,131,250,0.2); }
+.facility-row.disabled { cursor: default; pointer-events: none; }
+.facility-info { flex: 1; min-width: 0; }
+.facility-name { font-size: 16px; font-weight: 700; margin-bottom: 3px; }
+.facility-meta { font-size: 12px; color: var(--gray); }
+.list-col.compressed .facility-meta { display: none; }
+.list-col.compressed .facility-name { font-size: 14px; margin-bottom: 0; }
+.list-col.compressed .facility-row { padding: 10px 14px; }
+.facility-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.status-dot.pending   { background: var(--blue); }
+.status-dot.reviewed  { background: var(--green); }
+.status-dot.scheduled { background: #007a3d; }
+.status-text { font-size: 12px; font-weight: 700; white-space: nowrap; }
+.status-text.pending   { color: var(--blue); }
+.status-text.reviewed  { color: var(--green); }
+.status-text.scheduled { color: #007a3d; }
+.btn-revisar {
+  background: #fff; color: var(--blue); border: 1px solid var(--blue);
+  border-radius: 6px; padding: 6px 14px; font-family: var(--font);
+  font-size: 13px; font-weight: 700; cursor: pointer; flex-shrink: 0;
+  transition: background 0.15s, color 0.15s; white-space: nowrap;
+}
+.btn-revisar:hover { background: var(--blue); color: #fff; }
+.list-col.compressed .btn-revisar { display: none; }
+
+/* ── PANEL COLUMN ── */
+.panel-col {
+  flex: 0 0 0; width: 0; overflow: hidden; transition: flex 0.3s ease;
+  border-left: 1px solid transparent; background: #fff; display: flex; flex-direction: column;
+}
+.panel-col.active { flex: 0 0 620px; border-left-color: var(--border); }
+.side-panel { display: flex; flex-direction: column; height: 100%; min-width: 620px; }
+
+.panel-header { padding: 18px 20px 14px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.panel-header-top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 12px; margin-bottom: 6px;
+}
+.panel-badge {
+  display: inline-block; background: #e8f0ff; color: var(--blue);
+  font-size: 11px; font-weight: 700; border-radius: 4px;
+  padding: 2px 7px; letter-spacing: 0.3px; margin-bottom: 5px;
+}
+.panel-title { font-size: 18px; font-weight: 700; line-height: 1.3; }
+.panel-close {
+  background: none; border: none; font-size: 20px; cursor: pointer;
+  color: var(--gray); line-height: 1; padding: 0; flex-shrink: 0; transition: color 0.15s;
+}
+.panel-close:hover { color: var(--dark); }
+.panel-subtitle { font-size: 14px; color: var(--gray); }
+.panel-subtitle strong { color: var(--dark); }
+
+.panel-body {
+  flex: 1; overflow-y: auto; padding: 16px 20px;
+  display: flex; flex-direction: column; gap: 12px;
+}
+
+/* ── VEHICLE CARDS ── */
+.vehicle-card {
+  border: 1px solid var(--border); border-radius: 8px;
+  overflow: hidden; flex-shrink: 0;
+}
+.vehicle-card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px; background: var(--bg-sec);
+  cursor: pointer; user-select: none; transition: background 0.12s;
+}
+.vehicle-card-header:hover { background: #e6e6e6; }
+.vehicle-card-name { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 700; }
+.vehicle-card-right { display: flex; align-items: center; gap: 12px; }
+.vehicle-count { font-size: 13px; color: var(--green); font-weight: 700; }
+.card-chev { font-size: 13px; color: var(--gray); transition: transform 0.2s; }
+.vehicle-card.open .card-chev { transform: rotate(180deg); }
+.vehicle-card-body { display: none; background: #fff; }
+.vehicle-card.open .vehicle-card-body { display: block; }
+
+/* ── WEEK CHIPS (Variante F) ── */
+.wc-chips {
+  display: flex;
+  gap: 6px;
+  padding: 12px 16px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--border);
+  background: #fafafa;
+}
+.wc-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 13px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: var(--font);
+  cursor: pointer;
+  border: 1.5px solid var(--border);
+  background: #fff;
+  color: var(--gray);
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.wc-chip:hover:not(.active) { border-color: var(--blue); color: var(--blue); }
+.wc-chip.active { background: var(--blue); border-color: var(--blue); color: #fff; }
+.wc-chip.modified { border-color: var(--blue); color: var(--blue); }
+.wc-chip .chip-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: currentColor; flex-shrink: 0;
+}
+
+/* ── WEEK PANEL CONTENT ── */
+.wc-panel { padding: 14px 16px 16px; }
+.wc-week-label {
+  font-size: 11px; color: var(--gray); margin-bottom: 10px;
+  display: flex; align-items: center; gap: 6px;
+}
+.wc-week-label.is-ref { color: var(--blue); font-weight: 700; }
+.ref-badge {
+  background: #e8f0ff; color: var(--blue);
+  border-radius: 4px; padding: 1px 6px; font-size: 10px; font-weight: 700;
+}
+
+/* ── CICLO ROW ── */
+.ciclo-row {
+  display: flex; align-items: flex-end; gap: 8px;
+  background: var(--bg-sec); border-radius: 6px; padding: 10px 12px;
+  overflow-x: auto;
+}
+.ciclo-dropdown { display: flex; flex-direction: column; gap: 3px; flex-shrink: 0; }
+.ciclo-dropdown label { font-size: 11px; color: var(--gray); }
+.ciclo-select {
+  height: 36px; border: 1px solid rgba(0,0,0,0.22); border-radius: 6px;
+  padding: 0 8px; font-family: var(--font); font-size: 13px;
+  color: var(--dark); cursor: pointer; background: #fff; min-width: 80px;
+}
+.ciclo-select:focus { outline: none; border-color: var(--blue); }
+.eta-group { display: flex; flex-direction: column; gap: 3px; flex-shrink: 0; }
+.eta-group label { font-size: 11px; color: var(--gray); }
+.eta-input {
+  width: 90px; height: 36px; border: 1px solid rgba(0,0,0,0.22);
+  border-radius: 6px; padding: 0 10px; font-family: var(--font);
+  font-size: 13px; color: var(--dark); background: #fff;
+}
+.eta-input:focus { outline: none; border-color: var(--blue); }
+.day-inputs { display: flex; align-items: flex-end; gap: 4px; flex-wrap: nowrap; }
+.day-group { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.day-group label { font-size: 10px; color: var(--gray); text-transform: uppercase; }
+.day-group input {
+  width: 34px; height: 36px; border: 1px solid rgba(0,0,0,0.22);
+  border-radius: 6px; text-align: center; font-family: var(--font);
+  font-size: 13px; color: var(--dark); background: #fff;
+}
+.day-group input:focus { outline: none; border-color: var(--blue); }
+
+/* diff highlight */
+.has-diff {
+  border-color: var(--blue) !important;
+  background: #eef4ff !important;
+  border-radius: 6px;
+}
+
+/* ── PANEL FOOTER ── */
+.panel-footer {
+  padding: 14px 20px; border-top: 1px solid var(--border); flex-shrink: 0;
+  background: #fff; box-shadow: 0 -2px 8px rgba(0,0,0,0.06);
+  display: flex; align-items: center; gap: 10px;
+}
+.btn-revisado {
+  flex: 1; background: var(--blue); color: #fff; border: none; border-radius: 6px;
+  padding: 12px; font-family: var(--font); font-size: 14px; font-weight: 700;
+  cursor: pointer; letter-spacing: 0.3px; transition: background 0.15s;
+}
+.btn-revisado:hover { background: #2a6fd6; }
+.btn-voltar {
+  flex: 0 0 auto; background: #fff; color: var(--blue); border: 1px solid var(--blue);
+  border-radius: 6px; padding: 12px 16px; font-family: var(--font); font-size: 14px;
+  font-weight: 700; cursor: pointer; letter-spacing: 0.3px;
+  transition: background 0.15s, color 0.15s; display: none; white-space: nowrap;
+}
+.btn-voltar:hover { background: #eef4ff; }
+.panel-footer.reviewed .btn-voltar { display: block; }
+
+/* ── MODAL ── */
+.modal-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.4); z-index: 600;
+  align-items: center; justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+.modal-dialog {
+  background: #fff; border-radius: 8px; box-shadow: 0 6px 32px rgba(0,0,0,0.18);
+  width: 525px; max-width: calc(100vw - 32px); padding: 44px 48px 40px;
+  display: flex; flex-direction: column; gap: 16px;
+}
+.modal-title { font-size: 24px; font-weight: 700; color: rgba(0,0,0,0.9); line-height: 1.25; font-family: var(--font); }
+.modal-subtitle { font-size: 16px; color: rgba(0,0,0,0.9); line-height: 1.4; margin-top: -8px; font-family: var(--font); }
+.modal-weeks-field {
+  display: flex; align-items: center; gap: 6px; border: 1px solid rgba(0,0,0,0.25);
+  border-radius: 6px; padding: 10px 12px; background: #fff; flex-wrap: wrap;
+  cursor: pointer; min-height: 48px;
+}
+.modal-weeks-field .cal-icon-sm { font-size: 16px; color: var(--gray); flex-shrink: 0; }
+.modal-week-pill {
+  display: inline-flex; align-items: center; gap: 4px; background: #fff;
+  border: 1px solid var(--border); border-radius: 20px; padding: 2px 8px;
+  font-size: 12px; font-weight: 700; color: var(--dark); white-space: nowrap; font-family: var(--font);
+}
+.modal-week-pill .xt { cursor: pointer; color: var(--gray); font-size: 11px; margin-left: 1px; }
+.modal-week-pill .xt:hover { color: #c00; }
+.modal-weeks-field .chev-sm { margin-left: auto; font-size: 12px; color: var(--gray); flex-shrink: 0; }
+.modal-summary {
+  background: var(--bg-sec); border-radius: 6px; padding: 14px 16px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+}
+.modal-summary-left { display: flex; flex-direction: column; gap: 2px; }
+.modal-summary-label { font-size: 13px; font-weight: 700; color: rgba(0,0,0,0.55); letter-spacing: 0.3px; text-transform: uppercase; font-family: var(--font); }
+.modal-summary-count { font-size: 16px; font-weight: 700; color: #000; font-family: var(--font); }
+.modal-summary-count span { font-weight: 400; font-size: 12px; color: #000; }
+.modal-fac-sep { margin: 0 4px; color: var(--gray); font-weight: 400; }
+.modal-date-range { font-size: 12px; color: #000; white-space: nowrap; font-family: var(--font); }
+.modal-picker-wrap { position: relative; }
+.modal-picker-dropdown {
+  display: none; position: absolute; top: calc(100% + 8px); left: 0;
+  background: #fff; border: 1px solid var(--border); border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.14); padding: 16px 16px 14px; width: 320px; z-index: 700;
+}
+.modal-picker-dropdown.open { display: block; }
+.modal-actions { display: flex; align-items: center; gap: 16px; margin-top: 8px; }
+.btn-modal-primary {
+  background: var(--blue); color: #fff; border: none; border-radius: 6px;
+  padding: 12px 24px; font-family: var(--font); font-size: 16px; font-weight: 700;
+  cursor: pointer; transition: background 0.15s;
+}
+.btn-modal-primary:hover { background: #2a6fd6; }
+.btn-modal-cancel {
+  background: none; border: none; color: var(--blue); font-family: var(--font);
+  font-size: 16px; font-weight: 700; cursor: pointer; padding: 12px 8px; transition: opacity 0.15s;
+}
+.btn-modal-cancel:hover { opacity: 0.7; }
+
+/* ── SNACKBAR ── */
+.snackbar {
+  position: fixed; bottom: 28px; left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--snack); color: #fff; border-radius: 10px;
+  padding: 14px 20px; width: 600px; max-width: calc(100vw - 32px);
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.28); z-index: 500;
+  transition: transform 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s;
+  opacity: 0; pointer-events: none;
+}
+.snackbar.green { background: var(--green); }
+.snackbar.show { transform: translateX(-50%) translateY(0); opacity: 1; pointer-events: auto; }
+.snackbar-text { font-size: 14px; line-height: 1.4; flex: 1; }
+.snackbar-text strong { font-weight: 700; }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <span class="nav-logo">Mercado Libre</span>
+  <span class="nav-sep">|</span>
+  <span class="nav-title">Flota fija FM / LM</span>
+</nav>
+
+<div class="page-wrapper">
+
+  <div class="page-header">
+    <div class="header-left">
+      <h1 class="page-title">Agendamiento flota dedicada Last Mile</h1>
+      <div class="filter-row">
+        <span class="filter-label">Filtros:</span>
+        <span class="filter-select">Región <span class="chev">▾</span></span>
+        <span class="filter-select">Facilitie <span class="chev">▾</span></span>
+        <span class="filter-select">Status <span class="chev">▾</span></span>
+      </div>
+    </div>
+
+    <div class="header-right">
+      <div class="week-bar" id="weekBar">
+        <button class="cal-btn" onclick="togglePicker(event)" title="Seleccionar semanas">📅</button>
+        <div class="week-tags" id="weekTags"></div>
+        <button class="chev-btn" id="chevBtn" onclick="togglePicker(event)">▾</button>
+        <div class="picker-dropdown" id="pickerDropdown">
+          <div class="picker-nav">
+            <button>‹</button>
+            <div class="picker-month">Mayo 2026 <span class="chev">▾</span></div>
+            <button>›</button>
+          </div>
+          <div class="wk-grid">
+            <div class="wk-header">
+              <span class="lbl">Sem.</span>
+              <span>Lun</span><span>Mar</span><span>Mié</span>
+              <span>Jue</span><span>Vie</span><span>Sáb</span><span>Dom</span>
+            </div>
+            <div class="wk-row" id="row22" onclick="toggleWeek(22)">
+              <div class="wk-row-label">Sem 22</div>
+              <div class="wk-day">27</div><div class="wk-day">28</div><div class="wk-day">29</div>
+              <div class="wk-day">30</div><div class="wk-day">1</div><div class="wk-day">2</div><div class="wk-day">3</div>
+            </div>
+            <div class="wk-row" id="row23" onclick="toggleWeek(23)">
+              <div class="wk-row-label">Sem 23</div>
+              <div class="wk-day">4</div><div class="wk-day">5</div><div class="wk-day">6</div>
+              <div class="wk-day">7</div><div class="wk-day">8</div><div class="wk-day">9</div><div class="wk-day">10</div>
+            </div>
+            <div class="wk-row" id="row24" onclick="toggleWeek(24)">
+              <div class="wk-row-label">Sem 24</div>
+              <div class="wk-day">11</div><div class="wk-day">12</div><div class="wk-day">13</div>
+              <div class="wk-day">14</div><div class="wk-day">15</div><div class="wk-day">16</div><div class="wk-day">17</div>
+            </div>
+            <div class="wk-row" id="row25" onclick="toggleWeek(25)">
+              <div class="wk-row-label">Sem 25</div>
+              <div class="wk-day">18</div><div class="wk-day">19</div><div class="wk-day">20</div>
+              <div class="wk-day">21</div><div class="wk-day">22</div><div class="wk-day">23</div><div class="wk-day">24</div>
+            </div>
+          </div>
+          <div class="picker-footer">
+            <button class="btn-aplicar" onclick="applyPicker()">APLICAR</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="action-row">
+        <span class="count-label">Viendo 12 de 12 facilities</span>
+        <button class="btn-primary" id="btnHeaderAgendar" disabled onclick="openModal()">Agendar vehículos</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="main-layout">
+
+    <div class="list-col" id="listCol">
+      <div class="facility-list">
+        <div class="facility-row" id="row-SSC05" onclick="openPanel('SSC05')">
+          <div class="facility-info">
+            <div class="facility-name">SSC05</div>
+            <div class="facility-meta">Total semana: 168 vehículos<br>72 Large vans · 70 Small vans · 18 Utilitarios</div>
+          </div>
+          <div class="facility-right">
+            <span class="status-dot pending" id="dot-SSC05"></span>
+            <span class="status-text pending" id="stxt-SSC05">Por revisar</span>
+          </div>
+        </div>
+        <div class="facility-row" id="row-SSC04" onclick="openPanel('SSC04')">
+          <div class="facility-info">
+            <div class="facility-name">SSC04</div>
+            <div class="facility-meta">Total semana: 168 vehículos<br>72 Large vans · 70 Small vans · 18 Utilitarios</div>
+          </div>
+          <div class="facility-right">
+            <span class="status-dot pending" id="dot-SSC04"></span>
+            <span class="status-text pending" id="stxt-SSC04">Por revisar</span>
+          </div>
+        </div>
+        <div class="facility-row disabled" id="row-SSC03">
+          <div class="facility-info">
+            <div class="facility-name">SSC03</div>
+            <div class="facility-meta">Total semana: 168 vehículos<br>72 Large vans · 70 Small vans · 18 Utilitarios</div>
+          </div>
+          <div class="facility-right">
+            <span class="status-dot pending" id="dot-SSC03"></span>
+            <span class="status-text pending" id="stxt-SSC03">Por revisar</span>
+          </div>
+        </div>
+        <div class="facility-row disabled" id="row-SSC02">
+          <div class="facility-info">
+            <div class="facility-name">SSC02</div>
+            <div class="facility-meta">Total semana: 168 vehículos<br>72 Large vans · 70 Small vans · 18 Utilitarios</div>
+          </div>
+          <div class="facility-right">
+            <span class="status-dot pending" id="dot-SSC02"></span>
+            <span class="status-text pending" id="stxt-SSC02">Por revisar</span>
+          </div>
+        </div>
+        <div class="facility-row disabled" id="row-SSC01">
+          <div class="facility-info">
+            <div class="facility-name">SSC01</div>
+            <div class="facility-meta">Total semana: 168 vehículos<br>72 Large vans · 70 Small vans · 18 Utilitarios</div>
+          </div>
+          <div class="facility-right">
+            <span class="status-dot pending" id="dot-SSC01"></span>
+            <span class="status-text pending" id="stxt-SSC01">Por revisar</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel-col" id="panelCol">
+      <div class="side-panel">
+        <div class="panel-header">
+          <div class="panel-header-top">
+            <div>
+              <div class="panel-badge">POR REVISAR</div>
+              <div class="panel-title" id="panelTitle">Vehículos de la semana para SSC05</div>
+            </div>
+            <button class="panel-close" onclick="closePanel()">×</button>
+          </div>
+          <div class="panel-subtitle"><strong>168 vehículos</strong></div>
+        </div>
+
+        <div class="panel-body">
+          <div class="vehicle-card open" id="card-large">
+            <div class="vehicle-card-header" onclick="toggleCard('card-large')">
+              <div class="vehicle-card-name">🚐 Large van</div>
+              <div class="vehicle-card-right">
+                <span class="vehicle-count">72/72 vehículos</span>
+                <span class="card-chev">▲</span>
+              </div>
+            </div>
+            <div class="vehicle-card-body">
+              <div id="chip-view-large"></div>
+            </div>
+          </div>
+
+          <div class="vehicle-card open" id="card-small">
+            <div class="vehicle-card-header" onclick="toggleCard('card-small')">
+              <div class="vehicle-card-name">🚗 Small van</div>
+              <div class="vehicle-card-right">
+                <span class="vehicle-count">70/70 vehículos</span>
+                <span class="card-chev">▲</span>
+              </div>
+            </div>
+            <div class="vehicle-card-body">
+              <div id="chip-view-small"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel-footer" id="panelFooter">
+          <button class="btn-voltar" onclick="undoReview()">Volver a revisar</button>
+          <button class="btn-revisado" id="btnRevisado" onclick="markReviewed()">Marcar como revisado</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-dialog">
+    <div class="modal-title">Agendar vehículos</div>
+    <div class="modal-subtitle">Revisa las semanas a agendar antes de continuar.</div>
+    <div class="modal-picker-wrap">
+      <div class="modal-weeks-field" id="modalWeeksField" onclick="toggleModalPicker(event)">
+        <span class="cal-icon-sm">📅</span>
+        <div id="modalWeekPills"></div>
+        <span class="chev-sm" id="modalChev">▾</span>
+      </div>
+      <div class="modal-picker-dropdown" id="modalPickerDropdown">
+        <div class="picker-nav">
+          <button>‹</button>
+          <div class="picker-month">Mayo 2026 <span class="chev">▾</span></div>
+          <button>›</button>
+        </div>
+        <div class="wk-grid">
+          <div class="wk-header">
+            <span class="lbl">Sem.</span>
+            <span>Lun</span><span>Mar</span><span>Mié</span>
+            <span>Jue</span><span>Vie</span><span>Sáb</span><span>Dom</span>
+          </div>
+          <div class="wk-row" id="mrow22" onclick="toggleWeekModal(22)">
+            <div class="wk-row-label">Sem 22</div>
+            <div class="wk-day">27</div><div class="wk-day">28</div><div class="wk-day">29</div>
+            <div class="wk-day">30</div><div class="wk-day">1</div><div class="wk-day">2</div><div class="wk-day">3</div>
+          </div>
+          <div class="wk-row" id="mrow23" onclick="toggleWeekModal(23)">
+            <div class="wk-row-label">Sem 23</div>
+            <div class="wk-day">4</div><div class="wk-day">5</div><div class="wk-day">6</div>
+            <div class="wk-day">7</div><div class="wk-day">8</div><div class="wk-day">9</div><div class="wk-day">10</div>
+          </div>
+          <div class="wk-row" id="mrow24" onclick="toggleWeekModal(24)">
+            <div class="wk-row-label">Sem 24</div>
+            <div class="wk-day">11</div><div class="wk-day">12</div><div class="wk-day">13</div>
+            <div class="wk-day">14</div><div class="wk-day">15</div><div class="wk-day">16</div><div class="wk-day">17</div>
+          </div>
+          <div class="wk-row" id="mrow25" onclick="toggleWeekModal(25)">
+            <div class="wk-row-label">Sem 25</div>
+            <div class="wk-day">18</div><div class="wk-day">19</div><div class="wk-day">20</div>
+            <div class="wk-day">21</div><div class="wk-day">22</div><div class="wk-day">23</div><div class="wk-day">24</div>
+          </div>
+        </div>
+        <div class="picker-footer">
+          <button class="btn-aplicar" onclick="applyModalPicker(event)">APLICAR</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-summary">
+      <div class="modal-summary-left">
+        <div class="modal-summary-label">Total a agendar</div>
+        <div class="modal-summary-count">
+          <span id="modalViajes">32</span> viajes
+          <span class="modal-fac-sep">·</span>
+          <span id="modalFacilities">1</span> <span id="modalFacLabel">Facilitie</span>
+        </div>
+      </div>
+      <div class="modal-date-range" id="modalDateRange">18 de mayo al 14 de junio</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-modal-primary" onclick="confirmModal()">Agendar</button>
+      <button class="btn-modal-cancel" onclick="closeModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<div class="snackbar" id="snackbar">
+  <span class="snackbar-text">Flota de <strong id="snackFacility">SSC05</strong> revisada y lista para agendamiento.</span>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+// WEEK STATE
+// ══════════════════════════════════════════
+const WEEKS = [22, 23, 24, 25];
+const weekLabels = { 22:'Semana 22', 23:'Semana 23', 24:'Semana 24', 25:'Semana 25' };
+const weekSel = { 22: true, 23: true, 24: true, 25: true };
+
+function renderTags() {
+  const selected = WEEKS.filter(w => weekSel[w]);
+  const tagsEl = document.getElementById('weekTags');
+  tagsEl.innerHTML = '';
+  if (selected.length === 0) return;
+  const visible = selected.slice(0, 2);
+  const hidden  = selected.slice(2);
+  visible.forEach(w => {
+    const tag = document.createElement('span');
+    tag.className = 'week-tag';
+    tag.innerHTML = `${weekLabels[w]} <span class="xt" onclick="removeWeek(${w},event)">×</span>`;
+    tagsEl.appendChild(tag);
+  });
+  if (hidden.length > 0) {
+    const more = document.createElement('span');
+    more.className = 'more-tag';
+    more.innerHTML = `+${hidden.length}
+      <div class="tooltip-popup">
+        <div class="tip-label">Semanas adicionales</div>
+        <div class="tip-tags">
+          ${hidden.map(w => `<span class="week-tag">${weekLabels[w]} <span class="xt" onclick="removeWeek(${w},event)">×</span></span>`).join('')}
+        </div>
+      </div>`;
+    tagsEl.appendChild(more);
+  }
+  WEEKS.forEach(w => {
+    const row = document.getElementById('row' + w);
+    if (row) row.classList.toggle('sel', weekSel[w]);
+  });
+}
+
+function removeWeek(w, evt) { evt.stopPropagation(); weekSel[w] = false; renderTags(); }
+function toggleWeek(w) { weekSel[w] = !weekSel[w]; renderTags(); }
+
+// ══════════════════════════════════════════
+// WEEK PICKER
+// ══════════════════════════════════════════
+let pickerOpen = false;
+function togglePicker(evt) {
+  evt && evt.stopPropagation();
+  pickerOpen = !pickerOpen;
+  document.getElementById('pickerDropdown').classList.toggle('open', pickerOpen);
+  document.getElementById('chevBtn').classList.toggle('open', pickerOpen);
+}
+function closePicker() {
+  pickerOpen = false;
+  document.getElementById('pickerDropdown').classList.remove('open');
+  document.getElementById('chevBtn').classList.remove('open');
+}
+function applyPicker() { renderTags(); closePicker(); }
+document.addEventListener('click', e => { if (!document.getElementById('weekBar').contains(e.target)) closePicker(); });
+
+// ══════════════════════════════════════════
+// CHIP STATE
+// chipState[type] = { active: weekNum, saved: { weekNum: [vals] }, modified: { weekNum: bool } }
+// ══════════════════════════════════════════
+const chipState = {};
+
+function cicloRowHTML() {
+  return `
+    <div class="ciclo-row">
+      <div class="ciclo-dropdown">
+        <label>Ciclo</label>
+        <select class="ciclo-select">
+          <option>AM 1</option><option>AM 2</option><option>PM 1</option><option>PM 2</option><option>NOON</option>
+        </select>
+      </div>
+      <div class="eta-group">
+        <label>ETA</label>
+        <input type="time" class="eta-input" value="06:00">
+      </div>
+      <div class="day-inputs">
+        <div class="day-group"><label>Lun</label><input type="number" value="6" min="0" max="99"></div>
+        <div class="day-group"><label>Mar</label><input type="number" value="6" min="0" max="99"></div>
+        <div class="day-group"><label>Mié</label><input type="number" value="6" min="0" max="99"></div>
+        <div class="day-group"><label>Jue</label><input type="number" value="6" min="0" max="99"></div>
+        <div class="day-group"><label>Vie</label><input type="number" value="6" min="0" max="99"></div>
+        <div class="day-group"><label>Sáb</label><input type="number" value="6" min="0" max="99"></div>
+        <div class="day-group"><label>Dom</label><input type="number" value="6" min="0" max="99"></div>
+      </div>
+    </div>`;
+}
+
+function getVals(panelEl) {
+  return [...panelEl.querySelectorAll('select, input[type=time], input[type=number]')].map(el => el.value);
+}
+function setVals(panelEl, vals) {
+  const els = [...panelEl.querySelectorAll('select, input[type=time], input[type=number]')];
+  els.forEach((el, i) => { if (vals[i] !== undefined) el.value = vals[i]; });
+}
+
+function recheckDiff(type) {
+  const selected = WEEKS.filter(w => weekSel[w]);
+  const refWeek  = selected[0];
+  const state    = chipState[type];
+  if (!state || state.active === refWeek) return;
+
+  const refVals  = state.saved[refWeek] || [];
+  const panel    = document.getElementById('panel-' + type);
+  if (!panel) return;
+
+  const els = [...panel.querySelectorAll('select, input[type=time], input[type=number]')];
+  let anyDiff = false;
+  els.forEach((el, i) => {
+    const diff = refVals[i] !== undefined && el.value !== refVals[i];
+    el.classList.toggle('has-diff', diff);
+    if (diff) anyDiff = true;
+  });
+
+  state.modified[state.active] = anyDiff;
+  updateChipBadge(type, state.active, anyDiff);
+}
+
+function updateChipBadge(type, week, modified) {
+  const chipsEl = document.getElementById('chips-' + type);
+  if (!chipsEl) return;
+  const chip = chipsEl.querySelector(`[data-week="${week}"]`);
+  if (!chip) return;
+  const isActive = chip.classList.contains('active');
+  chip.classList.toggle('modified', modified && !isActive);
+  let dot = chip.querySelector('.chip-dot');
+  if (modified && !isActive) {
+    if (!dot) chip.insertAdjacentHTML('beforeend', '<span class="chip-dot"></span>');
+  } else {
+    if (dot) dot.remove();
+  }
+}
+
+function buildChipView(type) {
+  const container = document.getElementById('chip-view-' + type);
+  if (!container) return;
+  const selected = WEEKS.filter(w => weekSel[w]);
+  if (selected.length === 0) { container.innerHTML = ''; return; }
+
+  const refWeek = selected[0];
+  if (!chipState[type]) {
+    chipState[type] = { active: refWeek, saved: {}, modified: {} };
+  }
+  if (!selected.includes(chipState[type].active)) {
+    chipState[type].active = refWeek;
+  }
+
+  container.innerHTML = `
+    <div class="wc-chips" id="chips-${type}"></div>
+    <div class="wc-panel">
+      <div class="wc-week-label" id="wc-label-${type}"></div>
+      <div id="panel-${type}"></div>
+    </div>`;
+
+  renderChips(type);
+  renderPanelContent(type);
+}
+
+function renderChips(type) {
+  const selected = WEEKS.filter(w => weekSel[w]);
+  const refWeek  = selected[0];
+  const state    = chipState[type];
+  const chipsEl  = document.getElementById('chips-' + type);
+  if (!chipsEl) return;
+
+  chipsEl.innerHTML = '';
+  selected.forEach(w => {
+    const isActive   = w === state.active;
+    const isRef      = w === refWeek;
+    const isModified = state.modified[w];
+
+    const chip = document.createElement('button');
+    chip.className = 'wc-chip';
+    chip.dataset.week = w;
+    if (isActive)             chip.classList.add('active');
+    if (!isActive && isModified) chip.classList.add('modified');
+
+    chip.innerHTML = isRef ? `Sem ${w} <span style="opacity:.7;font-weight:400">· ref</span>` : `Sem ${w}`;
+    if (!isActive && isModified) chip.innerHTML += ' <span class="chip-dot"></span>';
+    chip.onclick = () => switchChip(type, w);
+    chipsEl.appendChild(chip);
+  });
+}
+
+function renderPanelContent(type) {
+  const selected = WEEKS.filter(w => weekSel[w]);
+  const refWeek  = selected[0];
+  const state    = chipState[type];
+  const isRef    = state.active === refWeek;
+
+  const labelEl = document.getElementById('wc-label-' + type);
+  const panelEl = document.getElementById('panel-' + type);
+  if (!labelEl || !panelEl) return;
+
+  labelEl.className = 'wc-week-label' + (isRef ? ' is-ref' : '');
+  labelEl.innerHTML = isRef
+    ? `<span class="ref-badge">REF</span> Sem ${state.active} — esta es la configuración base`
+    : `Sem ${state.active} — editá solo lo que cambia respecto a Sem ${refWeek}`;
+
+  panelEl.innerHTML = cicloRowHTML();
+
+  if (state.saved[state.active]) {
+    setVals(panelEl, state.saved[state.active]);
+  } else if (!isRef && state.saved[refWeek]) {
+    setVals(panelEl, state.saved[refWeek]);
+  }
+
+  if (!isRef) {
+    [...panelEl.querySelectorAll('select, input')].forEach(el => {
+      el.addEventListener('input', () => recheckDiff(type));
+    });
+    recheckDiff(type);
+  }
+}
+
+function switchChip(type, week) {
+  const state = chipState[type];
+  if (state.active === week) return;
+
+  // Save current values before switching
+  const panelEl = document.getElementById('panel-' + type);
+  if (panelEl) {
+    const selected = WEEKS.filter(w => weekSel[w]);
+    const refWeek  = selected[0];
+    state.saved[state.active] = getVals(panelEl);
+    if (state.active !== refWeek) {
+      const refVals = state.saved[refWeek] || [];
+      state.modified[state.active] = getVals(panelEl).some((v, i) => refVals[i] !== undefined && v !== refVals[i]);
+    }
+  }
+
+  state.active = week;
+  renderChips(type);
+  renderPanelContent(type);
+}
+
+function buildAllChipViews() {
+  buildChipView('large');
+  buildChipView('small');
+}
+
+// ══════════════════════════════════════════
+// PANEL OPEN / CLOSE
+// ══════════════════════════════════════════
+const reviewedSet = new Set();
+let activeFacility = null;
+let reviewedFacility = null;
+
+function checkAllReviewed() {
+  document.getElementById('btnHeaderAgendar').disabled = reviewedSet.size === 0;
+}
+
+function openPanel(facility) {
+  activeFacility = facility;
+  buildAllChipViews();
+  document.getElementById('panelTitle').textContent = 'Vehículos de la semana para ' + facility;
+
+  const footer = document.getElementById('panelFooter');
+  const btn    = document.getElementById('btnRevisado');
+  if (reviewedSet.has(facility)) {
+    footer.classList.add('reviewed');
+    btn.textContent = 'Agendar vehículos';
+    btn.onclick = openModal;
+  } else {
+    footer.classList.remove('reviewed');
+    btn.textContent = 'Marcar como revisado';
+    btn.onclick = markReviewed;
+  }
+
+  document.getElementById('listCol').classList.add('compressed');
+  document.getElementById('panelCol').classList.add('active');
+  document.querySelectorAll('.facility-row').forEach(r => r.classList.remove('active-row'));
+  const activeRow = document.getElementById('row-' + facility);
+  if (activeRow) activeRow.classList.add('active-row');
+  closePicker();
+}
+
+function closePanel() {
+  document.getElementById('listCol').classList.remove('compressed');
+  document.getElementById('panelCol').classList.remove('active');
+  document.querySelectorAll('.facility-row').forEach(r => r.classList.remove('active-row'));
+  activeFacility = null;
+}
+
+function toggleCard(id) { document.getElementById(id).classList.toggle('open'); }
+
+// ══════════════════════════════════════════
+// MARK REVIEWED
+// ══════════════════════════════════════════
+function markReviewed() {
+  if (!activeFacility) return;
+  const fac = activeFacility;
+  reviewedFacility = fac;
+  reviewedSet.add(fac);
+  const dot  = document.getElementById('dot-'  + fac);
+  const stxt = document.getElementById('stxt-' + fac);
+  if (dot && stxt) {
+    dot.className    = 'status-dot reviewed';
+    stxt.className   = 'status-text reviewed';
+    stxt.textContent = 'Listo para agendar';
+  }
+  checkAllReviewed();
+  const footer = document.getElementById('panelFooter');
+  footer.classList.add('reviewed');
+  const btn = document.getElementById('btnRevisado');
+  btn.textContent = 'Agendar vehículos';
+  btn.onclick = openModal;
+  document.getElementById('snackFacility').textContent = fac;
+  const snack = document.getElementById('snackbar');
+  snack.classList.add('show');
+  setTimeout(() => snack.classList.remove('show'), 4000);
+}
+
+function undoReview() {
+  if (!reviewedFacility) return;
+  const fac = reviewedFacility;
+  const dot  = document.getElementById('dot-'  + fac);
+  const stxt = document.getElementById('stxt-' + fac);
+  if (dot && stxt) {
+    dot.className    = 'status-dot pending';
+    stxt.className   = 'status-text pending';
+    stxt.textContent = 'Por revisar';
+  }
+  const footer = document.getElementById('panelFooter');
+  footer.classList.remove('reviewed');
+  const btn = document.getElementById('btnRevisado');
+  btn.textContent = 'Marcar como revisado';
+  btn.onclick = markReviewed;
+  reviewedSet.delete(fac);
+  reviewedFacility = null;
+  checkAllReviewed();
+  document.getElementById('snackbar').classList.remove('show');
+}
+
+// ══════════════════════════════════════════
+// MODAL
+// ══════════════════════════════════════════
+const VIAJES_PER_WEEK = 8;
+const weekDates = {
+  22: { start: '27 de mayo',  end: '2 de junio' },
+  23: { start: '4 de junio',  end: '10 de junio' },
+  24: { start: '11 de junio', end: '17 de junio' },
+  25: { start: '18 de junio', end: '24 de junio' },
+};
+
+function renderModalWeeks() {
+  const selected = WEEKS.filter(w => weekSel[w]);
+  const pillsEl  = document.getElementById('modalWeekPills');
+  pillsEl.innerHTML = '';
+  selected.forEach(w => {
+    const pill = document.createElement('span');
+    pill.className = 'modal-week-pill';
+    pill.innerHTML = `Semana ${w} <span class="xt" onclick="removeWeekModal(${w},event)">×</span>`;
+    pillsEl.appendChild(pill);
+  });
+  const facCount = reviewedSet.size || 1;
+  document.getElementById('modalViajes').textContent = selected.length * VIAJES_PER_WEEK * facCount;
+  document.getElementById('modalFacilities').textContent = facCount;
+  document.getElementById('modalFacLabel').textContent = facCount === 1 ? 'Facilitie' : 'Facilities';
+  const dateEl = document.getElementById('modalDateRange');
+  if (selected.length === 0) { dateEl.textContent = '—'; return; }
+  const first = Math.min(...selected);
+  const last  = Math.max(...selected);
+  dateEl.textContent = weekDates[first].start + ' al ' + weekDates[last].end;
+  WEEKS.forEach(w => {
+    const row = document.getElementById('mrow' + w);
+    if (row) row.classList.toggle('sel', weekSel[w]);
+  });
+}
+
+let modalPickerOpen = false;
+function toggleModalPicker(evt) {
+  evt && evt.stopPropagation();
+  modalPickerOpen = !modalPickerOpen;
+  document.getElementById('modalPickerDropdown').classList.toggle('open', modalPickerOpen);
+  document.getElementById('modalChev').textContent = modalPickerOpen ? '▴' : '▾';
+}
+function closeModalPicker() {
+  modalPickerOpen = false;
+  document.getElementById('modalPickerDropdown').classList.remove('open');
+  document.getElementById('modalChev').textContent = '▾';
+}
+function toggleWeekModal(w) { weekSel[w] = !weekSel[w]; renderTags(); renderModalWeeks(); }
+function applyModalPicker(evt) { evt && evt.stopPropagation(); closeModalPicker(); }
+function removeWeekModal(w, evt) { evt.stopPropagation(); weekSel[w] = false; renderTags(); renderModalWeeks(); }
+function openModal() { renderModalWeeks(); document.getElementById('modalOverlay').classList.add('open'); }
+function closeModal() { closeModalPicker(); document.getElementById('modalOverlay').classList.remove('open'); }
+
+function confirmModal() {
+  const viajes   = document.getElementById('modalViajes').textContent;
+  const facCount = reviewedSet.size;
+  const facLabel = facCount === 1 ? 'facilite' : 'facilites';
+  closeModal();
+  reviewedSet.forEach(fac => {
+    const dot  = document.getElementById('dot-'  + fac);
+    const stxt = document.getElementById('stxt-' + fac);
+    if (dot && stxt) {
+      dot.className    = 'status-dot scheduled';
+      stxt.className   = 'status-text scheduled';
+      stxt.textContent = 'Agendado';
+    }
+  });
+  reviewedSet.clear();
+  checkAllReviewed();
+  const snack = document.getElementById('snackbar');
+  snack.classList.add('green');
+  snack.querySelector('.snackbar-text').innerHTML =
+    `<strong>${facCount} ${facLabel}</strong> con una flota de <strong>${viajes} viajes</strong> fue agendado.`;
+  snack.classList.add('show');
+  setTimeout(() => { snack.classList.remove('show'); snack.classList.remove('green'); }, 5000);
+}
+
+document.getElementById('modalOverlay').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
+document.addEventListener('click', e => {
+  const wrap = document.querySelector('.modal-picker-wrap');
+  if (wrap && !wrap.contains(e.target)) closeModalPicker();
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeModalPicker(); closeModal(); closePicker(); closePanel(); }
+});
+
+// ══════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════
+renderTags();
+</script>
+</body>
+</html>
