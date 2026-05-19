@@ -1,0 +1,1184 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Proto 01I — Navegador de semanas</title>
+<link href="https://fonts.googleapis.com/css2?family=Balsamiq+Sans:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --blue:   #3483FA;
+  --dark:   #1e1e1e;
+  --gray:   #666;
+  --border: #ededed;
+  --green:  #00a650;
+  --amber:  #f5a623;
+  --amber-bg: #fff8ec;
+  --amber-border: #f5dea3;
+  --bg-sec: #f5f5f5;
+  --font:   'Balsamiq Sans', cursive;
+}
+
+html, body { height: 100%; }
+body {
+  font-family: var(--font);
+  background: #fafafa;
+  color: var(--dark);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* ── NAV ── */
+.nav {
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+  z-index: 10;
+}
+.nav-logo  { font-weight: 700; font-size: 16px; color: var(--blue); }
+.nav-sep   { color: var(--border); font-size: 20px; }
+.nav-title { font-size: 14px; color: var(--gray); }
+
+/* ── PAGE WRAPPER ── */
+.page-wrapper {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ── PAGE HEADER ── */
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 28px 24px 16px;
+  background: #fafafa;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--border);
+}
+.header-left { display: flex; flex-direction: column; gap: 12px; }
+.page-title { font-size: 24px; font-weight: 700; letter-spacing: -0.456px; }
+.filter-row { display: flex; align-items: center; gap: 8px; }
+.filter-label { font-size: 14px; color: var(--gray); }
+.filter-select {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid rgba(0,0,0,0.18);
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-family: var(--font);
+  font-size: 13px;
+  color: var(--dark);
+  cursor: pointer;
+  background: #fff;
+  user-select: none;
+}
+.filter-select .chev { font-size: 10px; color: var(--gray); }
+
+/* ── HEADER RIGHT ── */
+.header-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+/* ── WEEK BAR ── */
+.week-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.week-tags { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.week-tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: #fff; border: 1px solid var(--border); border-radius: 20px;
+  padding: 4px 10px; font-size: 12px; font-weight: 700; color: var(--dark); white-space: nowrap;
+}
+.week-tag .xt { cursor: pointer; color: var(--gray); font-size: 11px; margin-left: 2px; line-height: 1; }
+.week-tag .xt:hover { color: #c00; }
+.chev-btn {
+  background: none; border: none; cursor: pointer;
+  font-size: 16px; color: var(--gray); padding: 2px 4px; line-height: 1;
+  transition: color 0.15s, transform 0.2s;
+}
+.chev-btn:hover { color: var(--dark); }
+.chev-btn.open { transform: rotate(180deg); }
+
+/* ── WEEK PICKER ── */
+.picker-dropdown {
+  display: none; position: absolute; top: calc(100% + 10px); right: 0;
+  background: #fff; border: 1px solid var(--border); border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.14); padding: 18px 18px 16px; width: 320px; z-index: 300;
+}
+.picker-dropdown.open { display: block; }
+.picker-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.picker-nav button {
+  background: none; border: none; font-size: 18px; cursor: pointer;
+  color: var(--gray); padding: 2px 6px; line-height: 1; font-family: var(--font);
+}
+.picker-nav button:hover { color: var(--dark); }
+.picker-month { font-size: 14px; font-weight: 700; }
+.wk-grid { display: grid; grid-template-columns: 56px repeat(7, 1fr); gap: 2px; }
+.wk-header span { font-size: 10px; color: var(--gray); text-align: center; padding-bottom: 6px; display: block; }
+.wk-header .lbl { text-align: left; }
+.wk-row-label {
+  font-size: 12px; font-weight: 700; color: var(--blue);
+  display: flex; align-items: center; padding: 4px; border-radius: 4px 0 0 4px;
+  cursor: pointer; user-select: none; transition: background 0.12s;
+}
+.wk-row-label:hover { background: #eef4ff; }
+.wk-day { height: 28px; display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--dark); border-radius: 4px; }
+.wk-row.sel .wk-row-label { background: #deeaff; }
+.wk-row.sel .wk-day { background: #deeaff; color: var(--blue); font-weight: 700; }
+.picker-footer { margin-top: 14px; border-top: 1px solid var(--border); padding-top: 12px; }
+.btn-aplicar {
+  width: 100%; background: var(--blue); color: #fff; border: none; border-radius: 6px;
+  padding: 11px; font-family: var(--font); font-size: 14px; font-weight: 700;
+  cursor: pointer; transition: background 0.15s;
+}
+.btn-aplicar:hover { background: #2a6fd6; }
+
+/* ── ACTION ROW ── */
+.action-row { display: flex; align-items: center; gap: 16px; }
+.count-label { font-size: 14px; color: var(--gray); white-space: nowrap; }
+.btn-primary {
+  background: var(--blue); color: #fff; border: none; border-radius: 6px;
+  padding: 9px 18px; font-family: var(--font); font-size: 14px; font-weight: 700;
+  cursor: pointer; white-space: nowrap; transition: background 0.15s;
+}
+.btn-primary:hover:not(:disabled) { background: #2a6fd6; }
+.btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ── MAIN LAYOUT ── */
+.main-layout { display: flex; flex: 1; overflow: hidden; }
+
+/* ── LIST COLUMN ── */
+.list-col {
+  flex: 1; overflow-y: auto; padding: 16px 24px 32px;
+  transition: flex 0.3s ease; min-width: 0;
+}
+.list-col.compressed { flex: 0 0 340px; min-width: 280px; }
+.facility-list { display: flex; flex-direction: column; gap: 8px; }
+.facility-row {
+  display: flex; align-items: center; justify-content: space-between;
+  background: #fff; border: 1px solid var(--border); border-radius: 8px;
+  padding: 14px 18px; gap: 10px; cursor: pointer;
+  transition: box-shadow 0.15s, border-color 0.15s;
+}
+.facility-row:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+.facility-row.active-row { border-color: var(--blue); box-shadow: 0 0 0 2px rgba(52,131,250,0.2); }
+.facility-info { flex: 1; min-width: 0; }
+.facility-name { font-size: 16px; font-weight: 700; margin-bottom: 3px; }
+.facility-meta { font-size: 12px; color: var(--gray); }
+.list-col.compressed .facility-meta { display: none; }
+.list-col.compressed .facility-name { font-size: 14px; margin-bottom: 0; }
+.list-col.compressed .facility-row { padding: 10px 14px; }
+.facility-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.status-dot.pending   { background: var(--blue); }
+.status-dot.reviewed  { background: var(--green); }
+.status-text { font-size: 12px; font-weight: 700; white-space: nowrap; }
+.status-text.pending   { color: var(--blue); }
+.status-text.reviewed  { color: var(--green); }
+.btn-revisar {
+  background: #fff; color: var(--blue); border: 1px solid var(--blue);
+  border-radius: 6px; padding: 6px 14px; font-family: var(--font);
+  font-size: 13px; font-weight: 700; cursor: pointer; flex-shrink: 0;
+  transition: background 0.15s, color 0.15s; white-space: nowrap;
+}
+.btn-revisar:hover { background: var(--blue); color: #fff; }
+.list-col.compressed .btn-revisar { display: none; }
+
+/* ── PANEL COLUMN ── */
+.panel-col {
+  flex: 0 0 0; width: 0; overflow: hidden; transition: flex 0.3s ease;
+  border-left: 1px solid transparent; background: #fff; display: flex; flex-direction: column;
+}
+.panel-col.active { flex: 0 0 640px; border-left-color: var(--border); }
+.side-panel { display: flex; flex-direction: column; height: 100%; min-width: 640px; }
+
+.panel-header { padding: 18px 20px 14px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.panel-header-top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 12px; margin-bottom: 6px;
+}
+.panel-badge {
+  display: inline-block; background: #e8f0ff; color: var(--blue);
+  font-size: 11px; font-weight: 700; border-radius: 4px;
+  padding: 2px 7px; letter-spacing: 0.3px; margin-bottom: 5px;
+}
+.panel-title { font-size: 18px; font-weight: 700; line-height: 1.3; }
+.panel-close {
+  background: none; border: none; font-size: 20px; cursor: pointer;
+  color: var(--gray); line-height: 1; padding: 0; flex-shrink: 0; transition: color 0.15s;
+}
+.panel-close:hover { color: var(--dark); }
+.panel-subtitle { font-size: 14px; color: var(--gray); }
+.panel-subtitle strong { color: var(--dark); }
+
+.panel-body {
+  flex: 1; overflow-y: auto; padding: 16px 20px;
+  display: flex; flex-direction: column; gap: 12px;
+}
+
+/* ── VEHICLE CARDS ── */
+.vehicle-card {
+  border: 1px solid var(--border); border-radius: 8px;
+  overflow: hidden; flex-shrink: 0;
+}
+.vehicle-card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px; background: var(--bg-sec);
+  cursor: pointer; user-select: none; transition: background 0.12s;
+}
+.vehicle-card-header:hover { background: #e6e6e6; }
+.vehicle-card-name { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 700; }
+.vehicle-card-right { display: flex; align-items: center; gap: 12px; }
+.vehicle-count { font-size: 13px; color: var(--green); font-weight: 700; }
+.card-chev { font-size: 13px; color: var(--gray); transition: transform 0.2s; }
+.vehicle-card.open .card-chev { transform: rotate(180deg); }
+.vehicle-card-body { display: none; background: #fff; }
+.vehicle-card.open .vehicle-card-body { display: block; }
+
+/* ── WEEK NAVIGATOR ── */
+.week-nav {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  background: #fafafa;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.nav-arrows-group {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+.nav-arrow {
+  background: #fff;
+  border: 1px solid var(--border);
+  color: var(--dark);
+  font-size: 14px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+  user-select: none;
+  line-height: 1;
+}
+.nav-arrow:first-child { border-radius: 6px 0 0 6px; border-right: none; }
+.nav-arrow:last-child { border-radius: 0 6px 6px 0; border-left: none; }
+.nav-arrow:hover:not(:disabled) { background: #eef4ff; color: var(--blue); }
+.nav-arrow:disabled { color: #ccc; cursor: not-allowed; }
+
+/* ── WEEK DROPDOWN ── */
+.week-dd-wrap {
+  position: relative;
+}
+.week-dd-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 5px 10px 5px 12px;
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--dark);
+  background: #fff;
+  cursor: pointer;
+  user-select: none;
+  transition: border-color 0.12s;
+  white-space: nowrap;
+}
+.week-dd-btn:hover { border-color: var(--blue); }
+.week-dd-btn.open { border-color: var(--blue); }
+.week-dd-btn .dd-chev { font-size: 10px; color: var(--gray); transition: transform 0.2s; }
+.week-dd-btn.open .dd-chev { transform: rotate(180deg); }
+.custom-dot {
+  display: inline-block;
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--amber);
+  margin-left: 2px;
+  flex-shrink: 0;
+}
+
+.week-dd-menu {
+  display: none;
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.12);
+  z-index: 400;
+  min-width: 180px;
+  padding: 6px 0;
+  overflow: hidden;
+}
+.week-dd-menu.open { display: block; }
+.dd-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 14px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.1s;
+  gap: 10px;
+}
+.dd-item:hover { background: #f0f4ff; }
+.dd-item.active { font-weight: 700; color: var(--blue); background: #eef4ff; }
+.dd-item .dd-wk-label { font-weight: 700; }
+.dd-item .dd-wk-range { font-size: 11px; color: var(--gray); font-weight: 400; }
+.dd-item-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: var(--amber-bg); border: 1px solid var(--amber-border);
+  color: #a06000; font-size: 10px; font-weight: 700;
+  border-radius: 4px; padding: 1px 6px; white-space: nowrap; flex-shrink: 0;
+}
+
+/* ── NAV STATUS ── */
+.nav-status {
+  flex: 1;
+  font-size: 12px;
+  color: var(--gray);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.nav-status .cnt { color: var(--amber); font-weight: 700; }
+
+.btn-personalize {
+  background: none;
+  border: 1px solid var(--blue);
+  color: var(--blue);
+  border-radius: 6px;
+  padding: 5px 12px;
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.12s, color 0.12s;
+  flex-shrink: 0;
+}
+.btn-personalize:hover { background: var(--blue); color: #fff; }
+
+/* ── PROPAGATION WARNING ── */
+.prop-warning {
+  display: none;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 16px;
+  background: var(--amber-bg);
+  border-bottom: 1px solid var(--amber-border);
+  font-size: 12px;
+  color: #7a4d00;
+  flex-shrink: 0;
+}
+.prop-warning.visible { display: flex; }
+.prop-warning .warn-icon { font-size: 14px; flex-shrink: 0; }
+.prop-warning .warn-text { flex: 1; line-height: 1.4; }
+.btn-reset {
+  background: none;
+  border: 1px solid #c8930a;
+  color: #7a4d00;
+  border-radius: 5px;
+  padding: 4px 10px;
+  font-family: var(--font);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.12s;
+  flex-shrink: 0;
+}
+.btn-reset:hover { background: #f5dea3; }
+
+/* ── CONFIG FORM ── */
+.config-form {
+  padding: 14px 16px 16px;
+}
+.form-section-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--gray);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 10px;
+}
+.form-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.form-field label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--gray);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.form-field select,
+.form-field input {
+  font-family: var(--font);
+  font-size: 13px;
+  color: var(--dark);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 8px;
+  background: #fff;
+  transition: border-color 0.15s;
+  outline: none;
+}
+.form-field select:focus,
+.form-field input:focus { border-color: var(--blue); }
+.form-field select.has-diff,
+.form-field input.has-diff {
+  border-color: var(--blue);
+  background: #eef4ff;
+}
+.field-ciclo select { width: 100px; }
+.field-eta input { width: 88px; }
+.field-day input { width: 56px; }
+
+/* days row */
+.days-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.days-title {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--gray);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+/* ── PANEL FOOTER ── */
+.panel-footer {
+  border-top: 1px solid var(--border);
+  padding: 14px 20px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-shrink: 0;
+  background: #fff;
+}
+.btn-cancel {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 9px 18px;
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--gray);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+.btn-cancel:hover { border-color: var(--dark); color: var(--dark); }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <span class="nav-logo">FleetView</span>
+  <span class="nav-sep">|</span>
+  <span class="nav-title">Proto 01I — Navegador de semanas</span>
+</nav>
+
+<div class="page-wrapper">
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div class="header-left">
+      <div class="page-title">Agendamiento de Flota</div>
+      <div class="filter-row">
+        <span class="filter-label">Hub:</span>
+        <div class="filter-select">Todos <span class="chev">▾</span></div>
+        <div class="filter-select">Tipo: Todos <span class="chev">▾</span></div>
+      </div>
+    </div>
+    <div class="header-right">
+      <!-- Week bar -->
+      <div class="week-bar" id="weekBarWrap">
+        <div class="week-tags" id="weekTagsContainer"></div>
+        <button class="chev-btn" id="calChevBtn" onclick="togglePicker()">▾</button>
+        <div class="picker-dropdown" id="pickerDropdown">
+          <div class="picker-nav">
+            <button onclick="pickerPrevMonth()">‹</button>
+            <div class="picker-month" id="pickerMonthLabel">May 2026</div>
+            <button onclick="pickerNextMonth()">›</button>
+          </div>
+          <div class="wk-grid" id="pickerGrid"></div>
+          <div class="picker-footer">
+            <button class="btn-aplicar" onclick="applyPicker()">Aplicar</button>
+          </div>
+        </div>
+      </div>
+      <!-- Action row -->
+      <div class="action-row">
+        <span class="count-label" id="countLabel">3 instalaciones pendientes</span>
+        <button class="btn-primary" id="btnGuardar" disabled>Guardar todo</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN LAYOUT -->
+  <div class="main-layout">
+    <!-- LIST -->
+    <div class="list-col" id="listCol">
+      <div class="facility-list" id="facilityList"></div>
+    </div>
+
+    <!-- PANEL -->
+    <div class="panel-col" id="panelCol">
+      <div class="side-panel">
+        <div class="panel-header">
+          <div class="panel-header-top">
+            <div>
+              <div class="panel-badge" id="panelBadge">PENDIENTE</div>
+              <div class="panel-title" id="panelTitle">—</div>
+            </div>
+            <button class="panel-close" onclick="closePanel()">✕</button>
+          </div>
+          <div class="panel-subtitle" id="panelSubtitle"></div>
+        </div>
+        <div class="panel-body" id="panelBody"></div>
+        <div class="panel-footer">
+          <button class="btn-cancel" onclick="closePanel()">Cancelar</button>
+          <button class="btn-primary" onclick="savePanel()">Confirmar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── DATA ───────────────────────────────────────────────────────────────────
+
+const VEHICLE_TYPES = [
+  { type: 'van-l', label: 'Van grande',    emoji: '🚐', count: 12 },
+  { type: 'van-s', label: 'Van pequena',   emoji: '🚌', count: 8  },
+  { type: 'moto',  label: 'Moto',          emoji: '🏍️', count: 24 },
+];
+
+const CICLO_OPTS = ['AM 1', 'AM 2', 'PM 1', 'PM 2', 'NOON'];
+const DAYS = [
+  { key: 'lun', label: 'Lun' },
+  { key: 'mar', label: 'Mar' },
+  { key: 'mie', label: 'Mié' },
+  { key: 'jue', label: 'Jue' },
+  { key: 'vie', label: 'Vie' },
+  { key: 'sab', label: 'Sáb' },
+  { key: 'dom', label: 'Dom' },
+];
+const FIELD_KEYS = ['ciclo', 'eta', ...DAYS.map(d => d.key)];
+
+const FACILITIES = [
+  { id: 1, name: 'CD Palermo',       meta: 'Buenos Aires · Hub principal', status: 'pending'  },
+  { id: 2, name: 'CD Villa Urquiza', meta: 'Buenos Aires · Hub secundario', status: 'pending'  },
+  { id: 3, name: 'CD Quilmes',       meta: 'Conurbano Sur · Hub terciario', status: 'pending'  },
+  { id: 4, name: 'CD San Justo',     meta: 'Conurbano Oeste',               status: 'reviewed' },
+  { id: 5, name: 'CD Tigre',         meta: 'Conurbano Norte',               status: 'reviewed' },
+];
+
+// Default base values per vehicle type
+const DEFAULT_BASE = {
+  'van-l': ['AM 1', '08:00', 10, 10, 10, 10, 10,  6,  4],
+  'van-s': ['PM 1', '14:00',  6,  6,  6,  6,  6,  3,  2],
+  'moto':  ['AM 2', '09:30', 18, 18, 18, 18, 18, 10,  6],
+};
+
+// ─── STATE ───────────────────────────────────────────────────────────────────
+
+let selectedWeeks   = [22, 23, 24, 25];
+let pickerSelected  = [...selectedWeeks];
+let pickerMonth     = { year: 2026, month: 4 }; // 0-based May
+let activeRow       = null;
+let openDropdown    = null; // type string or null
+
+// formState[facilityId][type] = {
+//   currentWeek: number,
+//   base: [...vals],
+//   custom: { weekNum: [...vals] }   // weeks with their own config
+// }
+const formState = {};
+
+function ensureState(fid, type) {
+  if (!formState[fid]) formState[fid] = {};
+  if (!formState[fid][type]) {
+    formState[fid][type] = {
+      currentWeek: selectedWeeks[0],
+      base: [...DEFAULT_BASE[type]],
+      custom: {},
+    };
+  }
+  return formState[fid][type];
+}
+
+function isCustom(state, week) {
+  return Object.prototype.hasOwnProperty.call(state.custom, week);
+}
+
+// ─── WEEK PICKER ─────────────────────────────────────────────────────────────
+
+function togglePicker() {
+  const dd = document.getElementById('pickerDropdown');
+  const btn = document.getElementById('calChevBtn');
+  const open = dd.classList.toggle('open');
+  btn.classList.toggle('open', open);
+  if (open) { pickerSelected = [...selectedWeeks]; renderPickerGrid(); }
+}
+
+function pickerPrevMonth() { pickerMonth.month--; if (pickerMonth.month < 0) { pickerMonth.month = 11; pickerMonth.year--; } renderPickerGrid(); }
+function pickerNextMonth() { pickerMonth.month++; if (pickerMonth.month > 11) { pickerMonth.month = 0; pickerMonth.year++; } renderPickerGrid(); }
+
+const MONTH_NAMES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+const DAY_LABELS  = ['L','M','X','J','V','S','D'];
+
+function isoWeek(date) {
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+}
+
+function getWeekDays(year, week) {
+  const simple = new Date(year, 0, 1 + (week - 1) * 7);
+  const dow = simple.getDay();
+  const monday = new Date(simple);
+  monday.setDate(simple.getDate() - (dow <= 4 ? dow - 1 : dow - 8));
+  return Array.from({ length: 7 }, (_, i) => { const d = new Date(monday); d.setDate(monday.getDate() + i); return d; });
+}
+
+function renderPickerGrid() {
+  document.getElementById('pickerMonthLabel').textContent = `${MONTH_NAMES[pickerMonth.month]} ${pickerMonth.year}`;
+  const { year, month } = pickerMonth;
+  const firstDay = new Date(year, month, 1);
+  const lastDay  = new Date(year, month + 1, 0);
+
+  // Collect weeks that have days in this month
+  const weeks = [];
+  const seen  = new Set();
+  for (let d = new Date(firstDay); d <= lastDay; d.setDate(d.getDate() + 1)) {
+    const wn = isoWeek(new Date(d));
+    if (!seen.has(wn)) { seen.add(wn); weeks.push(wn); }
+  }
+
+  const grid = document.getElementById('pickerGrid');
+  let html = '<div class="wk-header"><span class="lbl">Sem</span>';
+  DAY_LABELS.forEach(l => html += `<span>${l}</span>`);
+  html += '</div>';
+
+  weeks.forEach(wn => {
+    const days = getWeekDays(year, wn);
+    const sel  = pickerSelected.includes(wn);
+    html += `<div class="wk-row${sel ? ' sel' : ''}" id="pkrow-${wn}">`;
+    html += `<div class="wk-row-label" onclick="togglePickerWeek(${wn})">S${wn}</div>`;
+    days.forEach(d => {
+      const inMonth = d.getMonth() === month;
+      html += `<div class="wk-day" style="${inMonth ? '' : 'opacity:.35'}">${d.getDate()}</div>`;
+    });
+    html += '</div>';
+  });
+
+  grid.innerHTML = html;
+}
+
+function togglePickerWeek(wn) {
+  const idx = pickerSelected.indexOf(wn);
+  if (idx >= 0) { if (pickerSelected.length > 1) pickerSelected.splice(idx, 1); }
+  else           { pickerSelected.push(wn); pickerSelected.sort((a, b) => a - b); }
+  renderPickerGrid();
+}
+
+function applyPicker() {
+  selectedWeeks = [...pickerSelected];
+  renderWeekTags();
+  document.getElementById('pickerDropdown').classList.remove('open');
+  document.getElementById('calChevBtn').classList.remove('open');
+  // If panel open, re-initialize navigator state to respect new weeks
+  if (activeRow !== null) {
+    const fid = activeRow;
+    VEHICLE_TYPES.forEach(({ type }) => {
+      const s = ensureState(fid, type);
+      s.currentWeek = selectedWeeks[0];
+      // remove custom weeks no longer selected
+      Object.keys(s.custom).forEach(k => {
+        if (!selectedWeeks.includes(+k)) delete s.custom[+k];
+      });
+    });
+    renderPanel(fid);
+  }
+}
+
+function renderWeekTags() {
+  const container = document.getElementById('weekTagsContainer');
+  const MAX_VISIBLE = 3;
+  const visible = selectedWeeks.slice(0, MAX_VISIBLE);
+  const hidden  = selectedWeeks.slice(MAX_VISIBLE);
+  let html = visible.map(w =>
+    `<span class="week-tag">S${w} <span class="xt" onclick="removeWeek(${w})">✕</span></span>`
+  ).join('');
+  if (hidden.length) {
+    html += `<span class="week-tag" style="color:var(--blue)">+${hidden.length}</span>`;
+  }
+  container.innerHTML = html;
+}
+
+function removeWeek(wn) {
+  if (selectedWeeks.length <= 1) return;
+  selectedWeeks = selectedWeeks.filter(w => w !== wn);
+  pickerSelected = [...selectedWeeks];
+  renderWeekTags();
+  if (activeRow !== null) {
+    VEHICLE_TYPES.forEach(({ type }) => {
+      const s = formState[activeRow]?.[type];
+      if (!s) return;
+      delete s.custom[wn];
+      if (s.currentWeek === wn) s.currentWeek = selectedWeeks[0];
+    });
+    renderPanel(activeRow);
+  }
+}
+
+// ─── FACILITY LIST ────────────────────────────────────────────────────────────
+
+function renderFacilityList() {
+  const list = document.getElementById('facilityList');
+  list.innerHTML = FACILITIES.map(f => {
+    const isPending = f.status === 'pending';
+    return `
+    <div class="facility-row${activeRow === f.id ? ' active-row' : ''}" onclick="openPanel(${f.id})">
+      <div class="facility-info">
+        <div class="facility-name">${f.name}</div>
+        <div class="facility-meta">${f.meta}</div>
+      </div>
+      <div class="facility-right">
+        <span class="status-dot ${f.status}"></span>
+        <span class="status-text ${f.status}">${isPending ? 'Pendiente' : 'Revisado'}</span>
+        ${isPending ? `<button class="btn-revisar" onclick="event.stopPropagation();openPanel(${f.id})">Revisar</button>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ─── PANEL ───────────────────────────────────────────────────────────────────
+
+function openPanel(fid) {
+  activeRow = fid;
+  const f = FACILITIES.find(x => x.id === fid);
+  document.getElementById('panelBadge').textContent    = f.status === 'pending' ? 'PENDIENTE' : 'REVISADO';
+  document.getElementById('panelTitle').textContent    = f.name;
+  document.getElementById('panelSubtitle').innerHTML   = `${f.meta} · <strong>${selectedWeeks.length} semana${selectedWeeks.length !== 1 ? 's' : ''}</strong>`;
+  document.getElementById('listCol').classList.add('compressed');
+  document.getElementById('panelCol').classList.add('active');
+
+  // Initialize states
+  VEHICLE_TYPES.forEach(({ type }) => {
+    const s = ensureState(fid, type);
+    s.currentWeek = selectedWeeks[0];
+  });
+
+  renderFacilityList();
+  renderPanel(fid);
+}
+
+function closePanel() {
+  activeRow = null;
+  document.getElementById('listCol').classList.remove('compressed');
+  document.getElementById('panelCol').classList.remove('active');
+  renderFacilityList();
+}
+
+function savePanel() {
+  // save current week inputs for all types before closing
+  if (activeRow !== null) {
+    VEHICLE_TYPES.forEach(({ type }) => saveCurrentWeek(activeRow, type));
+  }
+  closePanel();
+}
+
+function renderPanel(fid) {
+  const body = document.getElementById('panelBody');
+  body.innerHTML = VEHICLE_TYPES.map(vt => buildVehicleCard(fid, vt)).join('');
+  // open first card
+  const first = body.querySelector('.vehicle-card');
+  if (first) openCard(first);
+}
+
+function buildVehicleCard(fid, vt) {
+  const { type, label, emoji, count } = vt;
+  return `
+  <div class="vehicle-card" id="vcard-${type}">
+    <div class="vehicle-card-header" onclick="toggleCard('${type}')">
+      <div class="vehicle-card-name">${emoji} ${label}</div>
+      <div class="vehicle-card-right">
+        <span class="vehicle-count">${count} vehículos</span>
+        <span class="card-chev">▾</span>
+      </div>
+    </div>
+    <div class="vehicle-card-body" id="vcbody-${type}">
+      ${buildWeekNavigator(fid, type)}
+      <div class="prop-warning" id="propwarn-${type}">
+        <span class="warn-icon">⚠️</span>
+        <span class="warn-text">Esta semana tiene configuración propia — los cambios <strong>no se propagarán</strong> a las demás semanas.</span>
+        <button class="btn-reset" onclick="resetWeek('${type}')">Restablecer</button>
+      </div>
+      <div class="config-form" id="cform-${type}">
+        ${buildForm(fid, type)}
+      </div>
+    </div>
+  </div>`;
+}
+
+function openCard(el) {
+  el.classList.add('open');
+}
+
+function toggleCard(type) {
+  const card = document.getElementById(`vcard-${type}`);
+  const wasOpen = card.classList.contains('open');
+  // close all
+  document.querySelectorAll('.vehicle-card').forEach(c => c.classList.remove('open'));
+  if (!wasOpen) {
+    card.classList.add('open');
+    if (activeRow !== null) {
+      const s = formState[activeRow]?.[type];
+      if (s) loadWeekIntoForm(activeRow, type, s.currentWeek);
+    }
+  }
+}
+
+// ─── WEEK NAVIGATOR ──────────────────────────────────────────────────────────
+
+function buildWeekNavigator(fid, type) {
+  const s = ensureState(fid, type);
+  const week = s.currentWeek;
+  const idx  = selectedWeeks.indexOf(week);
+
+  // Status text
+  const customCount = Object.keys(s.custom).length;
+  let statusText;
+  if (customCount === 0) {
+    statusText = `<span>Igual para las ${selectedWeeks.length} semanas</span>`;
+  } else {
+    statusText = `<span><span class="cnt">${customCount}</span> sem. con config. propia</span>`;
+  }
+
+  const isC = isCustom(s, week);
+  const wkLabel = weekLabel(week);
+
+  return `
+  <div class="week-nav" id="wnav-${type}">
+    <div class="nav-arrows-group">
+      <button class="nav-arrow" id="prev-${type}" onclick="prevWeek('${type}')" ${idx <= 0 ? 'disabled' : ''}>‹</button>
+      <div class="week-dd-wrap" id="ddwrap-${type}">
+        <button class="week-dd-btn" id="ddbtn-${type}" onclick="toggleDd('${type}')">
+          ${wkLabel}${isC ? '<span class="custom-dot"></span>' : ''}
+          <span class="dd-chev">▾</span>
+        </button>
+        <div class="week-dd-menu" id="ddmenu-${type}">
+          ${buildDdItems(s, type)}
+        </div>
+      </div>
+      <button class="nav-arrow" id="next-${type}" onclick="nextWeek('${type}')" ${idx >= selectedWeeks.length - 1 ? 'disabled' : ''}>›</button>
+    </div>
+    <div class="nav-status">${statusText}</div>
+    ${!isC ? `<button class="btn-personalize" onclick="personalizeWeek('${type}')">Personalizar esta semana</button>` : ''}
+  </div>`;
+}
+
+function buildDdItems(s, type) {
+  return selectedWeeks.map(wn => {
+    const active = wn === s.currentWeek;
+    const custom = isCustom(s, wn);
+    return `
+    <div class="dd-item${active ? ' active' : ''}" onclick="selectWeek('${type}', ${wn})">
+      <div>
+        <div class="dd-wk-label">${weekLabel(wn)}</div>
+        <div class="dd-wk-range">${weekRange(wn)}</div>
+      </div>
+      ${custom ? `<span class="dd-item-badge">⚡ Config. propia</span>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function weekLabel(wn) { return `Sem ${wn}`; }
+
+function weekRange(wn) {
+  const days = getWeekDays(2026, wn);
+  const fmt = d => `${d.getDate()}/${d.getMonth()+1}`;
+  return `${fmt(days[0])} – ${fmt(days[6])}`;
+}
+
+function toggleDd(type) {
+  const menu = document.getElementById(`ddmenu-${type}`);
+  const btn  = document.getElementById(`ddbtn-${type}`);
+  const isOpen = menu.classList.contains('open');
+
+  // close any other open dropdown
+  if (openDropdown && openDropdown !== type) {
+    document.getElementById(`ddmenu-${openDropdown}`)?.classList.remove('open');
+    document.getElementById(`ddbtn-${openDropdown}`)?.classList.remove('open');
+  }
+
+  menu.classList.toggle('open', !isOpen);
+  btn.classList.toggle('open', !isOpen);
+  openDropdown = !isOpen ? type : null;
+}
+
+function closeDd(type) {
+  document.getElementById(`ddmenu-${type}`)?.classList.remove('open');
+  document.getElementById(`ddbtn-${type}`)?.classList.remove('open');
+  if (openDropdown === type) openDropdown = null;
+}
+
+function selectWeek(type, wn) {
+  if (!activeRow) return;
+  saveCurrentWeek(activeRow, type);
+  const s = ensureState(activeRow, type);
+  s.currentWeek = wn;
+  closeDd(type);
+  refreshNavigator(activeRow, type);
+  loadWeekIntoForm(activeRow, type, wn);
+}
+
+function prevWeek(type) {
+  if (!activeRow) return;
+  saveCurrentWeek(activeRow, type);
+  const s = ensureState(activeRow, type);
+  const idx = selectedWeeks.indexOf(s.currentWeek);
+  if (idx > 0) { s.currentWeek = selectedWeeks[idx - 1]; refreshNavigator(activeRow, type); loadWeekIntoForm(activeRow, type, s.currentWeek); }
+}
+
+function nextWeek(type) {
+  if (!activeRow) return;
+  saveCurrentWeek(activeRow, type);
+  const s = ensureState(activeRow, type);
+  const idx = selectedWeeks.indexOf(s.currentWeek);
+  if (idx < selectedWeeks.length - 1) { s.currentWeek = selectedWeeks[idx + 1]; refreshNavigator(activeRow, type); loadWeekIntoForm(activeRow, type, s.currentWeek); }
+}
+
+function personalizeWeek(type) {
+  if (!activeRow) return;
+  const s = ensureState(activeRow, type);
+  const wn = s.currentWeek;
+  if (!isCustom(s, wn)) {
+    // Clone base into custom
+    s.custom[wn] = [...s.base];
+  }
+  refreshNavigator(activeRow, type);
+  loadWeekIntoForm(activeRow, type, wn);
+}
+
+function resetWeek(type) {
+  if (!activeRow) return;
+  const s = ensureState(activeRow, type);
+  const wn = s.currentWeek;
+  delete s.custom[wn];
+  refreshNavigator(activeRow, type);
+  loadWeekIntoForm(activeRow, type, wn);
+}
+
+function saveCurrentWeek(fid, type) {
+  const s = formState[fid]?.[type];
+  if (!s) return;
+  const vals = readFormVals(type);
+  if (!vals) return;
+  if (isCustom(s, s.currentWeek)) {
+    s.custom[s.currentWeek] = vals;
+  } else {
+    s.base = vals;
+  }
+}
+
+function readFormVals(type) {
+  const form = document.getElementById(`cform-${type}`);
+  if (!form) return null;
+  const vals = [];
+  const cicloEl = form.querySelector(`[data-key="ciclo"]`);
+  const etaEl   = form.querySelector(`[data-key="eta"]`);
+  if (!cicloEl || !etaEl) return null;
+  vals.push(cicloEl.value);
+  vals.push(etaEl.value);
+  DAYS.forEach(({ key }) => {
+    const el = form.querySelector(`[data-key="${key}"]`);
+    vals.push(el ? +el.value : 0);
+  });
+  return vals;
+}
+
+function refreshNavigator(fid, type) {
+  const s = ensureState(fid, type);
+  const navEl = document.getElementById(`wnav-${type}`);
+  if (!navEl) return;
+
+  const week = s.currentWeek;
+  const idx  = selectedWeeks.indexOf(week);
+  const isC  = isCustom(s, week);
+  const wkLabel = weekLabel(week);
+  const customCount = Object.keys(s.custom).length;
+
+  let statusText;
+  if (customCount === 0) {
+    statusText = `<span>Igual para las ${selectedWeeks.length} semanas</span>`;
+  } else {
+    statusText = `<span><span class="cnt">${customCount}</span> sem. con config. propia</span>`;
+  }
+
+  navEl.innerHTML = `
+    <div class="nav-arrows-group">
+      <button class="nav-arrow" id="prev-${type}" onclick="prevWeek('${type}')" ${idx <= 0 ? 'disabled' : ''}>‹</button>
+      <div class="week-dd-wrap" id="ddwrap-${type}">
+        <button class="week-dd-btn" id="ddbtn-${type}" onclick="toggleDd('${type}')">
+          ${wkLabel}${isC ? '<span class="custom-dot"></span>' : ''}
+          <span class="dd-chev">▾</span>
+        </button>
+        <div class="week-dd-menu" id="ddmenu-${type}">
+          ${buildDdItems(s, type)}
+        </div>
+      </div>
+      <button class="nav-arrow" id="next-${type}" onclick="nextWeek('${type}')" ${idx >= selectedWeeks.length - 1 ? 'disabled' : ''}>›</button>
+    </div>
+    <div class="nav-status">${statusText}</div>
+    ${!isC ? `<button class="btn-personalize" onclick="personalizeWeek('${type}')">Personalizar esta semana</button>` : ''}
+  `;
+
+  // Update warning bar
+  const warn = document.getElementById(`propwarn-${type}`);
+  if (warn) warn.classList.toggle('visible', isC);
+}
+
+// ─── CONFIG FORM ─────────────────────────────────────────────────────────────
+
+function buildForm(fid, type) {
+  const s = ensureState(fid, type);
+  const vals = isCustom(s, s.currentWeek) ? s.custom[s.currentWeek] : s.base;
+  const baseVals = s.base;
+
+  const cicloOpts = CICLO_OPTS.map(o =>
+    `<option${vals[0] === o ? ' selected' : ''}>${o}</option>`
+  ).join('');
+
+  return `
+  <div class="form-row">
+    <div class="form-field field-ciclo">
+      <label>Ciclo</label>
+      <select data-key="ciclo" onchange="onFormChange('${type}')">
+        ${cicloOpts}
+      </select>
+    </div>
+    <div class="form-field field-eta">
+      <label>ETA</label>
+      <input type="time" data-key="eta" value="${vals[1]}" onchange="onFormChange('${type}')">
+    </div>
+  </div>
+  <div class="form-section-title">Capacidad por día</div>
+  <div class="days-row">
+    ${DAYS.map((d, i) => `
+    <div class="form-field field-day">
+      <label>${d.label}</label>
+      <input type="number" min="0" max="99" data-key="${d.key}" value="${vals[i + 2]}" onchange="onFormChange('${type}')">
+    </div>`).join('')}
+  </div>`;
+}
+
+function loadWeekIntoForm(fid, type, wn) {
+  const s = ensureState(fid, type);
+  const vals = isCustom(s, wn) ? s.custom[wn] : s.base;
+  const baseVals = s.base;
+  const form = document.getElementById(`cform-${type}`);
+  if (!form) return;
+
+  const cicloEl = form.querySelector(`[data-key="ciclo"]`);
+  const etaEl   = form.querySelector(`[data-key="eta"]`);
+  if (cicloEl) { cicloEl.value = vals[0]; cicloEl.classList.toggle('has-diff', isCustom(s, wn) && vals[0] !== baseVals[0]); }
+  if (etaEl)   { etaEl.value   = vals[1]; etaEl.classList.toggle('has-diff', isCustom(s, wn) && vals[1] !== baseVals[1]); }
+  DAYS.forEach((d, i) => {
+    const el = form.querySelector(`[data-key="${d.key}"]`);
+    if (el) { el.value = vals[i + 2]; el.classList.toggle('has-diff', isCustom(s, wn) && vals[i + 2] !== baseVals[i + 2]); }
+  });
+
+  // Update warning bar
+  const warn = document.getElementById(`propwarn-${type}`);
+  if (warn) warn.classList.toggle('visible', isCustom(s, wn));
+}
+
+function onFormChange(type) {
+  if (!activeRow) return;
+  const s = ensureState(activeRow, type);
+  const wn = s.currentWeek;
+  if (!isCustom(s, wn)) return; // sync mode — diffs only meaningful in custom
+  // Highlight differences vs base
+  const form = document.getElementById(`cform-${type}`);
+  if (!form) return;
+  const baseVals = s.base;
+  form.querySelector(`[data-key="ciclo"]`).classList.toggle('has-diff', form.querySelector(`[data-key="ciclo"]`).value !== baseVals[0]);
+  form.querySelector(`[data-key="eta"]`).classList.toggle('has-diff', form.querySelector(`[data-key="eta"]`).value !== baseVals[1]);
+  DAYS.forEach((d, i) => {
+    const el = form.querySelector(`[data-key="${d.key}"]`);
+    if (el) el.classList.toggle('has-diff', +el.value !== baseVals[i + 2]);
+  });
+}
+
+// ─── CLOSE DROPDOWNS ON OUTSIDE CLICK ────────────────────────────────────────
+
+document.addEventListener('click', e => {
+  // picker
+  const picker = document.getElementById('pickerDropdown');
+  const calBtn = document.getElementById('calChevBtn');
+  if (!picker.contains(e.target) && e.target !== calBtn && !calBtn.contains(e.target)) {
+    picker.classList.remove('open');
+    calBtn.classList.remove('open');
+  }
+
+  // week nav dropdowns
+  if (openDropdown) {
+    const wrap = document.getElementById(`ddwrap-${openDropdown}`);
+    if (wrap && !wrap.contains(e.target)) closeDd(openDropdown);
+  }
+});
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+
+renderWeekTags();
+renderFacilityList();
+renderPickerGrid();
+</script>
+</body>
+</html>
