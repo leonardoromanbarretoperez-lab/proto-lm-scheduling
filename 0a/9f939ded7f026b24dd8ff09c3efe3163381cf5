@@ -1,0 +1,9 @@
+variants/index.html
+  ai_agent 1-421
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.11",
+  "base_commit_sha": "0a9f939ded7f026b24dd8ff09c3efe3163381cf5",
+  "prompts": {}
+}
