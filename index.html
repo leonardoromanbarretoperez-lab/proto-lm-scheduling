@@ -325,7 +325,8 @@ body {
   white-space: nowrap;
   transition: background 0.15s;
 }
-.btn-primary:hover { background: #2a6fd6; }
+.btn-primary:hover:not(:disabled) { background: #2a6fd6; }
+.btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
 
 /* ── MAIN LAYOUT: split pane ── */
 .main-layout {
@@ -363,6 +364,7 @@ body {
 }
 .facility-row:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
 .facility-row.active-row { border-color: var(--blue); box-shadow: 0 0 0 2px rgba(52,131,250,0.2); }
+.facility-row.disabled { cursor: default; pointer-events: none; }
 
 .facility-info { flex: 1; min-width: 0; }
 .facility-name { font-size: 16px; font-weight: 700; margin-bottom: 3px; }
@@ -383,11 +385,13 @@ body {
   border-radius: 50%;
   flex-shrink: 0;
 }
-.status-dot.pending  { background: var(--blue); }
-.status-dot.reviewed { background: var(--green); }
+.status-dot.pending    { background: var(--blue); }
+.status-dot.reviewed   { background: var(--green); }
+.status-dot.scheduled  { background: #007a3d; }
 .status-text { font-size: 12px; font-weight: 700; white-space: nowrap; }
-.status-text.pending  { color: var(--blue); }
-.status-text.reviewed { color: var(--green); }
+.status-text.pending   { color: var(--blue); }
+.status-text.reviewed  { color: var(--green); }
+.status-text.scheduled { color: #007a3d; }
 
 .btn-revisar {
   background: #fff;
@@ -526,51 +530,78 @@ body {
 .ciclo-row {
   display: flex;
   align-items: flex-end;
-  gap: 12px;
+  gap: 8px;
   background: var(--bg-sec);
   border-radius: 6px;
-  padding: 10px 12px;
-  flex-wrap: wrap;
+  padding: 8px 10px;
+  flex-wrap: nowrap;
 }
 .ciclo-dropdown {
   display: flex;
   flex-direction: column;
   gap: 3px;
-  min-width: 110px;
+  width: 86px;
+  flex-shrink: 0;
 }
-.ciclo-dropdown label { font-size: 12px; color: var(--gray); }
+.ciclo-dropdown label { font-size: 11px; color: var(--gray); }
 .ciclo-select-box {
   display: inline-flex;
   align-items: center;
   justify-content: space-between;
-  gap: 6px;
+  gap: 4px;
   border: 1px solid rgba(0,0,0,0.22);
   border-radius: 6px;
-  padding: 10px 10px;
+  padding: 0 8px;
   font-family: var(--font);
-  font-size: 14px;
+  font-size: 13px;
   color: var(--dark);
   cursor: pointer;
   background: #fff;
-  height: 44px;
+  height: 36px;
+  white-space: nowrap;
 }
-.ciclo-select-box .chev { font-size: 10px; color: var(--gray); }
+.ciclo-select-box .chev { font-size: 9px; color: var(--gray); }
 
-.day-inputs { display: flex; align-items: flex-end; gap: 8px; flex-wrap: wrap; }
+.day-inputs { display: flex; align-items: flex-end; gap: 4px; flex-wrap: nowrap; }
 .day-group { display: flex; flex-direction: column; align-items: center; gap: 3px; }
 .day-group label { font-size: 10px; color: var(--gray); text-transform: uppercase; }
 .day-group input {
-  width: 40px;
-  height: 44px;
+  width: 34px;
+  height: 36px;
   border: 1px solid rgba(0,0,0,0.22);
   border-radius: 6px;
   text-align: center;
   font-family: var(--font);
-  font-size: 14px;
+  font-size: 13px;
   color: var(--dark);
   background: #fff;
 }
 .day-group input:focus { outline: none; border-color: var(--blue); }
+
+.eta-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  background: var(--bg-sec);
+  border-radius: 6px;
+  padding: 10px 12px;
+  margin-top: 8px;
+}
+.eta-group { display: flex; flex-direction: column; gap: 3px; }
+.eta-group label { font-size: 11px; color: var(--gray); font-family: var(--font); }
+.eta-input {
+  width: 90px;
+  height: 36px;
+  border: 1px solid rgba(0,0,0,0.22);
+  border-radius: 6px;
+  padding: 0 12px;
+  font-family: var(--font);
+  font-size: 14px;
+  color: var(--dark);
+  background: #fff;
+}
+.eta-input:focus { outline: none; border-color: var(--blue); }
+.eta-hint { font-size: 11px; color: var(--gray); align-self: flex-end; padding-bottom: 12px; }
 
 .btn-add-ciclo {
   background: none;
@@ -585,6 +616,22 @@ body {
   transition: background 0.12s;
 }
 .btn-add-ciclo:hover { background: #eef4ff; }
+.ciclo-row-wrap { position: relative; }
+.btn-remove-ciclo {
+  position: absolute;
+  top: 50%;
+  right: -22px;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  font-size: 16px;
+  color: var(--gray);
+  cursor: pointer;
+  line-height: 1;
+  padding: 2px;
+  transition: color 0.12s;
+}
+.btn-remove-ciclo:hover { color: #c00; }
 
 .panel-footer {
   padding: 14px 20px;
@@ -592,9 +639,12 @@ body {
   flex-shrink: 0;
   background: #fff;
   box-shadow: 0 -2px 8px rgba(0,0,0,0.06);
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 .btn-revisado {
-  width: 100%;
+  flex: 1;
   background: var(--blue);
   color: #fff;
   border: none;
@@ -608,8 +658,186 @@ body {
   transition: background 0.15s;
 }
 .btn-revisado:hover { background: #2a6fd6; }
+.btn-voltar {
+  flex: 0 0 auto;
+  background: #fff;
+  color: var(--blue);
+  border: 1px solid var(--blue);
+  border-radius: 6px;
+  padding: 12px 16px;
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.3px;
+  transition: background 0.15s, color 0.15s;
+  display: none;
+  white-space: nowrap;
+}
+.btn-voltar:hover { background: #eef4ff; }
+.panel-footer.reviewed .btn-voltar { display: block; }
+
+/* ── MODAL ── */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 600;
+  align-items: center;
+  justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+
+.modal-dialog {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 6px 32px rgba(0,0,0,0.18);
+  width: 525px;
+  max-width: calc(100vw - 32px);
+  padding: 44px 48px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.modal-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: rgba(0,0,0,0.9);
+  line-height: 1.25;
+  font-family: var(--font);
+}
+.modal-subtitle {
+  font-size: 16px;
+  color: rgba(0,0,0,0.9);
+  line-height: 1.4;
+  margin-top: -8px;
+  font-family: var(--font);
+}
+
+/* week pills field inside modal */
+.modal-weeks-field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid rgba(0,0,0,0.25);
+  border-radius: 6px;
+  padding: 10px 12px;
+  background: #fff;
+  flex-wrap: wrap;
+  cursor: pointer;
+  min-height: 48px;
+}
+.modal-weeks-field .cal-icon-sm { font-size: 16px; color: var(--gray); flex-shrink: 0; }
+.modal-week-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--dark);
+  white-space: nowrap;
+  font-family: var(--font);
+}
+.modal-week-pill .xt {
+  cursor: pointer;
+  color: var(--gray);
+  font-size: 11px;
+  margin-left: 1px;
+}
+.modal-week-pill .xt:hover { color: #c00; }
+.modal-weeks-field .chev-sm { margin-left: auto; font-size: 12px; color: var(--gray); flex-shrink: 0; }
+
+/* summary box */
+.modal-summary {
+  background: var(--bg-sec);
+  border-radius: 6px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.modal-summary-left { display: flex; flex-direction: column; gap: 2px; }
+.modal-summary-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(0,0,0,0.55);
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  font-family: var(--font);
+}
+.modal-summary-count {
+  font-size: 16px;
+  font-weight: 700;
+  color: #000;
+  font-family: var(--font);
+}
+.modal-summary-count span { font-weight: 400; font-size: 12px; color: #000; }
+.modal-fac-sep { margin: 0 4px; color: var(--gray); font-weight: 400; }
+.modal-date-range {
+  font-size: 12px;
+  color: #000;
+  white-space: nowrap;
+  font-family: var(--font);
+}
+
+/* modal week picker dropdown */
+.modal-picker-wrap { position: relative; }
+.modal-picker-dropdown {
+  display: none;
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.14);
+  padding: 16px 16px 14px;
+  width: 320px;
+  z-index: 700;
+}
+.modal-picker-dropdown.open { display: block; }
+
+/* modal buttons */
+.modal-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 8px;
+}
+.btn-modal-primary {
+  background: var(--blue);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 12px 24px;
+  font-family: var(--font);
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btn-modal-primary:hover { background: #2a6fd6; }
+.btn-modal-cancel {
+  background: none;
+  border: none;
+  color: var(--blue);
+  font-family: var(--font);
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 12px 8px;
+  transition: opacity 0.15s;
+}
+.btn-modal-cancel:hover { opacity: 0.7; }
 
 /* ── SNACKBAR ── */
+.snackbar.green { background: var(--green); }
 .snackbar {
   position: fixed;
   bottom: 28px;
@@ -675,7 +903,7 @@ body {
 <nav class="nav">
   <span class="nav-logo">Mercado Libre</span>
   <span class="nav-sep">|</span>
-  <span class="nav-title">Frota Fixa FM / LM</span>
+  <span class="nav-title">Flora fija FM / LM</span>
 </nav>
 
 <div class="page-wrapper">
@@ -752,7 +980,7 @@ body {
 
       <div class="action-row">
         <span class="count-label">Viendo 12 de 12 facilities</span>
-        <button class="btn-primary">AGENDAR VEHÍCULOS</button>
+        <button class="btn-primary" id="btnHeaderAgendar" disabled onclick="openModal()">Agendar vehículos</button>
       </div>
     </div>
   </div><!-- /page-header -->
@@ -781,41 +1009,41 @@ body {
             <div class="facility-meta">Total semana: 168 vehículos<br>72 Large vans · 70 Small vans · 18 Utilitarios</div>
           </div>
           <div class="facility-right">
-            <span class="status-dot pending"></span>
-            <span class="status-text pending">Por revisar</span>
+            <span class="status-dot pending" id="dot-SSC04"></span>
+            <span class="status-text pending" id="stxt-SSC04">Por revisar</span>
           </div>
         </div>
 
-        <div class="facility-row" id="row-SSC03" onclick="openPanel('SSC03')">
+        <div class="facility-row disabled" id="row-SSC03">
           <div class="facility-info">
             <div class="facility-name">SSC03</div>
             <div class="facility-meta">Total semana: 168 vehículos<br>72 Large vans · 70 Small vans · 18 Utilitarios</div>
           </div>
           <div class="facility-right">
-            <span class="status-dot pending"></span>
-            <span class="status-text pending">Por revisar</span>
+            <span class="status-dot pending" id="dot-SSC03"></span>
+            <span class="status-text pending" id="stxt-SSC03">Por revisar</span>
           </div>
         </div>
 
-        <div class="facility-row" id="row-SSC02" onclick="openPanel('SSC02')">
+        <div class="facility-row disabled" id="row-SSC02">
           <div class="facility-info">
             <div class="facility-name">SSC02</div>
             <div class="facility-meta">Total semana: 168 vehículos<br>72 Large vans · 70 Small vans · 18 Utilitarios</div>
           </div>
           <div class="facility-right">
-            <span class="status-dot pending"></span>
-            <span class="status-text pending">Por revisar</span>
+            <span class="status-dot pending" id="dot-SSC02"></span>
+            <span class="status-text pending" id="stxt-SSC02">Por revisar</span>
           </div>
         </div>
 
-        <div class="facility-row" id="row-SSC01" onclick="openPanel('SSC01')">
+        <div class="facility-row disabled" id="row-SSC01">
           <div class="facility-info">
             <div class="facility-name">SSC01</div>
             <div class="facility-meta">Total semana: 168 vehículos<br>72 Large vans · 70 Small vans · 18 Utilitarios</div>
           </div>
           <div class="facility-right">
-            <span class="status-dot pending"></span>
-            <span class="status-text pending">Por revisar</span>
+            <span class="status-dot pending" id="dot-SSC01"></span>
+            <span class="status-text pending" id="stxt-SSC01">Por revisar</span>
           </div>
         </div>
 
@@ -855,6 +1083,10 @@ body {
                     <label>Ciclo</label>
                     <div class="ciclo-select-box">AM 1 <span class="chev">▾</span></div>
                   </div>
+                  <div class="eta-group">
+                    <label>ETA</label>
+                    <input type="time" class="eta-input" value="06:00">
+                  </div>
                   <div class="day-inputs">
                     <div class="day-group"><label>Seg</label><input type="number" value="6" min="0"></div>
                     <div class="day-group"><label>Ter</label><input type="number" value="6" min="0"></div>
@@ -865,10 +1097,10 @@ body {
                     <div class="day-group"><label>Dom</label><input type="number" value="6" min="0"></div>
                   </div>
                 </div>
-              </div>
-              <button class="btn-add-ciclo">+ Adicionar ciclo</button>
-            </div>
-          </div>
+              </div><!-- /ciclo-section -->
+              <button class="btn-add-ciclo" onclick="addCiclo(this)">+ Adicionar ciclo</button>
+            </div><!-- /vehicle-card-body -->
+          </div><!-- /card-large -->
 
           <!-- Small van card -->
           <div class="vehicle-card open" id="card-small">
@@ -886,6 +1118,10 @@ body {
                     <label>Ciclo</label>
                     <div class="ciclo-select-box">AM 1 <span class="chev">▾</span></div>
                   </div>
+                  <div class="eta-group">
+                    <label>ETA</label>
+                    <input type="time" class="eta-input" value="06:00">
+                  </div>
                   <div class="day-inputs">
                     <div class="day-group"><label>Seg</label><input type="number" value="6" min="0"></div>
                     <div class="day-group"><label>Ter</label><input type="number" value="6" min="0"></div>
@@ -897,14 +1133,15 @@ body {
                   </div>
                 </div>
               </div>
-              <button class="btn-add-ciclo">+ Adicionar ciclo</button>
+              <button class="btn-add-ciclo" onclick="addCiclo(this)">+ Adicionar ciclo</button>
             </div>
           </div>
 
         </div><!-- /panel-body -->
 
-        <div class="panel-footer">
-          <button class="btn-revisado" onclick="markReviewed()">Marcar como revisado</button>
+        <div class="panel-footer" id="panelFooter">
+          <button class="btn-voltar" onclick="undoReview()">Volver para revisar</button>
+          <button class="btn-revisado" id="btnRevisado" onclick="markReviewed()">Marcar como revisado</button>
         </div>
       </div>
     </div><!-- /panel-col -->
@@ -912,13 +1149,79 @@ body {
   </div><!-- /main-layout -->
 </div><!-- /page-wrapper -->
 
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-dialog">
+    <div class="modal-title">Agendar vehículos</div>
+    <div class="modal-subtitle">Revisa las semanas a agendar antes de continuar.</div>
+
+    <div class="modal-picker-wrap">
+      <div class="modal-weeks-field" id="modalWeeksField" onclick="toggleModalPicker(event)">
+        <span class="cal-icon-sm">📅</span>
+        <div id="modalWeekPills"></div>
+        <span class="chev-sm" id="modalChev">▾</span>
+      </div>
+      <div class="modal-picker-dropdown" id="modalPickerDropdown">
+        <div class="picker-nav">
+          <button>‹</button>
+          <div class="picker-month">Mayo 2026 <span class="chev">▾</span></div>
+          <button>›</button>
+        </div>
+        <div class="wk-grid">
+          <div class="wk-header">
+            <span class="lbl">Sem.</span>
+            <span>Lun</span><span>Mar</span><span>Mié</span>
+            <span>Jue</span><span>Vie</span><span>Sáb</span><span>Dom</span>
+          </div>
+          <div class="wk-row" id="mrow22" onclick="toggleWeekModal(22)">
+            <div class="wk-row-label">Sem 22</div>
+            <div class="wk-day">27</div><div class="wk-day">28</div><div class="wk-day">29</div>
+            <div class="wk-day">30</div><div class="wk-day">1</div><div class="wk-day">2</div><div class="wk-day">3</div>
+          </div>
+          <div class="wk-row" id="mrow23" onclick="toggleWeekModal(23)">
+            <div class="wk-row-label">Sem 23</div>
+            <div class="wk-day">4</div><div class="wk-day">5</div><div class="wk-day">6</div>
+            <div class="wk-day">7</div><div class="wk-day">8</div><div class="wk-day">9</div><div class="wk-day">10</div>
+          </div>
+          <div class="wk-row" id="mrow24" onclick="toggleWeekModal(24)">
+            <div class="wk-row-label">Sem 24</div>
+            <div class="wk-day">11</div><div class="wk-day">12</div><div class="wk-day">13</div>
+            <div class="wk-day">14</div><div class="wk-day">15</div><div class="wk-day">16</div><div class="wk-day">17</div>
+          </div>
+          <div class="wk-row" id="mrow25" onclick="toggleWeekModal(25)">
+            <div class="wk-row-label">Sem 25</div>
+            <div class="wk-day">18</div><div class="wk-day">19</div><div class="wk-day">20</div>
+            <div class="wk-day">21</div><div class="wk-day">22</div><div class="wk-day">23</div><div class="wk-day">24</div>
+          </div>
+        </div>
+        <div class="picker-footer">
+          <button class="btn-aplicar" onclick="applyModalPicker(event)">APLICAR</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-summary">
+      <div class="modal-summary-left">
+        <div class="modal-summary-label">Total a agendar</div>
+        <div class="modal-summary-count">
+          <span id="modalViajes">32</span> viajes
+          <span class="modal-fac-sep">·</span>
+          <span id="modalFacilities">1</span> <span id="modalFacLabel">Facilitie</span>
+        </div>
+      </div>
+      <div class="modal-date-range" id="modalDateRange">18 de mayo al 14 de junio</div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-modal-primary" onclick="confirmModal()">Agendar</button>
+      <button class="btn-modal-cancel" onclick="closeModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
 <!-- SNACKBAR -->
 <div class="snackbar" id="snackbar">
   <span class="snackbar-text">Frota de <strong id="snackFacility">SSC05</strong> revisada e pronta para agendamento.</span>
-  <div class="snackbar-actions">
-    <button class="btn-snack-ghost" onclick="undoReview()">Voltar a revisar</button>
-    <button class="btn-snack-filled">Agendar veículos</button>
-  </div>
 </div>
 
 <script>
@@ -1011,14 +1314,33 @@ document.addEventListener('click', function(e) {
 // ══════════════════════════════════════════
 // PANEL OPEN / CLOSE
 // ══════════════════════════════════════════
+const ALL_FACILITIES = ['SSC05','SSC04','SSC03','SSC02','SSC01'];
+const reviewedSet = new Set();
 let activeFacility = null;
 let reviewedFacility = null;
+
+function checkAllReviewed() {
+  document.getElementById('btnHeaderAgendar').disabled = reviewedSet.size === 0;
+}
 
 function openPanel(facility) {
   activeFacility = facility;
 
   // update panel title
   document.getElementById('panelTitle').textContent = 'Veículos da semana para ' + facility;
+
+  // restore footer state based on whether this facility was already reviewed
+  const footer = document.getElementById('panelFooter');
+  const btn    = document.getElementById('btnRevisado');
+  if (reviewedSet.has(facility)) {
+    footer.classList.add('reviewed');
+    btn.textContent = 'Agendar vehículos';
+    btn.onclick = openModal;
+  } else {
+    footer.classList.remove('reviewed');
+    btn.textContent = 'Marcar como revisado';
+    btn.onclick = markReviewed;
+  }
 
   // expand panel col, compress list
   document.getElementById('listCol').classList.add('compressed');
@@ -1050,48 +1372,237 @@ function markReviewed() {
   if (!activeFacility) return;
   const fac = activeFacility;
   reviewedFacility = fac;
+  reviewedSet.add(fac);
 
-  closePanel();
-
-  // Update status for the reviewed facility (wired for SSC05 and generic)
+  // Update row status in the list
   const dot  = document.getElementById('dot-' + fac);
   const stxt = document.getElementById('stxt-' + fac);
   if (dot && stxt) {
-    dot.className  = 'status-dot reviewed';
-    stxt.className = 'status-text reviewed';
+    dot.className    = 'status-dot reviewed';
+    stxt.className   = 'status-text reviewed';
     stxt.textContent = 'Pronto para agendar';
   }
 
-  // Show snackbar
+  checkAllReviewed();
+
+  // Switch footer: show "Volver para revisar" + change primary to "Agendar vehículos"
+  const footer = document.getElementById('panelFooter');
+  footer.classList.add('reviewed');
+  const btn = document.getElementById('btnRevisado');
+  btn.textContent = 'Agendar vehículos';
+  btn.onclick = openModal;
+
+  // Show snackbar (no buttons, auto-dismiss)
   document.getElementById('snackFacility').textContent = fac;
   const snack = document.getElementById('snackbar');
   snack.classList.add('show');
-  setTimeout(() => snack.classList.remove('show'), 6000);
+  setTimeout(() => snack.classList.remove('show'), 4000);
 }
 
 function undoReview() {
   if (!reviewedFacility) return;
   const fac = reviewedFacility;
+
+  // Revert row status
   const dot  = document.getElementById('dot-' + fac);
   const stxt = document.getElementById('stxt-' + fac);
   if (dot && stxt) {
-    dot.className  = 'status-dot pending';
-    stxt.className = 'status-text pending';
+    dot.className    = 'status-dot pending';
+    stxt.className   = 'status-text pending';
     stxt.textContent = 'Por revisar';
   }
+
+  // Revert footer
+  const footer = document.getElementById('panelFooter');
+  footer.classList.remove('reviewed');
+  const btn = document.getElementById('btnRevisado');
+  btn.textContent = 'Marcar como revisado';
+  btn.onclick = markReviewed;
+
+  reviewedSet.delete(fac);
   reviewedFacility = null;
+  checkAllReviewed();
   document.getElementById('snackbar').classList.remove('show');
 }
+
+// ══════════════════════════════════════════
+// MODAL
+// ══════════════════════════════════════════
+const VIAJES_PER_WEEK = 8;
+
+const weekDates = {
+  22: { start: '27 de mayo',   end: '2 de junio' },
+  23: { start: '4 de junio',   end: '10 de junio' },
+  24: { start: '11 de junio',  end: '17 de junio' },
+  25: { start: '18 de junio',  end: '24 de junio' },
+};
+
+function renderModalWeeks() {
+  const selected = WEEKS.filter(w => weekSel[w]);
+  const pillsEl  = document.getElementById('modalWeekPills');
+  pillsEl.innerHTML = '';
+
+  selected.forEach(w => {
+    const pill = document.createElement('span');
+    pill.className = 'modal-week-pill';
+    pill.innerHTML = `Semana ${w} <span class="xt" onclick="removeWeekModal(${w},event)">×</span>`;
+    pillsEl.appendChild(pill);
+  });
+
+  // Update viajes × all reviewed facilities
+  const facCount = reviewedSet.size || 1;
+  document.getElementById('modalViajes').textContent = selected.length * VIAJES_PER_WEEK * facCount;
+  document.getElementById('modalFacilities').textContent = facCount;
+  document.getElementById('modalFacLabel').textContent = facCount === 1 ? 'Facilitie' : 'Facilities';
+
+  // Update date range
+  const dateEl = document.getElementById('modalDateRange');
+  if (selected.length === 0) {
+    dateEl.textContent = '—';
+  } else {
+    const first = Math.min(...selected);
+    const last  = Math.max(...selected);
+    dateEl.textContent = weekDates[first].start + ' al ' + weekDates[last].end;
+  }
+
+  // Sync modal picker row highlights
+  WEEKS.forEach(w => {
+    const row = document.getElementById('mrow' + w);
+    if (row) row.classList.toggle('sel', weekSel[w]);
+  });
+}
+
+let modalPickerOpen = false;
+
+function toggleModalPicker(evt) {
+  evt && evt.stopPropagation();
+  modalPickerOpen = !modalPickerOpen;
+  document.getElementById('modalPickerDropdown').classList.toggle('open', modalPickerOpen);
+  document.getElementById('modalChev').textContent = modalPickerOpen ? '▴' : '▾';
+}
+
+function closeModalPicker() {
+  modalPickerOpen = false;
+  document.getElementById('modalPickerDropdown').classList.remove('open');
+  document.getElementById('modalChev').textContent = '▾';
+}
+
+function toggleWeekModal(w) {
+  weekSel[w] = !weekSel[w];
+  renderTags();
+  renderModalWeeks();
+}
+
+function applyModalPicker(evt) {
+  evt && evt.stopPropagation();
+  closeModalPicker();
+}
+
+function removeWeekModal(w, evt) {
+  evt.stopPropagation();
+  weekSel[w] = false;
+  renderTags();        // sync main filter bar
+  renderModalWeeks();  // sync modal
+}
+
+function openModal() {
+  renderModalWeeks();
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function closeModal() {
+  closeModalPicker();
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+
+function confirmModal() {
+  const viajes   = document.getElementById('modalViajes').textContent;
+  const facCount = reviewedSet.size;
+  const facLabel = facCount === 1 ? 'facilite' : 'facilites';
+  closeModal();
+
+  // Update all reviewed facilities → "Agendado"
+  reviewedSet.forEach(fac => {
+    const dot  = document.getElementById('dot-'  + fac);
+    const stxt = document.getElementById('stxt-' + fac);
+    if (dot && stxt) {
+      dot.className    = 'status-dot scheduled';
+      stxt.className   = 'status-text scheduled';
+      stxt.textContent = 'Agendado';
+    }
+  });
+  reviewedSet.clear();
+  checkAllReviewed();
+
+  // Show green success snackbar
+  const snack = document.getElementById('snackbar');
+  snack.classList.add('green');
+  snack.querySelector('.snackbar-text').innerHTML =
+    `<strong>${facCount} ${facLabel}</strong> con una flota de <strong>${viajes} viajes</strong> fue agendado.`;
+  snack.classList.add('show');
+  setTimeout(() => {
+    snack.classList.remove('show');
+    snack.classList.remove('green');
+  }, 5000);
+}
+
+// close modal on backdrop click; close modal picker on click outside field
+document.getElementById('modalOverlay').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+document.addEventListener('click', function(e) {
+  const wrap = document.querySelector('.modal-picker-wrap');
+  if (wrap && !wrap.contains(e.target)) closeModalPicker();
+});
 
 // ══════════════════════════════════════════
 // KEYBOARD
 // ══════════════════════════════════════════
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') {
+    closeModalPicker();
+    closeModal();
     closePicker();
     closePanel();
   }
 });
+
+// ══════════════════════════════════════════
+// ADICIONAR CICLO
+// ══════════════════════════════════════════
+function addCiclo(btn) {
+  const section = btn.closest('.vehicle-card-body').querySelector('.ciclo-section');
+  const wrap = document.createElement('div');
+  wrap.className = 'ciclo-row-wrap';
+  wrap.style.position = 'relative';
+  wrap.style.marginTop = '6px';
+  wrap.style.paddingRight = '28px';
+
+  wrap.innerHTML = `
+    <div class="ciclo-row">
+      <div class="ciclo-dropdown">
+        <label>Ciclo</label>
+        <div class="ciclo-select-box">AM 1 <span class="chev">▾</span></div>
+      </div>
+      <div class="eta-group">
+        <label>ETA</label>
+        <input type="time" class="eta-input" value="06:00">
+      </div>
+      <div class="day-inputs">
+        <div class="day-group"><label>Seg</label><input type="number" value="6" min="0"></div>
+        <div class="day-group"><label>Ter</label><input type="number" value="6" min="0"></div>
+        <div class="day-group"><label>Qua</label><input type="number" value="6" min="0"></div>
+        <div class="day-group"><label>Qui</label><input type="number" value="6" min="0"></div>
+        <div class="day-group"><label>Sex</label><input type="number" value="6" min="0"></div>
+        <div class="day-group"><label>Sáb</label><input type="number" value="6" min="0"></div>
+        <div class="day-group"><label>Dom</label><input type="number" value="6" min="0"></div>
+      </div>
+    </div>
+    <button class="btn-remove-ciclo" onclick="this.parentElement.remove()" title="Eliminar ciclo">×</button>
+  `;
+
+  section.appendChild(wrap);
+}
 
 // ══════════════════════════════════════════
 // INIT
