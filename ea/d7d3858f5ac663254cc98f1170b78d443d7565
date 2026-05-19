@@ -1,0 +1,23 @@
+launcher/index.html
+  s_1d42129a58e151::t_60d57ca8d3b076 529
+  s_1d42129a58e151::t_0a657584253f9f 1-453,455-528,530-547
+  s_1d42129a58e151::t_90e8ec982e2457 454
+proto-02/index.html
+  s_1d42129a58e151::t_0a657584253f9f 1-831
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.11",
+  "base_commit_sha": "ead7d3858f5ac663254cc98f1170b78d443d7565",
+  "prompts": {},
+  "sessions": {
+    "s_1d42129a58e151": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "20fc1c1c-f68f-41cd-9f24-8dc29480a272",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Leonardo Barreto Perez <lbarretopere@internal-admins-internal-traffic-l-6ad629-1124484131.us-east-1.elb.amazonaws.com>"
+    }
+  }
+}
