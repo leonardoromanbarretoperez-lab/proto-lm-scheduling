@@ -1254,7 +1254,7 @@ function buildVehicleCard(fid, vt) {
            </div>`
         : `<div class="prop-banner sync" id="propwarn-${type}">
              <span class="ban-icon">🔁</span>
-             <span class="ban-text">Los cambios se aplicarán a las <strong>${selectedWeeks.length} semanas</strong> seleccionadas.</span>
+             <span class="ban-text">${syncBannerText()}</span>
            </div>`
       }
       <div class="config-form" id="cform-${type}">
@@ -1414,6 +1414,13 @@ function onFormChange(type) {
   });
 }
 
+function syncBannerText() {
+  const after = selectedWeeks.filter(w => w > panelWeek).length;
+  if (after === 0) return 'Los cambios solo se aplicarán a <strong>esta semana</strong>.';
+  if (after === 1) return 'Los cambios también se aplicarán a la <strong>semana siguiente</strong>.';
+  return `Los cambios también se aplicarán a las <strong>${after} semanas siguientes</strong>.`;
+}
+
 function updatePropBanner(type, isCustomMode) {
   const banner = document.getElementById(`propwarn-${type}`);
   if (!banner) return;
@@ -1425,9 +1432,7 @@ function updatePropBanner(type, isCustomMode) {
       <button class="btn-reset" onclick="resetWeek('${type}')">Restablecer</button>`;
   } else {
     banner.className = 'prop-banner sync';
-    banner.innerHTML = `
-      <span class="ban-icon">🔁</span>
-      <span class="ban-text">Los cambios se aplicarán a las <strong>${selectedWeeks.length} semanas</strong> seleccionadas.</span>`;
+    banner.innerHTML = `<span class="ban-icon">🔁</span><span class="ban-text">${syncBannerText()}</span>`;
   }
 }
 
