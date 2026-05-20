@@ -580,7 +580,7 @@ body {
         <div class="panel-body" id="panelBody"></div>
         <div class="panel-footer">
           <button class="btn-cancel" onclick="closePanel()">Cancelar</button>
-          <button class="btn-primary" onclick="savePanel()">Confirmar</button>
+          <button class="btn-primary" onclick="savePanel()">Marcar como revisado</button>
         </div>
       </div>
     </div>
@@ -609,11 +609,11 @@ const DAYS = [
 const FIELD_KEYS = ['ciclo', 'eta', ...DAYS.map(d => d.key)];
 
 const FACILITIES = [
-  { id: 1, name: 'CD Palermo',       meta: 'Buenos Aires · Hub principal', status: 'pending'  },
-  { id: 2, name: 'CD Villa Urquiza', meta: 'Buenos Aires · Hub secundario', status: 'pending'  },
-  { id: 3, name: 'CD Quilmes',       meta: 'Conurbano Sur · Hub terciario', status: 'pending'  },
-  { id: 4, name: 'CD San Justo',     meta: 'Conurbano Oeste',               status: 'reviewed' },
-  { id: 5, name: 'CD Tigre',         meta: 'Conurbano Norte',               status: 'reviewed' },
+  { id: 1, name: 'SSC05', meta: 'Total semana: 168 vehículos · 72 Large vans · 70 Small vans · 18 Utilitarios', status: 'pending'  },
+  { id: 2, name: 'SSC04', meta: 'Total semana: 168 vehículos · 72 Large vans · 70 Small vans · 18 Utilitarios', status: 'pending'  },
+  { id: 3, name: 'SSC03', meta: 'Total semana: 168 vehículos · 72 Large vans · 70 Small vans · 18 Utilitarios', status: 'pending'  },
+  { id: 4, name: 'SSC02', meta: 'Total semana: 168 vehículos · 72 Large vans · 70 Small vans · 18 Utilitarios', status: 'pending'  },
+  { id: 5, name: 'SSC01', meta: 'Total semana: 168 vehículos · 72 Large vans · 70 Small vans · 18 Utilitarios', status: 'pending'  },
 ];
 
 // Default base values per vehicle type
@@ -790,7 +790,7 @@ function renderFacilityList() {
       </div>
       <div class="facility-right">
         <span class="status-dot ${f.status}"></span>
-        <span class="status-text ${f.status}">${isPending ? 'Pendiente' : 'Revisado'}</span>
+        <span class="status-text ${f.status}">${isPending ? 'Por revisar' : 'Pronto para agendar'}</span>
         ${isPending ? `<button class="btn-revisar" onclick="event.stopPropagation();openPanel(${f.id})">Revisar</button>` : ''}
       </div>
     </div>`;
