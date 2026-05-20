@@ -423,21 +423,21 @@ body {
 }
 .btn-personalize:hover { background: var(--blue); color: #fff; }
 
-/* ── PROPAGATION WARNING ── */
-.prop-warning {
-  display: none;
+/* ── PROPAGATION BANNER ── */
+.prop-banner {
+  display: flex;
   align-items: center;
   gap: 10px;
   padding: 9px 16px;
-  background: var(--amber-bg);
-  border-bottom: 1px solid var(--amber-border);
+  border-bottom: 1px solid var(--border);
   font-size: 12px;
-  color: #7a4d00;
   flex-shrink: 0;
+  line-height: 1.4;
 }
-.prop-warning.visible { display: flex; }
-.prop-warning .warn-icon { font-size: 14px; flex-shrink: 0; }
-.prop-warning .warn-text { flex: 1; line-height: 1.4; }
+.prop-banner.sync  { background: #f0f4ff; border-color: #cfdcff; color: #1a3a8c; }
+.prop-banner.custom { background: var(--amber-bg); border-color: var(--amber-border); color: #7a4d00; }
+.prop-banner .ban-icon { font-size: 14px; flex-shrink: 0; }
+.prop-banner .ban-text { flex: 1; }
 .btn-reset {
   background: none;
   border: 1px solid #c8930a;
@@ -1246,15 +1246,21 @@ function buildVehicleCard(fid, vt) {
       </div>
     </div>
     <div class="vehicle-card-body" id="vcbody-${type}">
-      <div class="prop-warning${isC ? ' visible' : ''}" id="propwarn-${type}">
-        <span class="warn-icon">⚠️</span>
-        <span class="warn-text">Esta semana tiene configuración propia — los cambios <strong>no se propagarán</strong> a las demás semanas.</span>
-        <button class="btn-reset" onclick="resetWeek('${type}')">Restablecer</button>
-      </div>
+      ${isC
+        ? `<div class="prop-banner custom" id="propwarn-${type}">
+             <span class="ban-icon">⚠️</span>
+             <span class="ban-text">Esta semana tiene configuración propia — los cambios <strong>no se propagarán</strong> a las demás semanas.</span>
+             <button class="btn-reset" onclick="resetWeek('${type}')">Restablecer</button>
+           </div>`
+        : `<div class="prop-banner sync" id="propwarn-${type}">
+             <span class="ban-icon">🔁</span>
+             <span class="ban-text">Los cambios se aplicarán a las <strong>${selectedWeeks.length} semanas</strong> seleccionadas.</span>
+             <button class="btn-personalize" onclick="personalizeWeek('${type}')">Personalizar esta semana</button>
+           </div>`
+      }
       <div class="config-form" id="cform-${type}">
         ${buildForm(fid, type)}
       </div>
-      ${!isC ? `<div class="personalize-wrap"><button class="btn-personalize" onclick="personalizeWeek('${type}')">Personalizar esta semana</button></div>` : ''}
     </div>
   </div>`;
 }
