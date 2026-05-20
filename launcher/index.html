@@ -384,10 +384,83 @@ footer {
 <!-- Cards -->
 <div class="cards">
 
-  <!-- Proto 01 -->
+  <!-- Proto 01I — FEATURED (first) -->
+  <div class="card">
+    <div class="preview" style="background:#fff8ec;">
+      <!-- Mini illustration: week navigator -->
+      <div class="p1-wrap">
+        <div class="p1-list">
+          <div class="p1-list-header">
+            <div class="p1-lh-dot"></div>
+            <div class="p1-lh-btn"></div>
+          </div>
+          <div class="p1-row active">
+            <div class="p1-row-dot"></div>
+            <div class="p1-row-bar active-bar"></div>
+          </div>
+          <div class="p1-row">
+            <div class="p1-row-dot"></div>
+            <div class="p1-row-bar"></div>
+          </div>
+          <div class="p1-row">
+            <div class="p1-row-dot"></div>
+            <div class="p1-row-bar"></div>
+          </div>
+          <div class="p1-row">
+            <div class="p1-row-dot"></div>
+            <div class="p1-row-bar"></div>
+          </div>
+        </div>
+        <div class="p1-panel">
+          <div class="p1-panel-header">
+            <div class="p1-ph-bar"></div>
+            <div class="p1-ph-sub"></div>
+          </div>
+          <!-- week nav bar mockup -->
+          <div style="display:flex;align-items:center;gap:3px;padding:5px 6px;background:#fafafa;border-bottom:1px solid #ededed;">
+            <div style="width:10px;height:10px;border:1px solid #ededed;border-radius:2px;background:#fff;font-size:6px;display:flex;align-items:center;justify-content:center;color:#666;">‹</div>
+            <div style="flex:1;height:10px;background:#3483FA;border-radius:3px;opacity:0.2;"></div>
+            <div style="width:10px;height:10px;border:1px solid #ededed;border-radius:2px;background:#fff;font-size:6px;display:flex;align-items:center;justify-content:center;color:#666;">›</div>
+          </div>
+          <!-- amber warning bar mockup -->
+          <div style="background:#fff8ec;border-bottom:1px solid #f5dea3;padding:3px 5px;display:flex;align-items:center;gap:3px;">
+            <div style="font-size:5px;">⚠️</div>
+            <div style="flex:1;height:4px;background:#f5dea3;border-radius:2px;"></div>
+          </div>
+          <div class="p1-vcard">
+            <div class="p1-vc-title"></div>
+            <div class="p1-vc-row">
+              <div class="p1-vc-input"></div>
+              <div class="p1-vc-input"></div>
+              <div class="p1-vc-input"></div>
+              <div class="p1-vc-input" style="background:#deeaff;border-color:#b8cfff;"></div>
+            </div>
+          </div>
+          <div class="p1-panel-btn"></div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-proto-num" style="color:#f5a623;">Prototipo 01I — Última iteración</div>
+      <div class="card-title">Navegador de semanas con sync/custom</div>
+      <div class="card-desc">Flechas ‹ › + dropdown para navegar semanas. Modo sync propaga cambios a todas; "Personalizar" rompe el sync para esa semana con aviso ámbar.</div>
+      <div class="card-tags">
+        <span class="tag">Navegador</span>
+        <span class="tag">Sync / Custom</span>
+        <span class="tag">Propagación</span>
+      </div>
+      <a class="card-cta" href="../proto-01i/index.html" target="_blank">
+        Abrir prototipo
+        <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M3 8h10M9 4l4 4-4 4" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+    </div>
+  </div>
+
+  <!-- Proto 01 (original) -->
   <div class="card">
     <div class="preview">
-      <!-- Mini illustration: list + side panel -->
       <div class="p1-wrap">
         <div class="p1-list">
           <div class="p1-list-header">
@@ -447,77 +520,6 @@ footer {
       <div class="card-title">Vista de lista con panel lateral (Front similar al actual)</div>
       <div class="card-desc">Listado de facilities con picker de semanas.</div>
       <a class="card-cta" href="../index.html" target="_blank">
-        Abrir prototipo
-        <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M3 8h10M9 4l4 4-4 4" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </a>
-    </div>
-  </div>
-
-  <!-- Proto 02 -->
-  <div class="card">
-    <div class="preview">
-      <!-- Mini illustration: grid/matrix -->
-      <div class="p2-wrap">
-        <div class="p2-header">
-          <div class="p2-hbar"></div>
-          <div class="p2-hbtn"></div>
-        </div>
-        <div class="p2-filters">
-          <div class="p2-fchip"></div>
-          <div class="p2-fchip"></div>
-          <div class="p2-fchip"></div>
-        </div>
-        <div class="p2-table">
-          <div class="p2-thead">
-            <div class="p2-th" style="flex:0 0 68px"><div class="p2-th-bar"></div></div>
-            <div class="p2-th"><div class="p2-th-bar"></div><div class="p2-th-sub"></div></div>
-            <div class="p2-th"><div class="p2-th-bar"></div><div class="p2-th-sub"></div></div>
-            <div class="p2-th"><div class="p2-th-bar"></div><div class="p2-th-sub"></div></div>
-            <div class="p2-th"><div class="p2-th-bar"></div><div class="p2-th-sub"></div></div>
-          </div>
-          <!-- row 1 -->
-          <div class="p2-row">
-            <div class="p2-cell" style="flex:0 0 68px"><div class="p2-cbar" style="background:#b8cfff"></div></div>
-            <div class="p2-cell"><span class="p2-cdot gray"></span><div class="p2-cbar"></div><span class="p2-cchev"></span></div>
-            <div class="p2-cell"><span class="p2-cdot"></span><div class="p2-cbar"></div><span class="p2-cchev"></span></div>
-            <div class="p2-cell"><span class="p2-cdot"></span><div class="p2-cbar"></div><span class="p2-cchev"></span></div>
-            <div class="p2-cell"><span class="p2-cdot"></span><div class="p2-cbar"></div><span class="p2-cchev"></span></div>
-          </div>
-          <!-- row 2 -->
-          <div class="p2-row">
-            <div class="p2-cell" style="flex:0 0 68px"><div class="p2-cbar" style="background:#b8cfff"></div></div>
-            <div class="p2-cell"><span class="p2-cdot green"></span><div class="p2-cbar"></div><span class="p2-cchev"></span></div>
-            <div class="p2-cell"><span class="p2-cdot"></span><div class="p2-cbar"></div><span class="p2-cchev"></span></div>
-            <div class="p2-cell"><span class="p2-cdot"></span><div class="p2-cbar"></div><span class="p2-cchev"></span></div>
-            <div class="p2-cell"><span class="p2-cdot"></span><div class="p2-cbar"></div><span class="p2-cchev"></span></div>
-          </div>
-          <!-- row 3 -->
-          <div class="p2-row">
-            <div class="p2-cell" style="flex:0 0 68px"><div class="p2-cbar" style="background:#b8cfff"></div></div>
-            <div class="p2-cell"><span class="p2-cdot"></span><div class="p2-cbar"></div><span class="p2-cchev"></span></div>
-            <div class="p2-cell"><span class="p2-cdot"></span><div class="p2-cbar"></div><span class="p2-cchev"></span></div>
-            <div class="p2-cell"><span class="p2-cdot"></span><div class="p2-cbar"></div><span class="p2-cchev"></span></div>
-            <div class="p2-cell"><span class="p2-cdot"></span><div class="p2-cbar"></div><span class="p2-cchev"></span></div>
-          </div>
-          <!-- row 4 -->
-          <div class="p2-row">
-            <div class="p2-cell" style="flex:0 0 68px"><div class="p2-cbar" style="background:#b8cfff"></div></div>
-            <div class="p2-cell"><span class="p2-cdot"></span><div class="p2-cbar"></div><span class="p2-cchev"></span></div>
-            <div class="p2-cell"><span class="p2-cdot"></span><div class="p2-cbar"></div><span class="p2-cchev"></span></div>
-            <div class="p2-cell"><span class="p2-cdot green"></span><div class="p2-cbar"></div><span class="p2-cchev"></span></div>
-            <div class="p2-cell"><span class="p2-cdot"></span><div class="p2-cbar"></div><span class="p2-cchev"></span></div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="card-body">
-      <div class="card-proto-num">Prototipo 02</div>
-      <div class="card-title">Vista de matriz por semana</div>
-      <div class="card-desc">Grid de facilities por semanas que muestra el estado de cada combinación de un vistazo. Al hacer clic en una celda, se despliega el panel de revisión filtrado a esa semana específica.</div>
-    
-      <a class="card-cta" href="../proto-02/index.html" target="_blank">
         Abrir prototipo
         <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M3 8h10M9 4l4 4-4 4" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
