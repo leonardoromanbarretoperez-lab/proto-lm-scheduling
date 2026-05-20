@@ -1,0 +1,26 @@
+proto-01i/index.html
+  s_1d42129a58e151::t_c7bcea08520548 688-693
+  s_1d42129a58e151::t_b862f95477c336 826-828,832-844,861,863-868,870-875,878-935
+  s_1d42129a58e151::t_e4a6499b7900ce 814
+  s_1d42129a58e151::t_b0313bb2d84e73 191-193,197
+  s_1d42129a58e151::t_b4fb6b87c21de8 617-619
+  s_1d42129a58e151::t_2f6271eba7b3ba 626-649
+  s_1d42129a58e151::t_3b24282925e1bd 493-522
+  s_1d42129a58e151::t_1414e320900f22 1281-1287
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.11",
+  "base_commit_sha": "93162b37d4592b269552155270379b409bd2b110",
+  "prompts": {},
+  "sessions": {
+    "s_1d42129a58e151": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "20fc1c1c-f68f-41cd-9f24-8dc29480a272",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "leonardoromanbarretoperez-lab <leonardoroman.barretoperez@mercadolibre.com>"
+    }
+  }
+}
