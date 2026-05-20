@@ -101,6 +101,23 @@ body {
   align-items: center;
   gap: 6px;
 }
+.cal-btn { background: none; border: none; cursor: pointer; font-size: 18px; color: var(--gray); padding: 2px; line-height: 1; transition: color 0.15s; }
+.cal-btn:hover { color: var(--blue); }
+.more-tag { display: inline-flex; align-items: center; gap: 4px; background: #fff; border: 1px solid var(--border); border-radius: 20px; padding: 4px 10px; font-size: 12px; font-weight: 700; color: var(--blue); cursor: default; user-select: none; position: relative; }
+.more-tag .tooltip-popup { display: none; position: absolute; top: calc(100% + 6px); right: 0; background: #fff; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.12); padding: 10px 12px; z-index: 200; min-width: 160px; }
+.more-tag:hover .tooltip-popup { display: block; }
+.tooltip-popup .tip-label { font-size: 11px; color: var(--gray); margin-bottom: 6px; font-weight: 400; }
+.tooltip-popup .tip-tags { display: flex; flex-direction: column; gap: 4px; }
+/* modal picker */
+.modal-picker-wrap { position: relative; }
+.modal-picker-dropdown { display: none; position: absolute; top: calc(100% + 8px); left: 0; background: #fff; border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.14); padding: 16px 16px 14px; width: 320px; z-index: 700; }
+.modal-picker-dropdown.open { display: block; }
+.modal-weeks-field { display: flex; align-items: center; gap: 6px; border: 1px solid rgba(0,0,0,0.25); border-radius: 6px; padding: 10px 12px; background: #fff; flex-wrap: wrap; cursor: pointer; min-height: 48px; }
+.modal-weeks-field .cal-icon-sm { font-size: 16px; color: var(--gray); flex-shrink: 0; }
+.modal-week-pill { display: inline-flex; align-items: center; gap: 4px; background: #fff; border: 1px solid var(--border); border-radius: 20px; padding: 2px 8px; font-size: 12px; font-weight: 700; color: var(--dark); white-space: nowrap; font-family: var(--font); }
+.modal-week-pill .xt { cursor: pointer; color: var(--gray); font-size: 11px; margin-left: 1px; }
+.modal-week-pill .xt:hover { color: #c00; }
+.modal-weeks-field .chev-sm { margin-left: auto; font-size: 12px; color: var(--gray); flex-shrink: 0; }
 .week-tags { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
 .week-tag {
   display: inline-flex; align-items: center; gap: 4px;
@@ -544,14 +561,15 @@ body {
     </div>
     <div class="header-right">
       <!-- Week bar -->
-      <div class="week-bar" id="weekBarWrap">
-        <div class="week-tags" id="weekTagsContainer"></div>
-        <button class="chev-btn" id="calChevBtn" onclick="togglePicker()">▾</button>
+      <div class="week-bar" id="weekBar">
+        <button class="cal-btn" onclick="togglePicker(event)" title="Seleccionar semanas">📅</button>
+        <div class="week-tags" id="weekTags"></div>
+        <button class="chev-btn" id="chevBtn" onclick="togglePicker(event)">▾</button>
         <div class="picker-dropdown" id="pickerDropdown">
           <div class="picker-nav">
-            <button style="visibility:hidden">‹</button>
-            <div class="picker-month">Mayo 2026</div>
-            <button style="visibility:hidden">›</button>
+            <button>‹</button>
+            <div class="picker-month">Mayo 2026 <span class="chev">▾</span></div>
+            <button>›</button>
           </div>
           <div class="wk-grid">
             <div class="wk-header">
@@ -559,29 +577,29 @@ body {
               <span>Lun</span><span>Mar</span><span>Mié</span>
               <span>Jue</span><span>Vie</span><span>Sáb</span><span>Dom</span>
             </div>
-            <div class="wk-row sel" id="pkrow-22" onclick="togglePickerWeek(22)">
+            <div class="wk-row" id="row22" onclick="toggleWeek(22)">
               <div class="wk-row-label">Sem 22</div>
               <div class="wk-day">27</div><div class="wk-day">28</div><div class="wk-day">29</div>
               <div class="wk-day">30</div><div class="wk-day">1</div><div class="wk-day">2</div><div class="wk-day">3</div>
             </div>
-            <div class="wk-row sel" id="pkrow-23" onclick="togglePickerWeek(23)">
+            <div class="wk-row" id="row23" onclick="toggleWeek(23)">
               <div class="wk-row-label">Sem 23</div>
               <div class="wk-day">4</div><div class="wk-day">5</div><div class="wk-day">6</div>
               <div class="wk-day">7</div><div class="wk-day">8</div><div class="wk-day">9</div><div class="wk-day">10</div>
             </div>
-            <div class="wk-row sel" id="pkrow-24" onclick="togglePickerWeek(24)">
+            <div class="wk-row" id="row24" onclick="toggleWeek(24)">
               <div class="wk-row-label">Sem 24</div>
               <div class="wk-day">11</div><div class="wk-day">12</div><div class="wk-day">13</div>
               <div class="wk-day">14</div><div class="wk-day">15</div><div class="wk-day">16</div><div class="wk-day">17</div>
             </div>
-            <div class="wk-row sel" id="pkrow-25" onclick="togglePickerWeek(25)">
+            <div class="wk-row" id="row25" onclick="toggleWeek(25)">
               <div class="wk-row-label">Sem 25</div>
               <div class="wk-day">18</div><div class="wk-day">19</div><div class="wk-day">20</div>
               <div class="wk-day">21</div><div class="wk-day">22</div><div class="wk-day">23</div><div class="wk-day">24</div>
             </div>
           </div>
           <div class="picker-footer">
-            <button class="btn-aplicar" onclick="applyPicker()">Aplicar</button>
+            <button class="btn-aplicar" onclick="applyPicker()">APLICAR</button>
           </div>
         </div>
       </div>
@@ -628,8 +646,52 @@ body {
   <div class="modal-dialog">
     <div class="modal-title">Agendar vehículos</div>
     <div class="modal-subtitle">Revisa las semanas a agendar antes de continuar.</div>
+    <div class="modal-picker-wrap">
+      <div class="modal-weeks-field" id="modalWeeksField" onclick="toggleModalPicker(event)">
+        <span class="cal-icon-sm">📅</span>
+        <div id="modalWeekPills"></div>
+        <span class="chev-sm" id="modalChev">▾</span>
+      </div>
+      <div class="modal-picker-dropdown" id="modalPickerDropdown">
+        <div class="picker-nav">
+          <button>‹</button>
+          <div class="picker-month">Mayo 2026 <span class="chev">▾</span></div>
+          <button>›</button>
+        </div>
+        <div class="wk-grid">
+          <div class="wk-header">
+            <span class="lbl">Sem.</span>
+            <span>Lun</span><span>Mar</span><span>Mié</span>
+            <span>Jue</span><span>Vie</span><span>Sáb</span><span>Dom</span>
+          </div>
+          <div class="wk-row" id="mrow22" onclick="toggleWeekModal(22)">
+            <div class="wk-row-label">Sem 22</div>
+            <div class="wk-day">27</div><div class="wk-day">28</div><div class="wk-day">29</div>
+            <div class="wk-day">30</div><div class="wk-day">1</div><div class="wk-day">2</div><div class="wk-day">3</div>
+          </div>
+          <div class="wk-row" id="mrow23" onclick="toggleWeekModal(23)">
+            <div class="wk-row-label">Sem 23</div>
+            <div class="wk-day">4</div><div class="wk-day">5</div><div class="wk-day">6</div>
+            <div class="wk-day">7</div><div class="wk-day">8</div><div class="wk-day">9</div><div class="wk-day">10</div>
+          </div>
+          <div class="wk-row" id="mrow24" onclick="toggleWeekModal(24)">
+            <div class="wk-row-label">Sem 24</div>
+            <div class="wk-day">11</div><div class="wk-day">12</div><div class="wk-day">13</div>
+            <div class="wk-day">14</div><div class="wk-day">15</div><div class="wk-day">16</div><div class="wk-day">17</div>
+          </div>
+          <div class="wk-row" id="mrow25" onclick="toggleWeekModal(25)">
+            <div class="wk-row-label">Sem 25</div>
+            <div class="wk-day">18</div><div class="wk-day">19</div><div class="wk-day">20</div>
+            <div class="wk-day">21</div><div class="wk-day">22</div><div class="wk-day">23</div><div class="wk-day">24</div>
+          </div>
+        </div>
+        <div class="picker-footer">
+          <button class="btn-aplicar" onclick="applyModalPicker(event)">APLICAR</button>
+        </div>
+      </div>
+    </div>
     <div class="modal-summary">
-      <div>
+      <div class="modal-summary-left">
         <div class="modal-summary-label">Total a agendar</div>
         <div class="modal-summary-count"><span id="modalViajes">32</span> viajes <span class="modal-fac-sep">·</span> <span id="modalFacilities">1</span> <span id="modalFacLabel">Facilitie</span></div>
       </div>
@@ -717,12 +779,57 @@ function isCustom(state, week) {
 
 // ─── WEEK PICKER ─────────────────────────────────────────────────────────────
 
-function togglePicker() {
-  const dd = document.getElementById('pickerDropdown');
-  const btn = document.getElementById('calChevBtn');
-  const open = dd.classList.toggle('open');
-  btn.classList.toggle('open', open);
-  if (open) { pickerSelected = [...selectedWeeks]; syncPickerRows(); }
+const WEEKS = [22, 23, 24, 25];
+const weekLabels = { 22: 'Semana 22', 23: 'Semana 23', 24: 'Semana 24', 25: 'Semana 25' };
+const weekDates  = { 22:{start:'27 de mayo',end:'2 de junio'}, 23:{start:'4 de junio',end:'10 de junio'}, 24:{start:'11 de junio',end:'17 de junio'}, 25:{start:'18 de junio',end:'24 de junio'} };
+
+function renderTags() {
+  const tagsEl = document.getElementById('weekTags');
+  tagsEl.innerHTML = '';
+  if (!selectedWeeks.length) return;
+  const visible = selectedWeeks.slice(0, 2);
+  const hidden  = selectedWeeks.slice(2);
+  visible.forEach(w => {
+    const tag = document.createElement('span');
+    tag.className = 'week-tag';
+    tag.innerHTML = `${weekLabels[w]} <span class="xt" onclick="removeWeek(${w},event)">×</span>`;
+    tagsEl.appendChild(tag);
+  });
+  if (hidden.length) {
+    const more = document.createElement('span');
+    more.className = 'more-tag';
+    more.innerHTML = `+${hidden.length}<div class="tooltip-popup"><div class="tip-label">Semanas adicionales</div><div class="tip-tags">${hidden.map(w => `<span class="week-tag">${weekLabels[w]} <span class="xt" onclick="removeWeek(${w},event)">×</span></span>`).join('')}</div></div>`;
+    tagsEl.appendChild(more);
+  }
+  WEEKS.forEach(w => {
+    const row = document.getElementById('row' + w);
+    if (row) row.classList.toggle('sel', selectedWeeks.includes(w));
+  });
+}
+
+function removeWeek(wn, evt) {
+  evt && evt.stopPropagation();
+  if (selectedWeeks.length <= 1) return;
+  selectedWeeks = selectedWeeks.filter(w => w !== wn);
+  pickerSelected = [...selectedWeeks];
+  renderTags();
+  if (activeRow !== null) {
+    VEHICLE_TYPES.forEach(({ type }) => {
+      const s = formState[activeRow]?.[type];
+      if (!s) return;
+      delete s.custom[wn];
+      if (s.currentWeek === wn) s.currentWeek = selectedWeeks[0];
+    });
+    renderPanel(activeRow);
+  }
+}
+
+function toggleWeek(w) {
+  const idx = selectedWeeks.indexOf(w);
+  if (idx >= 0) { if (selectedWeeks.length > 1) selectedWeeks.splice(idx, 1); }
+  else           { selectedWeeks.push(w); selectedWeeks.sort((a, b) => a - b); }
+  pickerSelected = [...selectedWeeks];
+  renderTags();
 }
 
 function getWeekDays(year, week) {
@@ -733,32 +840,29 @@ function getWeekDays(year, week) {
   return Array.from({ length: 7 }, (_, i) => { const d = new Date(monday); d.setDate(monday.getDate() + i); return d; });
 }
 
-function syncPickerRows() {
-  [22, 23, 24, 25].forEach(wn => {
-    const row = document.getElementById('pkrow-' + wn);
-    if (row) row.classList.toggle('sel', pickerSelected.includes(wn));
-  });
+let pickerOpen = false;
+
+function togglePicker(evt) {
+  evt && evt.stopPropagation();
+  pickerOpen = !pickerOpen;
+  document.getElementById('pickerDropdown').classList.toggle('open', pickerOpen);
+  document.getElementById('chevBtn').classList.toggle('open', pickerOpen);
 }
 
-function togglePickerWeek(wn) {
-  const idx = pickerSelected.indexOf(wn);
-  if (idx >= 0) { if (pickerSelected.length > 1) pickerSelected.splice(idx, 1); }
-  else           { pickerSelected.push(wn); pickerSelected.sort((a, b) => a - b); }
-  syncPickerRows();
+function closePicker() {
+  pickerOpen = false;
+  document.getElementById('pickerDropdown').classList.remove('open');
+  document.getElementById('chevBtn').classList.remove('open');
 }
 
 function applyPicker() {
-  selectedWeeks = [...pickerSelected];
-  renderWeekTags();
-  document.getElementById('pickerDropdown').classList.remove('open');
-  document.getElementById('calChevBtn').classList.remove('open');
-  // If panel open, re-initialize navigator state to respect new weeks
+  renderTags();
+  closePicker();
   if (activeRow !== null) {
     const fid = activeRow;
     VEHICLE_TYPES.forEach(({ type }) => {
       const s = ensureState(fid, type);
-      s.currentWeek = selectedWeeks[0];
-      // remove custom weeks no longer selected
+      if (!selectedWeeks.includes(s.currentWeek)) s.currentWeek = selectedWeeks[0];
       Object.keys(s.custom).forEach(k => {
         if (!selectedWeeks.includes(+k)) delete s.custom[+k];
       });
@@ -767,34 +871,66 @@ function applyPicker() {
   }
 }
 
-function renderWeekTags() {
-  const container = document.getElementById('weekTagsContainer');
-  const MAX_VISIBLE = 3;
-  const visible = selectedWeeks.slice(0, MAX_VISIBLE);
-  const hidden  = selectedWeeks.slice(MAX_VISIBLE);
-  let html = visible.map(w =>
-    `<span class="week-tag">S${w} <span class="xt" onclick="removeWeek(${w})">✕</span></span>`
-  ).join('');
-  if (hidden.length) {
-    html += `<span class="week-tag" style="color:var(--blue)">+${hidden.length}</span>`;
-  }
-  container.innerHTML = html;
+// ─── MODAL PICKER ────────────────────────────────────────────────────────────
+
+let modalPickerOpen = false;
+
+function toggleModalPicker(e) {
+  e && e.stopPropagation();
+  modalPickerOpen = !modalPickerOpen;
+  document.getElementById('modalPickerDropdown').classList.toggle('open', modalPickerOpen);
+  document.getElementById('modalChev').textContent = modalPickerOpen ? '▴' : '▾';
 }
 
-function removeWeek(wn) {
-  if (selectedWeeks.length <= 1) return;
-  selectedWeeks = selectedWeeks.filter(w => w !== wn);
+function closeModalPicker() {
+  modalPickerOpen = false;
+  document.getElementById('modalPickerDropdown').classList.remove('open');
+  document.getElementById('modalChev').textContent = '▾';
+}
+
+function toggleWeekModal(w) {
+  const idx = selectedWeeks.indexOf(w);
+  if (idx >= 0) { if (selectedWeeks.length > 1) selectedWeeks.splice(idx, 1); }
+  else           { selectedWeeks.push(w); selectedWeeks.sort((a, b) => a - b); }
   pickerSelected = [...selectedWeeks];
-  renderWeekTags();
-  if (activeRow !== null) {
-    VEHICLE_TYPES.forEach(({ type }) => {
-      const s = formState[activeRow]?.[type];
-      if (!s) return;
-      delete s.custom[wn];
-      if (s.currentWeek === wn) s.currentWeek = selectedWeeks[0];
-    });
-    renderPanel(activeRow);
-  }
+  renderTags();
+  renderModalWeeks();
+}
+
+function applyModalPicker(e) {
+  e && e.stopPropagation();
+  closeModalPicker();
+}
+
+function removeWeekModal(w, e) {
+  e.stopPropagation();
+  if (selectedWeeks.length <= 1) return;
+  selectedWeeks = selectedWeeks.filter(x => x !== w);
+  pickerSelected = [...selectedWeeks];
+  renderTags();
+  renderModalWeeks();
+}
+
+function renderModalWeeks() {
+  const pillsEl = document.getElementById('modalWeekPills');
+  pillsEl.innerHTML = '';
+  selectedWeeks.forEach(w => {
+    const p = document.createElement('span');
+    p.className = 'modal-week-pill';
+    p.innerHTML = `${weekLabels[w]} <span class="xt" onclick="removeWeekModal(${w},event)">×</span>`;
+    pillsEl.appendChild(p);
+  });
+  const facCount = reviewedSet.size || 1;
+  document.getElementById('modalViajes').textContent    = selectedWeeks.length * 8 * facCount;
+  document.getElementById('modalFacilities').textContent = facCount;
+  document.getElementById('modalFacLabel').textContent   = facCount === 1 ? 'Facilitie' : 'Facilities';
+  const dateEl = document.getElementById('modalDateRange');
+  if (!selectedWeeks.length) { dateEl.textContent = '—'; return; }
+  dateEl.textContent = weekDates[Math.min(...selectedWeeks)].start + ' al ' + weekDates[Math.max(...selectedWeeks)].end;
+  WEEKS.forEach(w => {
+    const row = document.getElementById('mrow' + w);
+    if (row) row.classList.toggle('sel', selectedWeeks.includes(w));
+  });
 }
 
 // ─── FACILITY LIST ────────────────────────────────────────────────────────────
@@ -903,10 +1039,7 @@ function undoReview() {
 }
 
 function openModal() {
-  const facCount = reviewedSet.size || 1;
-  document.getElementById('modalViajes').textContent    = selectedWeeks.length * 8 * facCount;
-  document.getElementById('modalFacilities').textContent = facCount;
-  document.getElementById('modalFacLabel').textContent   = facCount === 1 ? 'Facilitie' : 'Facilities';
+  renderModalWeeks();
   document.getElementById('modalOverlay').classList.add('open');
 }
 
@@ -1261,13 +1394,13 @@ function onFormChange(type) {
 // ─── CLOSE DROPDOWNS ON OUTSIDE CLICK ────────────────────────────────────────
 
 document.addEventListener('click', e => {
-  // picker
-  const picker = document.getElementById('pickerDropdown');
-  const calBtn = document.getElementById('calChevBtn');
-  if (!picker.contains(e.target) && e.target !== calBtn && !calBtn.contains(e.target)) {
-    picker.classList.remove('open');
-    calBtn.classList.remove('open');
-  }
+  // header picker
+  const weekBar = document.getElementById('weekBar');
+  if (pickerOpen && weekBar && !weekBar.contains(e.target)) closePicker();
+
+  // modal picker
+  const modalWrap = document.querySelector('.modal-picker-wrap');
+  if (modalPickerOpen && modalWrap && !modalWrap.contains(e.target)) closeModalPicker();
 
   // week nav dropdowns
   if (openDropdown) {
@@ -1285,7 +1418,7 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape') { closeModal(); closePanel(); }
 });
 
-renderWeekTags();
+renderTags();
 renderFacilityList();
 </script>
 </body>
