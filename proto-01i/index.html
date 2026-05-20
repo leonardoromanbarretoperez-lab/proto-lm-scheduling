@@ -148,18 +148,21 @@ body {
 }
 .picker-nav button:hover { color: var(--dark); }
 .picker-month { font-size: 14px; font-weight: 700; }
-.wk-grid { display: grid; grid-template-columns: 56px repeat(7, 1fr); gap: 2px; }
+.wk-grid { display: flex; flex-direction: column; gap: 2px; }
+.wk-header, .wk-row { display: grid; grid-template-columns: 56px repeat(7, 1fr); gap: 2px; }
 .wk-header span { font-size: 10px; color: var(--gray); text-align: center; padding-bottom: 6px; display: block; }
 .wk-header .lbl { text-align: left; }
+.wk-row { cursor: pointer; border-radius: 4px; overflow: hidden; }
 .wk-row-label {
   font-size: 12px; font-weight: 700; color: var(--blue);
   display: flex; align-items: center; padding: 4px; border-radius: 4px 0 0 4px;
-  cursor: pointer; user-select: none; transition: background 0.12s;
+  user-select: none; transition: background 0.12s;
 }
-.wk-row-label:hover { background: #eef4ff; }
-.wk-day { height: 28px; display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--dark); border-radius: 4px; }
+.wk-row:hover .wk-row-label, .wk-row:hover .wk-day { background: #eef4ff; }
+.wk-day { height: 28px; display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--dark); border-radius: 4px; transition: background 0.12s; }
 .wk-row.sel .wk-row-label { background: #deeaff; }
 .wk-row.sel .wk-day { background: #deeaff; color: var(--blue); font-weight: 700; }
+.wk-row.sel:hover .wk-row-label, .wk-row.sel:hover .wk-day { background: #c8dcff; }
 .picker-footer { margin-top: 14px; border-top: 1px solid var(--border); padding-top: 12px; }
 .btn-aplicar {
   width: 100%; background: var(--blue); color: #fff; border: none; border-radius: 6px;
@@ -167,6 +170,21 @@ body {
   cursor: pointer; transition: background 0.15s;
 }
 .btn-aplicar:hover { background: #2a6fd6; }
+
+/* ── FILTER BAR ── */
+.fbar { display: flex; align-items: center; padding: 10px 24px; gap: 2px; background: #fff; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.fdrop { position: relative; }
+.fdrop > button { background: none; border: none; font-family: var(--font); font-size: 13px; color: var(--dark); cursor: pointer; padding: 5px 10px 5px 0; display: flex; align-items: center; gap: 4px; }
+.fdrop > button:hover, .fdrop.open > button { color: var(--blue); }
+.fmenu { display: none; position: absolute; top: calc(100% + 4px); left: 0; background: #fff; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,.1); z-index: 500; min-width: 175px; padding: 6px 0; }
+.fdrop.open .fmenu { display: block; }
+.fmenu label { display: flex; align-items: center; gap: 8px; padding: 7px 14px; font-size: 13px; cursor: pointer; font-family: var(--font); }
+.fmenu label:hover { background: #f5f5f5; }
+.fmenu input { accent-color: var(--blue); cursor: pointer; }
+.fsep { width: 1px; height: 16px; background: var(--border); margin: 0 6px; }
+
+/* ── PERSONALIZE BAR ── */
+.personalize-wrap { padding: 8px 16px 12px; }
 
 /* ── ACTION ROW ── */
 .action-row { display: flex; align-items: center; gap: 16px; }
@@ -611,6 +629,33 @@ body {
     </div>
   </div>
 
+  <!-- FILTER BAR -->
+  <div class="fbar">
+    <div class="fdrop" id="drRegion">
+      <button onclick="toggleDrop('drRegion')">Región <span>˅</span></button>
+      <div class="fmenu">
+        <label><input type="checkbox" value="CDMX" checked onchange="applyFilters()"> CDMX</label>
+        <label><input type="checkbox" value="MTY"  checked onchange="applyFilters()"> MTY</label>
+        <label><input type="checkbox" value="GDL"  checked onchange="applyFilters()"> GDL</label>
+      </div>
+    </div>
+    <div class="fsep"></div>
+    <div class="fdrop" id="drFac">
+      <button onclick="toggleDrop('drFac')">Facilitie <span>˅</span></button>
+      <div class="fmenu" id="facMenu"></div>
+    </div>
+    <div class="fsep"></div>
+    <div class="fdrop" id="drStatus">
+      <button onclick="toggleDrop('drStatus')">Status <span>˅</span></button>
+      <div class="fmenu">
+        <label><input type="radio" name="sf" value=""          checked onchange="applyFilters()"> Todos</label>
+        <label><input type="radio" name="sf" value="pending"          onchange="applyFilters()"> Por revisar</label>
+        <label><input type="radio" name="sf" value="reviewed"         onchange="applyFilters()"> Listo para agendar</label>
+        <label><input type="radio" name="sf" value="scheduled"        onchange="applyFilters()"> Agendado</label>
+      </div>
+    </div>
+  </div>
+
   <!-- MAIN LAYOUT -->
   <div class="main-layout">
     <!-- LIST -->
@@ -731,11 +776,11 @@ const DAYS = [
 const FIELD_KEYS = ['ciclo', 'eta', ...DAYS.map(d => d.key)];
 
 const FACILITIES = [
-  { id: 1, name: 'SSC05', meta: 'Total semana: 168 vehículos · 72 Large vans · 70 Small vans · 18 Utilitarios', status: 'pending'  },
-  { id: 2, name: 'SSC04', meta: 'Total semana: 168 vehículos · 72 Large vans · 70 Small vans · 18 Utilitarios', status: 'pending'  },
-  { id: 3, name: 'SSC03', meta: 'Total semana: 168 vehículos · 72 Large vans · 70 Small vans · 18 Utilitarios', status: 'pending'  },
-  { id: 4, name: 'SSC02', meta: 'Total semana: 168 vehículos · 72 Large vans · 70 Small vans · 18 Utilitarios', status: 'pending'  },
-  { id: 5, name: 'SSC01', meta: 'Total semana: 168 vehículos · 72 Large vans · 70 Small vans · 18 Utilitarios', status: 'pending'  },
+  { id: 1, name: 'SSC05', region: 'CDMX', meta: 'Total semana: 168 vehículos · 72 Large vans · 70 Small vans · 18 Utilitarios', status: 'pending'  },
+  { id: 2, name: 'SSC04', region: 'CDMX', meta: 'Total semana: 168 vehículos · 72 Large vans · 70 Small vans · 18 Utilitarios', status: 'pending'  },
+  { id: 3, name: 'SSC03', region: 'MTY',  meta: 'Total semana: 168 vehículos · 72 Large vans · 70 Small vans · 18 Utilitarios', status: 'pending'  },
+  { id: 4, name: 'SSC02', region: 'MTY',  meta: 'Total semana: 168 vehículos · 72 Large vans · 70 Small vans · 18 Utilitarios', status: 'pending'  },
+  { id: 5, name: 'SSC01', region: 'GDL',  meta: 'Total semana: 168 vehículos · 72 Large vans · 70 Small vans · 18 Utilitarios', status: 'pending'  },
 ];
 
 // Default base values per vehicle type
@@ -750,9 +795,16 @@ const DEFAULT_BASE = {
 let selectedWeeks    = [22, 23, 24, 25];
 let pickerSelected   = [...selectedWeeks];
 let activeRow        = null;
-let openDropdown     = null;
+let panelWeek        = null;
+let panelDdOpen      = false;
 const reviewedSet    = new Set();
 let reviewedFacility = null;
+
+let filterState = {
+  regions: new Set(['CDMX', 'MTY', 'GDL']),
+  facs:    new Set(FACILITIES.map(f => f.id)),
+  status:  ''
+};
 
 // formState[facilityId][type] = {
 //   currentWeek: number,
@@ -765,7 +817,6 @@ function ensureState(fid, type) {
   if (!formState[fid]) formState[fid] = {};
   if (!formState[fid][type]) {
     formState[fid][type] = {
-      currentWeek: selectedWeeks[0],
       base: [...DEFAULT_BASE[type]],
       custom: {},
     };
@@ -816,10 +867,9 @@ function removeWeek(wn, evt) {
   if (activeRow !== null) {
     VEHICLE_TYPES.forEach(({ type }) => {
       const s = formState[activeRow]?.[type];
-      if (!s) return;
-      delete s.custom[wn];
-      if (s.currentWeek === wn) s.currentWeek = selectedWeeks[0];
+      if (s) delete s.custom[wn];
     });
+    if (panelWeek === wn) panelWeek = selectedWeeks[0];
     renderPanel(activeRow);
   }
 }
@@ -862,11 +912,11 @@ function applyPicker() {
     const fid = activeRow;
     VEHICLE_TYPES.forEach(({ type }) => {
       const s = ensureState(fid, type);
-      if (!selectedWeeks.includes(s.currentWeek)) s.currentWeek = selectedWeeks[0];
       Object.keys(s.custom).forEach(k => {
         if (!selectedWeeks.includes(+k)) delete s.custom[+k];
       });
     });
+    if (!selectedWeeks.includes(panelWeek)) panelWeek = selectedWeeks[0];
     renderPanel(fid);
   }
 }
@@ -933,11 +983,42 @@ function renderModalWeeks() {
   });
 }
 
+// ─── FILTERS ─────────────────────────────────────────────────────────────────
+
+function toggleDrop(id) {
+  const el = document.getElementById(id);
+  const wasOpen = el.classList.contains('open');
+  document.querySelectorAll('.fdrop').forEach(d => d.classList.remove('open'));
+  if (!wasOpen) el.classList.add('open');
+}
+
+function applyFilters() {
+  const sr = document.querySelector('input[name="sf"]:checked');
+  filterState.status = sr ? sr.value : '';
+  filterState.regions = new Set();
+  document.querySelectorAll('#drRegion input[type=checkbox]:checked').forEach(cb => filterState.regions.add(cb.value));
+  filterState.facs = new Set();
+  document.querySelectorAll('#facMenu input[type=checkbox]:checked').forEach(cb => filterState.facs.add(+cb.value));
+  renderFacilityList();
+}
+
+function buildFacMenu() {
+  document.getElementById('facMenu').innerHTML = FACILITIES.map(f =>
+    `<label><input type="checkbox" value="${f.id}" checked onchange="applyFilters()"> ${f.name}</label>`
+  ).join('');
+}
+
 // ─── FACILITY LIST ────────────────────────────────────────────────────────────
 
 function renderFacilityList() {
   const list = document.getElementById('facilityList');
-  list.innerHTML = FACILITIES.map(f => {
+  const visible = FACILITIES.filter(f => {
+    if (!filterState.regions.has(f.region)) return false;
+    if (!filterState.facs.has(f.id)) return false;
+    if (filterState.status && f.status !== filterState.status) return false;
+    return true;
+  });
+  list.innerHTML = visible.map(f => {
     const isPending = f.status === 'pending';
     return `
     <div class="facility-row${activeRow === f.id ? ' active-row' : ''}" onclick="openPanel(${f.id})">
@@ -952,12 +1033,16 @@ function renderFacilityList() {
       </div>
     </div>`;
   }).join('');
+  const pending = FACILITIES.filter(f => f.status === 'pending').length;
+  const cl = document.getElementById('countLabel');
+  if (cl) cl.textContent = `${pending} instalacion${pending !== 1 ? 'es' : ''} pendiente${pending !== 1 ? 's' : ''}`;
 }
 
 // ─── PANEL ───────────────────────────────────────────────────────────────────
 
 function openPanel(fid) {
   activeRow = fid;
+  panelWeek = selectedWeeks[0];
   const f = FACILITIES.find(x => x.id === fid);
   document.getElementById('panelBadge').textContent  = reviewedSet.has(fid) ? 'REVISADO' : 'POR REVISAR';
   document.getElementById('panelTitle').textContent  = f.name;
@@ -978,10 +1063,7 @@ function openPanel(fid) {
     btn.onclick = markReviewed;
   }
 
-  VEHICLE_TYPES.forEach(({ type }) => {
-    const s = ensureState(fid, type);
-    s.currentWeek = selectedWeeks[0];
-  });
+  VEHICLE_TYPES.forEach(({ type }) => ensureState(fid, type));
 
   renderFacilityList();
   renderPanel(fid);
@@ -1070,14 +1152,90 @@ function confirmModal() {
 
 function renderPanel(fid) {
   const body = document.getElementById('panelBody');
-  body.innerHTML = VEHICLE_TYPES.map(vt => buildVehicleCard(fid, vt)).join('');
-  // open first card
+  body.innerHTML = buildPanelWeekNav(fid) + VEHICLE_TYPES.map(vt => buildVehicleCard(fid, vt)).join('');
   const first = body.querySelector('.vehicle-card');
   if (first) openCard(first);
+  VEHICLE_TYPES.forEach(({ type }) => loadWeekIntoForm(fid, type, panelWeek));
+}
+
+function buildPanelWeekNav(fid) {
+  const idx = selectedWeeks.indexOf(panelWeek);
+  let customWeeks = new Set();
+  VEHICLE_TYPES.forEach(({ type }) => {
+    const s = formState[fid]?.[type];
+    if (s) Object.keys(s.custom).forEach(k => customWeeks.add(+k));
+  });
+  const statusText = customWeeks.size === 0
+    ? `<span>Igual para las ${selectedWeeks.length} semanas</span>`
+    : `<span><span class="cnt">${customWeeks.size}</span> sem. con config. propia</span>`;
+  const items = selectedWeeks.map(wn => {
+    const hasCustom = VEHICLE_TYPES.some(({ type }) => {
+      const s = formState[fid]?.[type];
+      return s && isCustom(s, wn);
+    });
+    return `
+    <div class="dd-item${wn === panelWeek ? ' active' : ''}" onclick="selectPanelWeek(${wn})">
+      <div>
+        <div class="dd-wk-label">${weekLabel(wn)}</div>
+        <div class="dd-wk-range">${weekRange(wn)}</div>
+      </div>
+      ${hasCustom ? `<span class="dd-item-badge">⚡ Config. propia</span>` : ''}
+    </div>`;
+  }).join('');
+  return `
+  <div class="week-nav" id="panelWeekNav">
+    <div class="nav-arrows-group">
+      <button class="nav-arrow" onclick="prevPanelWeek()" ${idx <= 0 ? 'disabled' : ''}>‹</button>
+      <div class="week-dd-wrap" id="panelDdWrap">
+        <button class="week-dd-btn" id="panelDdBtn" onclick="togglePanelDd()">
+          ${weekLabel(panelWeek)} <span class="dd-chev">▾</span>
+        </button>
+        <div class="week-dd-menu" id="panelDdMenu">${items}</div>
+      </div>
+      <button class="nav-arrow" onclick="nextPanelWeek()" ${idx >= selectedWeeks.length - 1 ? 'disabled' : ''}>›</button>
+    </div>
+    <div class="nav-status">${statusText}</div>
+  </div>`;
+}
+
+function prevPanelWeek() {
+  if (!activeRow || panelWeek === null) return;
+  VEHICLE_TYPES.forEach(({ type }) => saveCurrentWeek(activeRow, type));
+  const idx = selectedWeeks.indexOf(panelWeek);
+  if (idx > 0) { panelWeek = selectedWeeks[idx - 1]; renderPanel(activeRow); }
+}
+
+function nextPanelWeek() {
+  if (!activeRow || panelWeek === null) return;
+  VEHICLE_TYPES.forEach(({ type }) => saveCurrentWeek(activeRow, type));
+  const idx = selectedWeeks.indexOf(panelWeek);
+  if (idx < selectedWeeks.length - 1) { panelWeek = selectedWeeks[idx + 1]; renderPanel(activeRow); }
+}
+
+function selectPanelWeek(wn) {
+  if (!activeRow) return;
+  VEHICLE_TYPES.forEach(({ type }) => saveCurrentWeek(activeRow, type));
+  panelWeek = wn;
+  closePanelDd();
+  renderPanel(activeRow);
+}
+
+function togglePanelDd() {
+  panelDdOpen = !panelDdOpen;
+  document.getElementById('panelDdMenu')?.classList.toggle('open', panelDdOpen);
+  document.getElementById('panelDdBtn')?.classList.toggle('open', panelDdOpen);
+}
+
+function closePanelDd() {
+  panelDdOpen = false;
+  document.getElementById('panelDdMenu')?.classList.remove('open');
+  document.getElementById('panelDdBtn')?.classList.remove('open');
 }
 
 function buildVehicleCard(fid, vt) {
   const { type, label, emoji, count } = vt;
+  const s = ensureState(fid, type);
+  const isC = isCustom(s, panelWeek);
   return `
   <div class="vehicle-card" id="vcard-${type}">
     <div class="vehicle-card-header" onclick="toggleCard('${type}')">
@@ -1088,8 +1246,7 @@ function buildVehicleCard(fid, vt) {
       </div>
     </div>
     <div class="vehicle-card-body" id="vcbody-${type}">
-      ${buildWeekNavigator(fid, type)}
-      <div class="prop-warning" id="propwarn-${type}">
+      <div class="prop-warning${isC ? ' visible' : ''}" id="propwarn-${type}">
         <span class="warn-icon">⚠️</span>
         <span class="warn-text">Esta semana tiene configuración propia — los cambios <strong>no se propagarán</strong> a las demás semanas.</span>
         <button class="btn-reset" onclick="resetWeek('${type}')">Restablecer</button>
@@ -1097,6 +1254,7 @@ function buildVehicleCard(fid, vt) {
       <div class="config-form" id="cform-${type}">
         ${buildForm(fid, type)}
       </div>
+      ${!isC ? `<div class="personalize-wrap"><button class="btn-personalize" onclick="personalizeWeek('${type}')">Personalizar esta semana</button></div>` : ''}
     </div>
   </div>`;
 }
@@ -1108,70 +1266,14 @@ function openCard(el) {
 function toggleCard(type) {
   const card = document.getElementById(`vcard-${type}`);
   const wasOpen = card.classList.contains('open');
-  // close all
   document.querySelectorAll('.vehicle-card').forEach(c => c.classList.remove('open'));
   if (!wasOpen) {
     card.classList.add('open');
-    if (activeRow !== null) {
-      const s = formState[activeRow]?.[type];
-      if (s) loadWeekIntoForm(activeRow, type, s.currentWeek);
-    }
+    if (activeRow !== null && panelWeek !== null) loadWeekIntoForm(activeRow, type, panelWeek);
   }
 }
 
-// ─── WEEK NAVIGATOR ──────────────────────────────────────────────────────────
-
-function buildWeekNavigator(fid, type) {
-  const s = ensureState(fid, type);
-  const week = s.currentWeek;
-  const idx  = selectedWeeks.indexOf(week);
-
-  // Status text
-  const customCount = Object.keys(s.custom).length;
-  let statusText;
-  if (customCount === 0) {
-    statusText = `<span>Igual para las ${selectedWeeks.length} semanas</span>`;
-  } else {
-    statusText = `<span><span class="cnt">${customCount}</span> sem. con config. propia</span>`;
-  }
-
-  const isC = isCustom(s, week);
-  const wkLabel = weekLabel(week);
-
-  return `
-  <div class="week-nav" id="wnav-${type}">
-    <div class="nav-arrows-group">
-      <button class="nav-arrow" id="prev-${type}" onclick="prevWeek('${type}')" ${idx <= 0 ? 'disabled' : ''}>‹</button>
-      <div class="week-dd-wrap" id="ddwrap-${type}">
-        <button class="week-dd-btn" id="ddbtn-${type}" onclick="toggleDd('${type}')">
-          ${wkLabel}${isC ? '<span class="custom-dot"></span>' : ''}
-          <span class="dd-chev">▾</span>
-        </button>
-        <div class="week-dd-menu" id="ddmenu-${type}">
-          ${buildDdItems(s, type)}
-        </div>
-      </div>
-      <button class="nav-arrow" id="next-${type}" onclick="nextWeek('${type}')" ${idx >= selectedWeeks.length - 1 ? 'disabled' : ''}>›</button>
-    </div>
-    <div class="nav-status">${statusText}</div>
-    ${!isC ? `<button class="btn-personalize" onclick="personalizeWeek('${type}')">Personalizar esta semana</button>` : ''}
-  </div>`;
-}
-
-function buildDdItems(s, type) {
-  return selectedWeeks.map(wn => {
-    const active = wn === s.currentWeek;
-    const custom = isCustom(s, wn);
-    return `
-    <div class="dd-item${active ? ' active' : ''}" onclick="selectWeek('${type}', ${wn})">
-      <div>
-        <div class="dd-wk-label">${weekLabel(wn)}</div>
-        <div class="dd-wk-range">${weekRange(wn)}</div>
-      </div>
-      ${custom ? `<span class="dd-item-badge">⚡ Config. propia</span>` : ''}
-    </div>`;
-  }).join('');
-}
+// ─── WEEK NAV HELPERS ────────────────────────────────────────────────────────
 
 function weekLabel(wn) { return `Sem ${wn}`; }
 
@@ -1181,85 +1283,27 @@ function weekRange(wn) {
   return `${fmt(days[0])} – ${fmt(days[6])}`;
 }
 
-function toggleDd(type) {
-  const menu = document.getElementById(`ddmenu-${type}`);
-  const btn  = document.getElementById(`ddbtn-${type}`);
-  const isOpen = menu.classList.contains('open');
-
-  // close any other open dropdown
-  if (openDropdown && openDropdown !== type) {
-    document.getElementById(`ddmenu-${openDropdown}`)?.classList.remove('open');
-    document.getElementById(`ddbtn-${openDropdown}`)?.classList.remove('open');
-  }
-
-  menu.classList.toggle('open', !isOpen);
-  btn.classList.toggle('open', !isOpen);
-  openDropdown = !isOpen ? type : null;
-}
-
-function closeDd(type) {
-  document.getElementById(`ddmenu-${type}`)?.classList.remove('open');
-  document.getElementById(`ddbtn-${type}`)?.classList.remove('open');
-  if (openDropdown === type) openDropdown = null;
-}
-
-function selectWeek(type, wn) {
-  if (!activeRow) return;
-  saveCurrentWeek(activeRow, type);
-  const s = ensureState(activeRow, type);
-  s.currentWeek = wn;
-  closeDd(type);
-  refreshNavigator(activeRow, type);
-  loadWeekIntoForm(activeRow, type, wn);
-}
-
-function prevWeek(type) {
-  if (!activeRow) return;
-  saveCurrentWeek(activeRow, type);
-  const s = ensureState(activeRow, type);
-  const idx = selectedWeeks.indexOf(s.currentWeek);
-  if (idx > 0) { s.currentWeek = selectedWeeks[idx - 1]; refreshNavigator(activeRow, type); loadWeekIntoForm(activeRow, type, s.currentWeek); }
-}
-
-function nextWeek(type) {
-  if (!activeRow) return;
-  saveCurrentWeek(activeRow, type);
-  const s = ensureState(activeRow, type);
-  const idx = selectedWeeks.indexOf(s.currentWeek);
-  if (idx < selectedWeeks.length - 1) { s.currentWeek = selectedWeeks[idx + 1]; refreshNavigator(activeRow, type); loadWeekIntoForm(activeRow, type, s.currentWeek); }
-}
-
 function personalizeWeek(type) {
-  if (!activeRow) return;
+  if (!activeRow || panelWeek === null) return;
   const s = ensureState(activeRow, type);
-  const wn = s.currentWeek;
-  if (!isCustom(s, wn)) {
-    // Clone base into custom
-    s.custom[wn] = [...s.base];
-  }
-  refreshNavigator(activeRow, type);
-  loadWeekIntoForm(activeRow, type, wn);
+  if (!isCustom(s, panelWeek)) s.custom[panelWeek] = [...s.base];
+  renderPanel(activeRow);
 }
 
 function resetWeek(type) {
-  if (!activeRow) return;
+  if (!activeRow || panelWeek === null) return;
   const s = ensureState(activeRow, type);
-  const wn = s.currentWeek;
-  delete s.custom[wn];
-  refreshNavigator(activeRow, type);
-  loadWeekIntoForm(activeRow, type, wn);
+  delete s.custom[panelWeek];
+  renderPanel(activeRow);
 }
 
 function saveCurrentWeek(fid, type) {
   const s = formState[fid]?.[type];
-  if (!s) return;
+  if (!s || panelWeek === null) return;
   const vals = readFormVals(type);
   if (!vals) return;
-  if (isCustom(s, s.currentWeek)) {
-    s.custom[s.currentWeek] = vals;
-  } else {
-    s.base = vals;
-  }
+  if (isCustom(s, panelWeek)) { s.custom[panelWeek] = vals; }
+  else                        { s.base = vals; }
 }
 
 function readFormVals(type) {
@@ -1278,52 +1322,11 @@ function readFormVals(type) {
   return vals;
 }
 
-function refreshNavigator(fid, type) {
-  const s = ensureState(fid, type);
-  const navEl = document.getElementById(`wnav-${type}`);
-  if (!navEl) return;
-
-  const week = s.currentWeek;
-  const idx  = selectedWeeks.indexOf(week);
-  const isC  = isCustom(s, week);
-  const wkLabel = weekLabel(week);
-  const customCount = Object.keys(s.custom).length;
-
-  let statusText;
-  if (customCount === 0) {
-    statusText = `<span>Igual para las ${selectedWeeks.length} semanas</span>`;
-  } else {
-    statusText = `<span><span class="cnt">${customCount}</span> sem. con config. propia</span>`;
-  }
-
-  navEl.innerHTML = `
-    <div class="nav-arrows-group">
-      <button class="nav-arrow" id="prev-${type}" onclick="prevWeek('${type}')" ${idx <= 0 ? 'disabled' : ''}>‹</button>
-      <div class="week-dd-wrap" id="ddwrap-${type}">
-        <button class="week-dd-btn" id="ddbtn-${type}" onclick="toggleDd('${type}')">
-          ${wkLabel}${isC ? '<span class="custom-dot"></span>' : ''}
-          <span class="dd-chev">▾</span>
-        </button>
-        <div class="week-dd-menu" id="ddmenu-${type}">
-          ${buildDdItems(s, type)}
-        </div>
-      </div>
-      <button class="nav-arrow" id="next-${type}" onclick="nextWeek('${type}')" ${idx >= selectedWeeks.length - 1 ? 'disabled' : ''}>›</button>
-    </div>
-    <div class="nav-status">${statusText}</div>
-    ${!isC ? `<button class="btn-personalize" onclick="personalizeWeek('${type}')">Personalizar esta semana</button>` : ''}
-  `;
-
-  // Update warning bar
-  const warn = document.getElementById(`propwarn-${type}`);
-  if (warn) warn.classList.toggle('visible', isC);
-}
-
 // ─── CONFIG FORM ─────────────────────────────────────────────────────────────
 
 function buildForm(fid, type) {
   const s = ensureState(fid, type);
-  const vals = isCustom(s, s.currentWeek) ? s.custom[s.currentWeek] : s.base;
+  const vals = isCustom(s, panelWeek) ? s.custom[panelWeek] : s.base;
   const baseVals = s.base;
 
   const cicloOpts = CICLO_OPTS.map(o =>
@@ -1375,9 +1378,9 @@ function loadWeekIntoForm(fid, type, wn) {
 }
 
 function onFormChange(type) {
-  if (!activeRow) return;
+  if (!activeRow || panelWeek === null) return;
   const s = ensureState(activeRow, type);
-  const wn = s.currentWeek;
+  const wn = panelWeek;
   if (!isCustom(s, wn)) return; // sync mode — diffs only meaningful in custom
   // Highlight differences vs base
   const form = document.getElementById(`cform-${type}`);
@@ -1394,19 +1397,19 @@ function onFormChange(type) {
 // ─── CLOSE DROPDOWNS ON OUTSIDE CLICK ────────────────────────────────────────
 
 document.addEventListener('click', e => {
-  // header picker
+  // filter dropdowns
+  if (!e.target.closest('.fdrop')) {
+    document.querySelectorAll('.fdrop').forEach(d => d.classList.remove('open'));
+  }
+  // header week picker
   const weekBar = document.getElementById('weekBar');
   if (pickerOpen && weekBar && !weekBar.contains(e.target)) closePicker();
-
   // modal picker
   const modalWrap = document.querySelector('.modal-picker-wrap');
   if (modalPickerOpen && modalWrap && !modalWrap.contains(e.target)) closeModalPicker();
-
-  // week nav dropdowns
-  if (openDropdown) {
-    const wrap = document.getElementById(`ddwrap-${openDropdown}`);
-    if (wrap && !wrap.contains(e.target)) closeDd(openDropdown);
-  }
+  // panel week dropdown
+  const panelDdWrap = document.getElementById('panelDdWrap');
+  if (panelDdOpen && panelDdWrap && !panelDdWrap.contains(e.target)) closePanelDd();
 });
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
@@ -1418,6 +1421,7 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape') { closeModal(); closePanel(); }
 });
 
+buildFacMenu();
 renderTags();
 renderFacilityList();
 </script>
