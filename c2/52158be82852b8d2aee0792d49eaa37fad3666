@@ -1,0 +1,19 @@
+launcher/index.html
+  s_1d42129a58e151::t_478381c3d18246 461,463-467,469-479,481-485,487-497,503-511,522-564,571-647
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.11",
+  "base_commit_sha": "c252158be82852b8d2aee0792d49eaa37fad3666",
+  "prompts": {},
+  "sessions": {
+    "s_1d42129a58e151": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "20fc1c1c-f68f-41cd-9f24-8dc29480a272",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "leonardoromanbarretoperez-lab <leonardoroman.barretoperez@mercadolibre.com>"
+    }
+  }
+}
