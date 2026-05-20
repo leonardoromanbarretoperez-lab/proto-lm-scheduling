@@ -1255,7 +1255,6 @@ function buildVehicleCard(fid, vt) {
         : `<div class="prop-banner sync" id="propwarn-${type}">
              <span class="ban-icon">🔁</span>
              <span class="ban-text">Los cambios se aplicarán a las <strong>${selectedWeeks.length} semanas</strong> seleccionadas.</span>
-             <button class="btn-personalize" onclick="personalizeWeek('${type}')">Personalizar esta semana</button>
            </div>`
       }
       <div class="config-form" id="cform-${type}">
@@ -1387,17 +1386,49 @@ function onFormChange(type) {
   if (!activeRow || panelWeek === null) return;
   const s = ensureState(activeRow, type);
   const wn = panelWeek;
-  if (!isCustom(s, wn)) return; // sync mode — diffs only meaningful in custom
-  // Highlight differences vs base
   const form = document.getElementById(`cform-${type}`);
   if (!form) return;
   const baseVals = s.base;
-  form.querySelector(`[data-key="ciclo"]`).classList.toggle('has-diff', form.querySelector(`[data-key="ciclo"]`).value !== baseVals[0]);
-  form.querySelector(`[data-key="eta"]`).classList.toggle('has-diff', form.querySelector(`[data-key="eta"]`).value !== baseVals[1]);
+
+  // Check day fields only for auto-custom trigger
+  const hasDayDiff = DAYS.some((d, i) => {
+    const el = form.querySelector(`[data-key="${d.key}"]`);
+    return el && +el.value !== +baseVals[i + 2];
+  });
+
+  if (hasDayDiff && !isCustom(s, wn)) {
+    s.custom[wn] = readFormVals(type) || [...baseVals];
+    updatePropBanner(type, true);
+  } else if (!hasDayDiff && isCustom(s, wn)) {
+    delete s.custom[wn];
+    updatePropBanner(type, false);
+  } else if (isCustom(s, wn)) {
+    s.custom[wn] = readFormVals(type) || s.custom[wn];
+  }
+
+  // Highlight day field diffs vs base
+  const nowCustom = isCustom(s, wn);
   DAYS.forEach((d, i) => {
     const el = form.querySelector(`[data-key="${d.key}"]`);
-    if (el) el.classList.toggle('has-diff', +el.value !== baseVals[i + 2]);
+    if (el) el.classList.toggle('has-diff', nowCustom && +el.value !== +baseVals[i + 2]);
   });
+}
+
+function updatePropBanner(type, isCustomMode) {
+  const banner = document.getElementById(`propwarn-${type}`);
+  if (!banner) return;
+  if (isCustomMode) {
+    banner.className = 'prop-banner custom';
+    banner.innerHTML = `
+      <span class="ban-icon">⚠️</span>
+      <span class="ban-text">Esta semana tiene configuración propia — los cambios <strong>no se propagarán</strong> a las demás semanas.</span>
+      <button class="btn-reset" onclick="resetWeek('${type}')">Restablecer</button>`;
+  } else {
+    banner.className = 'prop-banner sync';
+    banner.innerHTML = `
+      <span class="ban-icon">🔁</span>
+      <span class="ban-text">Los cambios se aplicarán a las <strong>${selectedWeeks.length} semanas</strong> seleccionadas.</span>`;
+  }
 }
 
 // ─── CLOSE DROPDOWNS ON OUTSIDE CLICK ────────────────────────────────────────
