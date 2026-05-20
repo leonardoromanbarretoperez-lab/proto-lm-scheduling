@@ -539,11 +539,37 @@ body {
         <button class="chev-btn" id="calChevBtn" onclick="togglePicker()">▾</button>
         <div class="picker-dropdown" id="pickerDropdown">
           <div class="picker-nav">
-            <button onclick="pickerPrevMonth()">‹</button>
-            <div class="picker-month" id="pickerMonthLabel">May 2026</div>
-            <button onclick="pickerNextMonth()">›</button>
+            <button style="visibility:hidden">‹</button>
+            <div class="picker-month">Mayo 2026</div>
+            <button style="visibility:hidden">›</button>
           </div>
-          <div class="wk-grid" id="pickerGrid"></div>
+          <div class="wk-grid">
+            <div class="wk-header">
+              <span class="lbl">Sem.</span>
+              <span>Lun</span><span>Mar</span><span>Mié</span>
+              <span>Jue</span><span>Vie</span><span>Sáb</span><span>Dom</span>
+            </div>
+            <div class="wk-row sel" id="pkrow-22" onclick="togglePickerWeek(22)">
+              <div class="wk-row-label">Sem 22</div>
+              <div class="wk-day">27</div><div class="wk-day">28</div><div class="wk-day">29</div>
+              <div class="wk-day">30</div><div class="wk-day">1</div><div class="wk-day">2</div><div class="wk-day">3</div>
+            </div>
+            <div class="wk-row sel" id="pkrow-23" onclick="togglePickerWeek(23)">
+              <div class="wk-row-label">Sem 23</div>
+              <div class="wk-day">4</div><div class="wk-day">5</div><div class="wk-day">6</div>
+              <div class="wk-day">7</div><div class="wk-day">8</div><div class="wk-day">9</div><div class="wk-day">10</div>
+            </div>
+            <div class="wk-row sel" id="pkrow-24" onclick="togglePickerWeek(24)">
+              <div class="wk-row-label">Sem 24</div>
+              <div class="wk-day">11</div><div class="wk-day">12</div><div class="wk-day">13</div>
+              <div class="wk-day">14</div><div class="wk-day">15</div><div class="wk-day">16</div><div class="wk-day">17</div>
+            </div>
+            <div class="wk-row sel" id="pkrow-25" onclick="togglePickerWeek(25)">
+              <div class="wk-row-label">Sem 25</div>
+              <div class="wk-day">18</div><div class="wk-day">19</div><div class="wk-day">20</div>
+              <div class="wk-day">21</div><div class="wk-day">22</div><div class="wk-day">23</div><div class="wk-day">24</div>
+            </div>
+          </div>
           <div class="picker-footer">
             <button class="btn-aplicar" onclick="applyPicker()">Aplicar</button>
           </div>
@@ -552,7 +578,7 @@ body {
       <!-- Action row -->
       <div class="action-row">
         <span class="count-label" id="countLabel">3 instalaciones pendientes</span>
-        <button class="btn-primary" id="btnGuardar" disabled>Guardar todo</button>
+        <button class="btn-primary" id="btnAgendar" disabled>Agendar vehículos</button>
       </div>
     </div>
   </div>
@@ -627,7 +653,6 @@ const DEFAULT_BASE = {
 
 let selectedWeeks   = [22, 23, 24, 25];
 let pickerSelected  = [...selectedWeeks];
-let pickerMonth     = { year: 2026, month: 4 }; // 0-based May
 let activeRow       = null;
 let openDropdown    = null; // type string or null
 
@@ -661,20 +686,7 @@ function togglePicker() {
   const btn = document.getElementById('calChevBtn');
   const open = dd.classList.toggle('open');
   btn.classList.toggle('open', open);
-  if (open) { pickerSelected = [...selectedWeeks]; renderPickerGrid(); }
-}
-
-function pickerPrevMonth() { pickerMonth.month--; if (pickerMonth.month < 0) { pickerMonth.month = 11; pickerMonth.year--; } renderPickerGrid(); }
-function pickerNextMonth() { pickerMonth.month++; if (pickerMonth.month > 11) { pickerMonth.month = 0; pickerMonth.year++; } renderPickerGrid(); }
-
-const MONTH_NAMES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-const DAY_LABELS  = ['L','M','X','J','V','S','D'];
-
-function isoWeek(date) {
-  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-  d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
-  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-  return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+  if (open) { pickerSelected = [...selectedWeeks]; syncPickerRows(); }
 }
 
 function getWeekDays(year, week) {
@@ -685,45 +697,18 @@ function getWeekDays(year, week) {
   return Array.from({ length: 7 }, (_, i) => { const d = new Date(monday); d.setDate(monday.getDate() + i); return d; });
 }
 
-function renderPickerGrid() {
-  document.getElementById('pickerMonthLabel').textContent = `${MONTH_NAMES[pickerMonth.month]} ${pickerMonth.year}`;
-  const { year, month } = pickerMonth;
-  const firstDay = new Date(year, month, 1);
-  const lastDay  = new Date(year, month + 1, 0);
-
-  // Collect weeks that have days in this month
-  const weeks = [];
-  const seen  = new Set();
-  for (let d = new Date(firstDay); d <= lastDay; d.setDate(d.getDate() + 1)) {
-    const wn = isoWeek(new Date(d));
-    if (!seen.has(wn)) { seen.add(wn); weeks.push(wn); }
-  }
-
-  const grid = document.getElementById('pickerGrid');
-  let html = '<div class="wk-header"><span class="lbl">Sem</span>';
-  DAY_LABELS.forEach(l => html += `<span>${l}</span>`);
-  html += '</div>';
-
-  weeks.forEach(wn => {
-    const days = getWeekDays(year, wn);
-    const sel  = pickerSelected.includes(wn);
-    html += `<div class="wk-row${sel ? ' sel' : ''}" id="pkrow-${wn}">`;
-    html += `<div class="wk-row-label" onclick="togglePickerWeek(${wn})">S${wn}</div>`;
-    days.forEach(d => {
-      const inMonth = d.getMonth() === month;
-      html += `<div class="wk-day" style="${inMonth ? '' : 'opacity:.35'}">${d.getDate()}</div>`;
-    });
-    html += '</div>';
+function syncPickerRows() {
+  [22, 23, 24, 25].forEach(wn => {
+    const row = document.getElementById('pkrow-' + wn);
+    if (row) row.classList.toggle('sel', pickerSelected.includes(wn));
   });
-
-  grid.innerHTML = html;
 }
 
 function togglePickerWeek(wn) {
   const idx = pickerSelected.indexOf(wn);
   if (idx >= 0) { if (pickerSelected.length > 1) pickerSelected.splice(idx, 1); }
   else           { pickerSelected.push(wn); pickerSelected.sort((a, b) => a - b); }
-  renderPickerGrid();
+  syncPickerRows();
 }
 
 function applyPicker() {
@@ -826,11 +811,14 @@ function closePanel() {
 }
 
 function savePanel() {
-  // save current week inputs for all types before closing
-  if (activeRow !== null) {
-    VEHICLE_TYPES.forEach(({ type }) => saveCurrentWeek(activeRow, type));
-  }
-  closePanel();
+  if (activeRow === null) return;
+  VEHICLE_TYPES.forEach(({ type }) => saveCurrentWeek(activeRow, type));
+  const f = FACILITIES.find(x => x.id === activeRow);
+  if (!f || f.status === 'reviewed') return;
+  f.status = 'reviewed';
+  document.getElementById('panelBadge').textContent = 'REVISADO';
+  document.getElementById('btnAgendar').disabled = false;
+  renderFacilityList();
 }
 
 function renderPanel(fid) {
