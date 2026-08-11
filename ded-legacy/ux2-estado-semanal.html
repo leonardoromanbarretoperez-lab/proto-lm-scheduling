@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UX 2 — Visibilidad del estado semanal</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --yellow: #FFE600;
+    --blue: #3483FA;
+    --blue-dark: #2968C8;
+    --green: #00A650;
+    --red: #F23D4F;
+    --orange: #FF7A00;
+    --gray-bg: #F5F5F5;
+    --gray-100: #EFEFEF;
+    --gray-200: #E0E0E0;
+    --gray-400: #999;
+    --gray-600: #666;
+    --gray-800: #333;
+    --white: #fff;
+    --border: #E0E0E0;
+    --radius: 6px;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  body { font-family: var(--font); background: var(--gray-bg); color: var(--gray-800); font-size: 14px; min-height: 100vh; }
+
+  .topbar { background: var(--yellow); height: 48px; display: flex; align-items: center; padding: 0 20px; justify-content: space-between; border-bottom: 1px solid #F0D800; position: sticky; top: 0; z-index: 100; }
+  .topbar-logo { display: flex; align-items: center; gap: 10px; }
+  .topbar-logo svg { width: 32px; height: 32px; }
+  .topbar-logo span { font-size: 15px; font-weight: 600; color: var(--gray-800); }
+  .topbar-right { display: flex; align-items: center; gap: 16px; font-size: 13px; color: var(--gray-800); }
+  .site-badge { background: var(--white); border-radius: 4px; padding: 3px 8px; font-weight: 600; font-size: 12px; }
+
+  .app { display: flex; min-height: calc(100vh - 48px); }
+  .sidebar { width: 220px; background: var(--white); border-right: 1px solid var(--border); padding: 20px 0; flex-shrink: 0; }
+  .sidebar-section { padding: 0 16px; margin-bottom: 20px; }
+  .sidebar-label { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--gray-400); margin-bottom: 8px; }
+  .sidebar-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: var(--radius); font-size: 13px; color: var(--gray-600); cursor: pointer; margin-bottom: 2px; }
+  .sidebar-item:hover { background: var(--gray-100); }
+  .sidebar-item.active { background: #EBF2FF; color: var(--blue); font-weight: 600; }
+
+  .main { flex: 1; padding: 28px 32px; overflow-x: hidden; }
+
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  .breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 13px; margin-bottom: 20px; }
+  .breadcrumb a { color: var(--blue); cursor: pointer; text-decoration: none; }
+  .breadcrumb a:hover { text-decoration: underline; }
+  .breadcrumb span { color: var(--gray-400); }
+
+  .page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 24px; }
+  .page-title { font-size: 22px; font-weight: 700; }
+  .page-subtitle { font-size: 13px; color: var(--gray-400); margin-top: 4px; }
+
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: var(--radius); font-size: 13px; font-weight: 600; cursor: pointer; border: none; font-family: var(--font); transition: all .15s; }
+  .btn-primary { background: var(--blue); color: var(--white); }
+  .btn-primary:hover { background: var(--blue-dark); }
+  .btn-secondary { background: var(--white); color: var(--blue); border: 1.5px solid var(--blue); }
+  .btn-secondary:hover { background: #EBF2FF; }
+  .btn-ghost { background: var(--white); color: var(--gray-600); border: 1.5px solid var(--border); }
+  .btn-ghost:hover { background: var(--gray-100); }
+  .btn-sm { padding: 6px 12px; font-size: 12px; }
+  .btn-group { display: flex; gap: 8px; }
+
+  .badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+  .badge-green { background: #E6F9F0; color: var(--green); }
+  .badge-blue { background: #EBF2FF; color: var(--blue); }
+  .badge-gray { background: var(--gray-100); color: var(--gray-400); }
+  .badge-red { background: #FEE8EA; color: var(--red); }
+  .badge-orange { background: #FFF3E8; color: var(--orange); }
+  .badge-version { background: #EBF2FF; color: var(--blue); font-size: 11px; font-weight: 700; padding: 1px 6px; border-radius: 4px; }
+  .chip { background: var(--gray-100); border-radius: 4px; padding: 2px 8px; font-size: 11px; font-weight: 600; color: var(--gray-600); display: inline-flex; }
+
+  .toggle { width: 40px; height: 22px; background: var(--blue); border-radius: 11px; position: relative; flex-shrink: 0; cursor: pointer; }
+  .toggle::after { content: ''; position: absolute; width: 16px; height: 16px; background: var(--white); border-radius: 50%; top: 3px; right: 4px; box-shadow: 0 1px 3px rgba(0,0,0,.2); }
+
+  /* CIRCUIT HEADER */
+  .circuit-header { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 24px; margin-bottom: 16px; display: flex; align-items: flex-start; justify-content: space-between; }
+  .circuit-id { font-size: 24px; font-weight: 800; }
+  .circuit-meta { display: flex; align-items: center; gap: 10px; margin-top: 6px; flex-wrap: wrap; }
+
+  /* ── UX 2: WEEKLY STATUS BAR ── */
+  .weekly-status {
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    margin-bottom: 16px;
+  }
+  .weekly-status-header {
+    display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;
+  }
+  .weekly-status-title {
+    font-size: 13px; font-weight: 700; color: var(--gray-800);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .weekly-status-week {
+    display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--gray-400);
+  }
+  .week-nav-btn { width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--border); background: var(--white); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 12px; color: var(--gray-600); }
+  .week-nav-btn:hover { background: var(--gray-100); }
+
+  /* STAT PILLS */
+  .status-pills { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+  .status-pill {
+    flex: 1; min-width: 100px;
+    border-radius: var(--radius); padding: 10px 14px;
+    border: 1px solid transparent;
+  }
+  .status-pill .pill-value { font-size: 20px; font-weight: 800; }
+  .status-pill .pill-label { font-size: 11px; margin-top: 2px; }
+  .status-pill.created { background: #EBF2FF; border-color: #C0D7FF; }
+  .status-pill.created .pill-value { color: var(--blue); }
+  .status-pill.created .pill-label { color: #5580C0; }
+  .status-pill.executed { background: #E6F9F0; border-color: #A0DFC0; }
+  .status-pill.executed .pill-value { color: var(--green); }
+  .status-pill.executed .pill-label { color: #007040; }
+  .status-pill.cancelled { background: #FEE8EA; border-color: #FFBCC0; }
+  .status-pill.cancelled .pill-value { color: var(--red); }
+  .status-pill.cancelled .pill-label { color: #B00010; }
+  .status-pill.pending { background: #FFF3E8; border-color: #FFD0A0; }
+  .status-pill.pending .pill-value { color: var(--orange); }
+  .status-pill.pending .pill-label { color: #AA4400; }
+
+  /* MINI CALENDAR */
+  .mini-calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+  .mini-day { border-radius: 4px; padding: 6px 4px; text-align: center; font-size: 11px; }
+  .mini-day .day-name { color: var(--gray-400); font-weight: 700; font-size: 10px; margin-bottom: 4px; }
+  .mini-day .day-num { font-weight: 700; font-size: 12px; margin-bottom: 4px; }
+  .mini-day .day-bar { height: 3px; border-radius: 2px; background: var(--gray-200); overflow: hidden; }
+  .mini-day .day-fill { height: 100%; border-radius: 2px; }
+  .mini-day.has-travels { background: #EBF2FF30; }
+  .mini-day.today { background: #EBF2FF; border: 1.5px solid var(--blue); }
+  .mini-day .day-count { font-size: 10px; color: var(--gray-400); margin-top: 3px; }
+
+  /* CTA inside weekly status */
+  .weekly-cta {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--gray-100); border-radius: var(--radius);
+    padding: 10px 14px; margin-top: 12px;
+  }
+  .weekly-cta-text { font-size: 12px; color: var(--gray-600); }
+  .weekly-cta-text strong { color: var(--gray-800); }
+
+  /* FLEET CARD */
+  .fleet-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; }
+  .fleet-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .fleet-card-title { font-size: 14px; font-weight: 700; }
+  .fleet-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--gray-100); }
+  .fleet-row:last-child { border-bottom: none; }
+  .fleet-label { font-size: 11px; color: var(--gray-400); margin-bottom: 4px; }
+  .fleet-value { font-size: 13px; font-weight: 600; }
+
+  /* ITINERARY TABLE */
+  .itin-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .itin-table th { background: var(--gray-100); padding: 8px 12px; text-align: left; font-weight: 700; color: var(--gray-600); border-bottom: 1px solid var(--border); }
+  .itin-table td { padding: 8px 12px; border-bottom: 1px solid var(--gray-100); }
+  .itin-table tr:last-child td { border-bottom: none; }
+  .linking-tag { font-size: 10px; color: var(--gray-400); font-weight: 600; }
+
+  /* MODAL */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 200; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--white); border-radius: 10px; width: 520px; max-width: 95vw; box-shadow: 0 8px 32px rgba(0,0,0,.15); overflow: hidden; animation: modalIn .18s ease; }
+  @keyframes modalIn { from { transform: translateY(12px); opacity: 0; } to { transform: none; opacity: 1; } }
+  .modal-header { padding: 20px 24px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .modal-title { font-size: 16px; font-weight: 700; }
+  .modal-close { width: 28px; height: 28px; border-radius: 50%; border: none; background: var(--gray-100); cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; color: var(--gray-600); }
+  .modal-body { padding: 20px 24px; }
+  .modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; gap: 10px; justify-content: flex-end; }
+
+  .form-group { margin-bottom: 16px; }
+  .form-label { font-size: 12px; font-weight: 700; color: var(--gray-600); margin-bottom: 6px; display: block; }
+  .form-input { width: 100%; padding: 9px 12px; border: 1.5px solid var(--border); border-radius: var(--radius); font-size: 13px; font-family: var(--font); color: var(--gray-800); outline: none; transition: border-color .15s; }
+  .form-input:focus { border-color: var(--blue); }
+  .form-select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23999' stroke-width='1.5' fill='none'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .form-hint { font-size: 11px; color: var(--gray-400); margin-top: 4px; }
+
+  .alert { border-radius: var(--radius); padding: 12px 16px; margin-bottom: 16px; display: flex; gap: 10px; align-items: flex-start; font-size: 13px; }
+  .alert-info { background: #EBF2FF; border: 1px solid #C0D7FF; color: #1A4FA0; }
+  .alert-warning { background: #FFFBE6; border: 1px solid #FFE600; color: #7A6000; }
+  .alert-success { background: #E6F9F0; border: 1px solid #00A650; color: #005C2D; }
+
+  .success-icon { width: 56px; height: 56px; background: #E6F9F0; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 26px; }
+
+  .controls { display: flex; gap: 10px; margin-bottom: 20px; }
+  .search-box { display: flex; align-items: center; gap: 8px; background: var(--white); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 7px 12px; font-size: 13px; color: var(--gray-400); min-width: 200px; }
+  .table-wrap { background: var(--white); border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; }
+  .table { width: 100%; border-collapse: collapse; }
+  .table th { background: var(--gray-100); padding: 10px 14px; text-align: left; font-size: 12px; font-weight: 700; color: var(--gray-600); border-bottom: 1px solid var(--border); }
+  .table td { padding: 12px 14px; border-bottom: 1px solid var(--gray-100); font-size: 13px; vertical-align: middle; }
+  .table tr:last-child td { border-bottom: none; }
+  .table tr:hover td { background: #FAFAFA; cursor: pointer; }
+
+  .proto-label { position: fixed; bottom: 16px; right: 16px; background: var(--green); color: var(--white); font-size: 11px; font-weight: 700; padding: 6px 12px; border-radius: 20px; letter-spacing: .04em; text-transform: uppercase; opacity: .8; pointer-events: none; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-logo">
+    <svg viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="20" fill="#fff"/><path d="M8 20c0-6.627 5.373-12 12-12s12 5.373 12 12-5.373 12-12 12S8 26.627 8 20z" fill="#3483FA"/><path d="M14 20l4 4 8-8" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <span>Fixed fleet · Circuits</span>
+  </div>
+  <div class="topbar-right">
+    <div class="site-badge">MLB</div>
+    <span>Leonardo ˅</span>
+  </div>
+</div>
+
+<div class="app">
+  <div class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Planning</div>
+      <div class="sidebar-item">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5" height="5" rx="1" fill="currentColor"/><rect x="9" y="2" width="5" height="5" rx="1" fill="currentColor" opacity=".4"/><rect x="2" y="9" width="5" height="5" rx="1" fill="currentColor" opacity=".4"/><rect x="9" y="9" width="5" height="5" rx="1" fill="currentColor" opacity=".4"/></svg>
+        Overview
+      </div>
+      <div class="sidebar-item active">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/><path d="M8 5v3l2 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Circuits
+      </div>
+      <div class="sidebar-item">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M5 7h6M5 10h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Calendar
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Operations</div>
+      <div class="sidebar-item">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h12M8 2l4 6-4 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Travel activity
+      </div>
+      <div class="sidebar-item">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 2h8a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V3a1 1 0 011-1z" stroke="currentColor" stroke-width="1.5"/><path d="M6 6h4M6 9h2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Imports
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <!-- SCREEN: LISTA -->
+    <div class="screen active" id="screen-list">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Gestión de circuitos</div>
+          <div class="page-subtitle">Haz seguimiento de los circuitos y sus estados.</div>
+        </div>
+        <div class="btn-group">
+          <button class="btn btn-ghost">Crear circuito</button>
+          <button class="btn btn-primary">Enviar viajes</button>
+        </div>
+      </div>
+      <div class="controls">
+        <div class="search-box">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.5"/><path d="M11 11l3 3" stroke="#999" stroke-width="1.5" stroke-linecap="round"/></svg>
+          Buscar
+        </div>
+        <button class="btn btn-ghost btn-sm">⚙ Filtros</button>
+      </div>
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th><input type="checkbox"></th>
+              <th>Circuito</th><th>Perfil de flota</th><th>Transportadora</th><th>Costo fijo</th><th>Saving semanal</th><th>Vigencia</th><th>Estado</th><th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr onclick="showScreen('detail')">
+              <td><input type="checkbox" onclick="event.stopPropagation()"></td>
+              <td><div style="font-weight:700">CE04 <span class="badge-version">V3</span></div><div style="font-size:11px;color:var(--gray-400)">ID 1682</div></td>
+              <td><div style="font-size:12px">34 Carreta +4</div><div style="font-size:11px;color:var(--gray-400)">1 conductor</div></td>
+              <td>Lemar</td><td>R$ 0,00</td><td>R$ 0,00</td><td>11/08/2026</td>
+              <td><div style="font-weight:700;font-size:12px">Configurado</div><div style="margin-top:2px"><span class="badge badge-green">Vigente</span></div></td>
+              <td>⚠️</td>
+            </tr>
+            <tr onclick="showScreen('detail')">
+              <td><input type="checkbox" onclick="event.stopPropagation()"></td>
+              <td><div style="font-weight:700">C414.3 <span class="badge-version">V7</span></div><div style="font-size:11px;color:var(--gray-400)">ID 1633</div></td>
+              <td><div style="font-size:12px">6 Carreta</div><div><span class="chip">Diesel</span></div></td>
+              <td>MARONItransp</td><td>R$ 48.200,40</td><td>R$ 84.755,80</td><td>10/08/2026</td>
+              <td><div style="font-weight:700;font-size:12px">Configurado</div><div style="margin-top:2px"><span class="badge badge-green">Vigente</span></div></td>
+              <td></td>
+            </tr>
+            <tr onclick="showScreen('detail')">
+              <td><input type="checkbox" onclick="event.stopPropagation()"></td>
+              <td><div style="font-weight:700">C415.1 <span class="badge-version">V2</span></div><div style="font-size:11px;color:var(--gray-400)">ID 1632</div></td>
+              <td><div style="font-size:12px">5 Carreta</div><div><span class="chip">Diesel</span></div></td>
+              <td>MARONItransp</td><td>R$ 40.167,00</td><td>R$ 63.952,79</td><td>10/08/2026</td>
+              <td><div style="font-weight:700;font-size:12px">Configurado</div><div style="margin-top:2px"><span class="badge badge-green">Vigente</span></div></td>
+              <td></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SCREEN: DETALLE CIRCUITO -->
+    <div class="screen" id="screen-detail">
+      <div class="breadcrumb">
+        <a onclick="showScreen('list')">Lista de circuitos</a>
+        <span>›</span>
+        <span style="color:var(--gray-800)">C414.3</span>
+      </div>
+
+      <!-- HEADER DEL CIRCUITO — igual al as-is -->
+      <div class="circuit-header">
+        <div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+            <div class="circuit-id">C414.3</div>
+            <span class="badge-version">V7</span>
+            <span class="badge badge-green">Vigente</span>
+          </div>
+          <div class="circuit-meta">
+            <span style="font-weight:700;font-size:13px;color:var(--gray-600)">Configurado</span>
+            <span style="font-size:13px;color:var(--gray-600)">10/08/2026 – No definida</span>
+            <a style="color:var(--blue);font-size:13px;cursor:pointer">Actualizar vigencia</a>
+          </div>
+          <div style="margin-top:6px;font-size:12px;color:var(--gray-400)">Circuit ID 1633</div>
+        </div>
+        <div class="btn-group">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div class="toggle"></div>
+            <span style="font-size:13px;font-weight:600;color:var(--blue)">Crear viajes</span>
+          </div>
+          <button class="btn btn-ghost btn-sm">Descargar CSV</button>
+        </div>
+      </div>
+
+      <!-- ── UX 2: WEEKLY STATUS (nuevo componente) ── -->
+      <div class="weekly-status">
+        <div class="weekly-status-header">
+          <div class="weekly-status-title">
+            📅 Estado de viajes esta semana
+          </div>
+          <div class="weekly-status-week">
+            <div class="week-nav-btn">‹</div>
+            <span style="font-weight:700;color:var(--gray-800)">10–16 Ago 2026</span>
+            <div class="week-nav-btn">›</div>
+          </div>
+        </div>
+
+        <!-- PILLS -->
+        <div class="status-pills">
+          <div class="status-pill created">
+            <div class="pill-value">24</div>
+            <div class="pill-label">Creados</div>
+          </div>
+          <div class="status-pill executed">
+            <div class="pill-value">18</div>
+            <div class="pill-label">Ejecutados</div>
+          </div>
+          <div class="status-pill cancelled">
+            <div class="pill-value">4</div>
+            <div class="pill-label">Cancelados</div>
+          </div>
+          <div class="status-pill pending">
+            <div class="pill-value">2</div>
+            <div class="pill-label">Pendientes</div>
+          </div>
+        </div>
+
+        <!-- MINI CALENDAR -->
+        <div class="mini-calendar">
+          <div class="mini-day">
+            <div class="day-name">LUN</div>
+            <div class="day-num">10</div>
+            <div class="day-bar"><div class="day-fill" style="width:80%;background:var(--blue)"></div></div>
+            <div class="day-count">8 viajes</div>
+          </div>
+          <div class="mini-day today">
+            <div class="day-name">MAR</div>
+            <div class="day-num" style="color:var(--blue)">11</div>
+            <div class="day-bar"><div class="day-fill" style="width:40%;background:var(--blue)"></div></div>
+            <div class="day-count" style="color:var(--blue);font-weight:700">4 hoy</div>
+          </div>
+          <div class="mini-day has-travels">
+            <div class="day-name">MIÉ</div>
+            <div class="day-num">12</div>
+            <div class="day-bar"><div class="day-fill" style="width:60%;background:var(--blue)"></div></div>
+            <div class="day-count">6 viajes</div>
+          </div>
+          <div class="mini-day">
+            <div class="day-name">JUE</div>
+            <div class="day-num">13</div>
+            <div class="day-bar"><div class="day-fill" style="width:20%;background:var(--gray-400)"></div></div>
+            <div class="day-count">2 viajes</div>
+          </div>
+          <div class="mini-day">
+            <div class="day-name">VIE</div>
+            <div class="day-num">14</div>
+            <div class="day-bar"></div>
+            <div class="day-count" style="color:var(--gray-300)">Sin viajes</div>
+          </div>
+          <div class="mini-day">
+            <div class="day-name">SÁB</div>
+            <div class="day-num">15</div>
+            <div class="day-bar"></div>
+            <div class="day-count" style="color:var(--gray-300)">Sin viajes</div>
+          </div>
+          <div class="mini-day">
+            <div class="day-name">DOM</div>
+            <div class="day-num">16</div>
+            <div class="day-bar"></div>
+            <div class="day-count" style="color:var(--gray-300)">Sin viajes</div>
+          </div>
+        </div>
+
+        <!-- CTA CONTEXTUAL -->
+        <div class="weekly-cta">
+          <div class="weekly-cta-text">
+            <strong>Hoy (Mar 11):</strong> 4 viajes creados · 2 ejecutados · 2 pendientes.
+            Quedan <strong>2 viajes pendientes</strong> de confirmación.
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="showModal('modal-create')">+ Crear viaje</button>
+        </div>
+      </div>
+
+      <!-- FLEET PROFILE — igual al as-is -->
+      <div class="fleet-card">
+        <div class="fleet-card-header">
+          <div class="fleet-card-title">Perfil de flota <span class="badge badge-green" style="margin-left:8px">Configurado</span></div>
+        </div>
+        <div style="font-size:13px;color:var(--gray-600);margin-bottom:12px">Transportadora: <strong>MARONItransp</strong></div>
+        <div class="fleet-row">
+          <div><div class="fleet-label">Tipo de vehículo</div><div class="fleet-value">Carreta</div></div>
+          <div><div class="fleet-label">Atributos</div><div class="fleet-value"><span class="chip">Diesel</span></div></div>
+          <div><div class="fleet-label">Cant. transportistas</div><div class="fleet-value">2</div></div>
+          <div><div class="fleet-label">Cant. vehículos</div><div class="fleet-value">6</div></div>
+          <div><div class="fleet-label">Itinerarios</div><div class="fleet-value" style="display:flex;gap:4px;flex-wrap:wrap">
+            <span class="chip">Itin 1</span><span class="chip">Itin 2</span><span class="chip">Itin 3</span>
+          </div></div>
+        </div>
+      </div>
+
+      <!-- ITINERARY TABLE -->
+      <div class="fleet-card">
+        <div class="fleet-card-header">
+          <div class="fleet-card-title">Itinerario 1</div>
+        </div>
+        <table class="itin-table">
+          <thead>
+            <tr><th>Ruta</th><th>Dist. (km)</th><th>Origen</th><th>ETA</th><th>Día ETA</th><th>ETD</th><th>Día ETD</th><th>TT</th><th>Destino Final</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><div style="font-weight:600">BRSP06-SRJ12</div><div style="font-size:10px;color:var(--gray-400)">Regular</div></td>
+              <td>669.64</td><td>BRSP06</td><td>15:00</td><td>Lun</td><td>17:00</td><td>Lun</td><td>15:30</td><td>SRJ12</td>
+            </tr>
+            <tr style="background:#FAFAFA">
+              <td><div style="font-weight:600">SRJ12-BRRJ02</div><div class="linking-tag">Linking</div></td>
+              <td>299.15</td><td>SRJ12</td><td>10:30</td><td>Mar</td><td>10:30</td><td>Mar</td><td>05:26</td><td>BRRJ02</td>
+            </tr>
+            <tr>
+              <td><div style="font-weight:600">BRRJ02-SRJ3</div><div style="font-size:10px;color:var(--gray-400)">Regular</div></td>
+              <td>102.84</td><td>BRRJ02</td><td>01:00</td><td>Mié</td><td>03:00</td><td>Mié</td><td>03:00</td><td>SRJ3</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL: CREAR VIAJE (con contexto de la semana) -->
+<div class="modal-overlay" id="modal-create">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Crear viaje — C414.3</div>
+      <button class="modal-close" onclick="closeModal('modal-create')">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- CONTEXTO SEMANAL DENTRO DEL MODAL -->
+      <div style="background:var(--gray-100);border-radius:var(--radius);padding:12px 14px;margin-bottom:16px;display:flex;align-items:center;gap:12px">
+        <div style="font-size:22px">📅</div>
+        <div>
+          <div style="font-size:12px;font-weight:700;color:var(--gray-800)">Esta semana (10–16 Ago) · C414.3</div>
+          <div style="font-size:12px;color:var(--gray-600);margin-top:3px">
+            <span style="color:var(--blue);font-weight:700">24</span> creados &nbsp;·&nbsp;
+            <span style="color:var(--green);font-weight:700">18</span> ejecutados &nbsp;·&nbsp;
+            <span style="color:var(--red);font-weight:700">4</span> cancelados &nbsp;·&nbsp;
+            <span style="color:var(--orange);font-weight:700">2</span> pendientes
+          </div>
+        </div>
+      </div>
+
+      <div class="alert alert-info">
+        <span>ℹ️</span>
+        <div>El viaje adoptará la nomenclatura y tarifa de <strong>C414.3</strong>. No clasificará como DED Legacy.</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Perfil de flota</label>
+        <select class="form-input form-select">
+          <option>FP-42294 · Carreta Vehículo 0Km Diesel 2M</option>
+        </select>
+        <div class="form-hint">Único perfil activo — preseleccionado automáticamente</div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Origen</label>
+          <select class="form-input form-select">
+            <option>BRSP06 — GLP Cajamar II</option>
+            <option>BRRC01</option>
+            <option>BRRJ02</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Destino</label>
+          <select class="form-input form-select">
+            <option>BRSP11</option>
+            <option>SSP36</option>
+            <option>SRJ12</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">ETA Origen</label>
+          <input type="datetime-local" class="form-input" value="2026-08-11T08:30">
+        </div>
+        <div class="form-group">
+          <label class="form-label">ETD Origen</label>
+          <input type="datetime-local" class="form-input" value="2026-08-11T09:00">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Atributo</label>
+        <select class="form-input form-select">
+          <option>MWH — Multiwarehouse</option>
+          <option>ADD — Adicional</option>
+          <option>BKP — Backup</option>
+        </select>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-create')">Cancelar</button>
+      <button class="btn btn-primary" onclick="closeModal('modal-create');showModal('modal-success')">Crear viaje</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: SUCCESS -->
+<div class="modal-overlay" id="modal-success">
+  <div class="modal">
+    <div class="modal-body" style="text-align:center;padding:32px 24px">
+      <div class="success-icon">✅</div>
+      <div style="font-size:16px;font-weight:700;margin-bottom:8px">Viaje creado exitosamente</div>
+      <div style="font-size:13px;color:var(--gray-600);margin-bottom:4px">BRSP06-BRSP11@BRSP06.DED.C414.3.MWH</div>
+      <div style="font-size:12px;color:var(--gray-400)">C414.3 · FP-42294 · TR–84311</div>
+      <div style="margin-top:16px;background:var(--gray-100);border-radius:var(--radius);padding:10px;font-size:12px;color:var(--gray-600)">
+        Esta semana ahora tiene <strong style="color:var(--blue)">25 viajes creados</strong> para C414.3
+      </div>
+    </div>
+    <div class="modal-footer" style="justify-content:center">
+      <button class="btn btn-ghost" onclick="closeModal('modal-success');showScreen('detail')">Ver circuito</button>
+      <button class="btn btn-primary" onclick="closeModal('modal-success');showModal('modal-create')">Crear otro viaje</button>
+    </div>
+  </div>
+</div>
+
+<div class="proto-label">UX 2 · Estado semanal</div>
+
+<script>
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen-' + id).classList.add('active');
+    window.scrollTo(0, 0);
+  }
+  function showModal(id) { document.getElementById(id).classList.add('open'); }
+  function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+  document.querySelectorAll('.modal-overlay').forEach(o => {
+    o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
+  });
+</script>
+</body>
+</html>
