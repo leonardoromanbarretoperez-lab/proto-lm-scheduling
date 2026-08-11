@@ -1,1 +1,689 @@
-<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Hipótesis B — Pantalla nueva separada</title><style>body{font-family:sans-serif;background:#0d1b2e;color:#fff;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0}.box{text-align:center;padding:40px}.badge{background:#FFE600;color:#000;padding:6px 16px;border-radius:20px;font-size:12px;font-weight:700;display:inline-block;margin-bottom:20px}.title{font-size:28px;font-weight:800;margin-bottom:12px}.sub{color:#aaa;font-size:15px;margin-bottom:32px}.btn{background:#3483FA;color:#fff;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px;display:inline-block}</style></head><body><div class="box"><div class="badge">PROTOTIPO · HIP B</div><div class="title">Hipótesis B — Pantalla nueva separada</div><div class="sub">Prototipo navegable — DED Legacy</div></div></body></html>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hip B — Programación de viajes especiales</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --yellow: #FFE600;
+    --yellow-dark: #F0D800;
+    --blue: #3483FA;
+    --blue-dark: #2968C8;
+    --green: #00A650;
+    --red: #F23D4F;
+    --orange: #FF7A00;
+    --purple: #7B61FF;
+    --gray-100: #EFEFEF;
+    --gray-200: #E0E0E0;
+    --gray-300: #C8C8C8;
+    --gray-400: #999;
+    --gray-600: #666;
+    --gray-800: #333;
+    --white: #fff;
+    --border: #E0E0E0;
+    --radius: 6px;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+
+  body { font-family: var(--font); background: #F5F5F5; color: var(--gray-800); font-size: 14px; min-height: 100vh; }
+
+  .topbar {
+    background: var(--yellow);
+    height: 48px;
+    display: flex; align-items: center; padding: 0 20px; justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
+    border-bottom: 1px solid var(--yellow-dark);
+  }
+  .topbar-logo { display: flex; align-items: center; gap: 10px; }
+  .topbar-logo svg { width: 32px; height: 32px; }
+  .topbar-logo span { font-size: 15px; font-weight: 600; color: var(--gray-800); }
+  .topbar-right { display: flex; align-items: center; gap: 16px; font-size: 13px; color: var(--gray-800); }
+  .site-badge { background: var(--white); border-radius: 4px; padding: 3px 8px; font-weight: 600; font-size: 12px; }
+
+  .app { display: flex; min-height: calc(100vh - 48px); }
+
+  .sidebar { width: 220px; background: var(--white); border-right: 1px solid var(--border); padding: 20px 0; flex-shrink: 0; }
+  .sidebar-section { padding: 0 16px; margin-bottom: 20px; }
+  .sidebar-label { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--gray-400); margin-bottom: 8px; }
+  .sidebar-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: var(--radius); font-size: 13px; color: var(--gray-600); cursor: pointer; margin-bottom: 2px; transition: background .15s; }
+  .sidebar-item:hover { background: var(--gray-100); }
+  .sidebar-item.active { background: #EBF2FF; color: var(--blue); font-weight: 600; }
+  .sidebar-item.highlight { color: var(--orange); font-weight: 600; }
+  .sidebar-item.highlight.active { background: #FFF3E8; }
+  .sidebar-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+  .sidebar-new { font-size: 9px; font-weight: 800; background: var(--orange); color: #fff; padding: 1px 5px; border-radius: 20px; margin-left: 4px; }
+
+  .main { flex: 1; padding: 28px 32px; overflow-x: hidden; }
+
+  .breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--blue); margin-bottom: 20px; }
+  .breadcrumb span { color: var(--gray-400); }
+  .breadcrumb a { color: var(--blue); cursor: pointer; text-decoration: none; }
+
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  .page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 24px; }
+  .page-title { font-size: 22px; font-weight: 700; color: var(--gray-800); }
+  .page-subtitle { font-size: 13px; color: var(--gray-400); margin-top: 4px; }
+
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: var(--radius); font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: all .15s; font-family: var(--font); }
+  .btn-primary { background: var(--blue); color: var(--white); }
+  .btn-primary:hover { background: var(--blue-dark); }
+  .btn-secondary { background: var(--white); color: var(--blue); border: 1.5px solid var(--blue); }
+  .btn-secondary:hover { background: #EBF2FF; }
+  .btn-ghost { background: transparent; color: var(--gray-600); border: 1.5px solid var(--border); }
+  .btn-ghost:hover { background: var(--gray-100); }
+  .btn-orange { background: var(--orange); color: var(--white); }
+  .btn-orange:hover { background: #E06D00; }
+  .btn-sm { padding: 5px 10px; font-size: 12px; }
+  .btn-group { display: flex; gap: 8px; align-items: center; }
+
+  /* TYPE CARDS (landing) */
+  .type-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 28px; }
+  .type-card { background: var(--white); border: 2px solid var(--border); border-radius: 10px; padding: 24px; cursor: pointer; transition: all .2s; }
+  .type-card:hover { border-color: var(--blue); box-shadow: 0 4px 16px rgba(52,131,250,.12); transform: translateY(-2px); }
+  .type-card.active { border-color: var(--orange); background: #FFF8F0; }
+  .type-icon { font-size: 28px; margin-bottom: 12px; }
+  .type-name { font-size: 15px; font-weight: 800; color: var(--gray-800); margin-bottom: 6px; }
+  .type-desc { font-size: 12px; color: var(--gray-400); line-height: 1.5; }
+  .type-volume { margin-top: 10px; font-size: 12px; font-weight: 700; color: var(--blue); }
+
+  /* CARDS */
+  .card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; }
+  .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .card-title { font-size: 14px; font-weight: 700; color: var(--gray-800); }
+
+  /* BADGES */
+  .badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+  .badge-green { background: #E6F9F0; color: var(--green); }
+  .badge-gray { background: var(--gray-100); color: var(--gray-400); }
+  .badge-blue { background: #EBF2FF; color: var(--blue); }
+  .badge-orange { background: #FFF3E8; color: var(--orange); }
+  .badge-red { background: #FEE8EA; color: var(--red); }
+
+  /* ROLE SELECTOR */
+  .role-bar { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 16px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; font-size: 13px; }
+  .role-label { color: var(--gray-400); }
+  .role-chip { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; cursor: pointer; border: 1.5px solid var(--border); background: var(--gray-100); color: var(--gray-600); }
+  .role-chip.active { background: var(--orange); color: var(--white); border-color: var(--orange); }
+
+  /* WEEK CALENDAR */
+  .week-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+  .week-label { font-size: 15px; font-weight: 700; }
+  .week-btn { width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid var(--border); background: var(--white); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 14px; color: var(--gray-600); }
+
+  /* CALENDAR GRID */
+  .cal-grid { display: grid; grid-template-columns: 100px repeat(7, 1fr); gap: 0; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; background: var(--white); }
+  .cal-head { background: var(--gray-100); padding: 8px; font-size: 11px; font-weight: 700; color: var(--gray-600); text-align: center; border-bottom: 1px solid var(--border); border-right: 1px solid var(--border); }
+  .cal-head:last-child { border-right: none; }
+  .cal-row-label { padding: 10px 8px; font-size: 11px; font-weight: 700; color: var(--gray-600); border-right: 1px solid var(--border); border-bottom: 1px solid var(--gray-100); display: flex; align-items: center; }
+  .cal-cell { padding: 6px; border-right: 1px solid var(--gray-100); border-bottom: 1px solid var(--gray-100); min-height: 52px; vertical-align: top; }
+  .cal-cell:last-child { border-right: none; }
+  .cal-event { background: #EBF2FF; border-left: 3px solid var(--blue); border-radius: 3px; padding: 3px 6px; font-size: 10px; font-weight: 600; color: var(--blue); margin-bottom: 3px; cursor: pointer; }
+  .cal-event.orange { background: #FFF3E8; border-color: var(--orange); color: var(--orange); }
+  .cal-event.green { background: #E6F9F0; border-color: var(--green); color: var(--green); }
+  .cal-event.gray { background: var(--gray-100); border-color: var(--gray-300); color: var(--gray-400); }
+  .cal-add { font-size: 10px; color: var(--gray-300); cursor: pointer; }
+  .cal-add:hover { color: var(--blue); }
+
+  /* IMPORT ZONE */
+  .import-zone { border: 2px dashed var(--border); border-radius: var(--radius); padding: 32px; text-align: center; cursor: pointer; transition: all .15s; margin-bottom: 16px; }
+  .import-zone:hover { border-color: var(--orange); background: #FFF8F010; }
+  .import-icon { font-size: 28px; margin-bottom: 10px; }
+  .import-text { font-size: 13px; color: var(--gray-600); }
+  .import-text strong { color: var(--orange); }
+  .import-hint { font-size: 11px; color: var(--gray-400); margin-top: 6px; }
+
+  /* ALERT */
+  .alert { border-radius: var(--radius); padding: 12px 16px; margin-bottom: 16px; display: flex; gap: 10px; align-items: flex-start; font-size: 13px; }
+  .alert-warning { background: #FFFBE6; border: 1px solid var(--yellow); color: #7A6000; }
+  .alert-error { background: #FEE8EA; border: 1px solid var(--red); color: #B30010; }
+  .alert-success { background: #E6F9F0; border: 1px solid var(--green); color: #005C2D; }
+  .alert-info { background: #EBF2FF; border: 1px solid var(--blue); color: #1A4FA0; }
+  .alert-orange { background: #FFF3E8; border: 1px solid var(--orange); color: #7A3800; }
+
+  /* TABLE */
+  .table-wrap { background: var(--white); border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; }
+  .table { width: 100%; border-collapse: collapse; }
+  .table th { background: var(--gray-100); padding: 10px 14px; text-align: left; font-size: 12px; font-weight: 700; color: var(--gray-600); border-bottom: 1px solid var(--border); }
+  .table td { padding: 10px 14px; border-bottom: 1px solid var(--gray-100); font-size: 13px; }
+  .table tr:last-child td { border-bottom: none; }
+  .table tr:hover td { background: #FAFAFA; cursor: pointer; }
+
+  /* FORM */
+  .form-group { margin-bottom: 16px; }
+  .form-label { font-size: 12px; font-weight: 700; color: var(--gray-600); margin-bottom: 6px; display: block; }
+  .form-input { width: 100%; padding: 9px 12px; border: 1.5px solid var(--border); border-radius: var(--radius); font-size: 13px; font-family: var(--font); color: var(--gray-800); transition: border-color .15s; }
+  .form-input:focus { outline: none; border-color: var(--orange); }
+  .form-select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23999' stroke-width='1.5' fill='none'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .form-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
+
+  /* MODAL */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 200; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--white); border-radius: 10px; padding: 28px; width: 520px; max-width: 95vw; box-shadow: 0 8px 32px rgba(0,0,0,.18); animation: modalIn .2s ease; }
+  @keyframes modalIn { from { transform: translateY(16px); opacity: 0; } to { transform: none; opacity: 1; } }
+  .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .modal-title { font-size: 16px; font-weight: 700; }
+  .modal-close { width: 28px; height: 28px; border-radius: 50%; border: none; background: var(--gray-100); cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; color: var(--gray-600); }
+
+  /* LINKING TRAVEL */
+  .linking-row { display: flex; align-items: center; gap: 12px; background: #FFF8F0; border: 1.5px solid var(--orange); border-radius: var(--radius); padding: 12px 16px; margin-bottom: 8px; cursor: pointer; }
+  .linking-icon { font-size: 18px; }
+  .linking-text { font-size: 13px; font-weight: 600; color: var(--orange); }
+  .linking-sub { font-size: 11px; color: var(--gray-400); margin-top: 2px; }
+
+  .divider { height: 1px; background: var(--border); margin: 16px 0; }
+  .chip { display: inline-flex; align-items: center; gap: 4px; background: var(--gray-100); border-radius: 4px; padding: 3px 8px; font-size: 11px; font-weight: 600; color: var(--gray-600); }
+
+  .proto-label { position: fixed; bottom: 16px; right: 16px; background: var(--orange); color: var(--white); font-size: 11px; font-weight: 700; padding: 6px 12px; border-radius: 20px; letter-spacing: .04em; text-transform: uppercase; opacity: .85; pointer-events: none; }
+
+  .success-icon { width: 56px; height: 56px; background: #E6F9F0; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 24px; }
+  .success-center { text-align: center; padding: 20px 0; }
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-logo">
+    <svg viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="20" fill="#fff"/><path d="M8 20c0-6.627 5.373-12 12-12s12 5.373 12 12-5.373 12-12 12S8 26.627 8 20z" fill="#3483FA"/><path d="M14 20l4 4 8-8" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <span>Fixed fleet · Viajes especiales</span>
+  </div>
+  <div class="topbar-right">
+    <div class="site-badge">MLB</div>
+    <span>Leonardo ˅</span>
+  </div>
+</div>
+
+<div class="app">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Planning</div>
+      <div class="sidebar-item" onclick="showScreen('landing')">
+        <svg viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5" height="5" rx="1" fill="currentColor"/><rect x="9" y="2" width="5" height="5" rx="1" fill="currentColor" opacity=".4"/><rect x="2" y="9" width="5" height="5" rx="1" fill="currentColor" opacity=".4"/><rect x="9" y="9" width="5" height="5" rx="1" fill="currentColor" opacity=".4"/></svg>
+        Overview
+      </div>
+      <div class="sidebar-item">
+        <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/><path d="M8 5v3l2 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Circuits
+      </div>
+      <div class="sidebar-item highlight active" onclick="showScreen('landing')">
+        <svg viewBox="0 0 16 16" fill="none"><path d="M2 4h12M2 8h8M2 12h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Viajes especiales
+        <span class="sidebar-new">NEW</span>
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Operations</div>
+      <div class="sidebar-item">
+        <svg viewBox="0 0 16 16" fill="none"><path d="M2 8h12M8 2l4 6-4 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Travel activity
+      </div>
+      <div class="sidebar-item">
+        <svg viewBox="0 0 16 16" fill="none"><path d="M4 2h8a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V3a1 1 0 011-1z" stroke="currentColor" stroke-width="1.5"/><path d="M6 6h4M6 9h2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Imports
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- SCREEN 1: LANDING -->
+    <div class="screen active" id="screen-landing">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Programación de viajes especiales</div>
+          <div class="page-subtitle">Gestioná Backup, Drop Hook y Multiwarehouse por separado, con acceso diferenciado por rol.</div>
+        </div>
+      </div>
+
+      <div class="alert alert-orange">
+        <span>🔒</span>
+        <div><strong>Acceso diferenciado:</strong> Planificadores pueden crear y editar programaciones. Operación de campo solo puede modificar horarios y cancelar viajes individuales.</div>
+      </div>
+
+      <div class="type-grid">
+        <div class="type-card" onclick="showScreen('backup')">
+          <div class="type-icon">🚛</div>
+          <div class="type-name">Backup</div>
+          <div class="type-desc">Vehículos de capacidad adicional asignados a facilities. Se activan ante fallas o picos de demanda.</div>
+          <div class="type-volume">MLB: ~629 viajes/sem · 2 usuarios</div>
+        </div>
+        <div class="type-card" onclick="showScreen('drophook')">
+          <div class="type-icon">🏭</div>
+          <div class="type-name">Drop Hook</div>
+          <div class="type-desc">Transferencias desde Receiving Centers. Alta frecuencia, horarios variables, siempre con Linking Travel de retorno.</div>
+          <div class="type-volume">MLB: RC02 163/sem · RC03 85/sem</div>
+        </div>
+        <div class="type-card" onclick="showScreen('mwh')">
+          <div class="type-icon">📦</div>
+          <div class="type-name">Multiwarehouse</div>
+          <div class="type-desc">Transferencias Full-to-Full. Sin circuito rígido ni itinerario fijo. Depende del volumen semanal de stock.</div>
+          <div class="type-volume">MLM: ~8.574 viajes/mes · MLB: ~8.207/mes</div>
+        </div>
+      </div>
+
+      <!-- RESUMEN SEMANAL -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Resumen semanal — 10–16 Ago 2026</div>
+          <div class="btn-group">
+            <div class="week-btn">‹</div>
+            <div class="week-btn">›</div>
+          </div>
+        </div>
+        <div class="cal-grid">
+          <div class="cal-head"></div>
+          <div class="cal-head">Lun 10</div>
+          <div class="cal-head">Mar 11</div>
+          <div class="cal-head">Mié 12</div>
+          <div class="cal-head">Jue 13</div>
+          <div class="cal-head">Vie 14</div>
+          <div class="cal-head">Sáb 15</div>
+          <div class="cal-head">Dom 16</div>
+          <div class="cal-row-label">Backup</div>
+          <div class="cal-cell"><div class="cal-event orange">BKP-01 08:00</div><div class="cal-event orange">BKP-02 12:00</div></div>
+          <div class="cal-cell"><div class="cal-event green">BKP-01 ✓</div></div>
+          <div class="cal-cell"></div>
+          <div class="cal-cell"><div class="cal-event orange">BKP-03 09:00</div></div>
+          <div class="cal-cell"><div class="cal-event orange">BKP-01 14:00</div></div>
+          <div class="cal-cell"></div>
+          <div class="cal-cell"></div>
+          <div class="cal-row-label">Drop Hook</div>
+          <div class="cal-cell"><div class="cal-event blue" style="background:#EBF2FF;border-color:var(--blue);color:var(--blue)">RC02 x12</div></div>
+          <div class="cal-cell"><div class="cal-event blue">RC02 x8</div><div class="cal-event blue">RC03 x5</div></div>
+          <div class="cal-cell"><div class="cal-event blue">RC02 x10</div></div>
+          <div class="cal-cell"><div class="cal-event blue">RC02 x9</div></div>
+          <div class="cal-cell"><div class="cal-event blue">RC02 x14</div><div class="cal-event blue">RC03 x7</div></div>
+          <div class="cal-cell"><div class="cal-event gray">RC02 x3</div></div>
+          <div class="cal-cell"></div>
+          <div class="cal-row-label">MWH</div>
+          <div class="cal-cell"><div class="cal-event" style="background:#F3EDFF;border-color:var(--purple);color:var(--purple)">994 viajes</div></div>
+          <div class="cal-cell"></div>
+          <div class="cal-cell"></div>
+          <div class="cal-cell"></div>
+          <div class="cal-cell"><div class="cal-event" style="background:#F3EDFF;border-color:var(--purple);color:var(--purple)">1.379 viajes</div></div>
+          <div class="cal-cell"></div>
+          <div class="cal-cell"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCREEN 2: BACKUP -->
+    <div class="screen" id="screen-backup">
+      <div class="breadcrumb">
+        <a onclick="showScreen('landing')">Viajes especiales</a>
+        <span>›</span>
+        <span style="color:var(--gray-800)">Backup</span>
+      </div>
+      <div class="page-header">
+        <div>
+          <div class="page-title">Backup</div>
+          <div class="page-subtitle">Vehículos de capacidad adicional asignados a facilities. Semana 10–16 Ago 2026.</div>
+        </div>
+        <div class="btn-group">
+          <button class="btn btn-ghost btn-sm" onclick="showScreen('import-backup')">Importar programación</button>
+          <button class="btn btn-orange btn-sm" onclick="showModal('modal-backup')">+ Agregar viaje</button>
+        </div>
+      </div>
+
+      <div class="alert alert-orange">
+        <span>🔗</span>
+        <div><strong>Linking Travel automático:</strong> Cada viaje de Backup genera automáticamente un viaje de retorno al facility de base. El kilometraje de retorno queda registrado para pago SRM.</div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Viaje</th><th>Facility</th><th>Ruta</th><th>ETA estimada</th><th>Flota</th><th>Estado</th><th>Linking Travel</th><th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>BKP-2026-001</strong></td>
+              <td>BRSP06<div style="font-size:11px;color:var(--gray-400)">GLP Cajamar II</div></td>
+              <td>BRSP06 → BRRC01</td>
+              <td>10 Ago · 08:00</td>
+              <td><span class="chip">Carreta Sider</span></td>
+              <td><span class="badge badge-orange">Pre-programado</span></td>
+              <td><span class="badge badge-green">Generado ✓</span></td>
+              <td><a style="color:var(--blue);font-size:12px;cursor:pointer">Editar horario</a></td>
+            </tr>
+            <tr>
+              <td><strong>BKP-2026-002</strong></td>
+              <td>BRSP06</td>
+              <td>BRSP06 → BRSP11</td>
+              <td>10 Ago · 12:00</td>
+              <td><span class="chip">Carreta Sider</span></td>
+              <td><span class="badge badge-orange">Pre-programado</span></td>
+              <td><span class="badge badge-green">Generado ✓</span></td>
+              <td><a style="color:var(--blue);font-size:12px;cursor:pointer">Editar horario</a></td>
+            </tr>
+            <tr>
+              <td><strong>BKP-2026-003</strong></td>
+              <td>BRRC01</td>
+              <td>BRRC01 → BRSP06</td>
+              <td>11 Ago · 06:00</td>
+              <td><span class="chip">Carreta Sider</span></td>
+              <td><span class="badge badge-green">Ejecutado</span></td>
+              <td><span class="badge badge-green">Registrado ✓</span></td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td><strong>BKP-2026-004</strong></td>
+              <td>BRSP06</td>
+              <td>BRSP06 → BRRJ02</td>
+              <td>13 Ago · 09:00</td>
+              <td><span class="chip">Carreta Sider</span></td>
+              <td><span class="badge badge-orange">Pre-programado</span></td>
+              <td><span class="badge badge-orange">Pendiente</span></td>
+              <td><a style="color:var(--blue);font-size:12px;cursor:pointer">Editar horario</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SCREEN 3: IMPORT BACKUP -->
+    <div class="screen" id="screen-import-backup">
+      <div class="breadcrumb">
+        <a onclick="showScreen('landing')">Viajes especiales</a>
+        <span>›</span>
+        <a onclick="showScreen('backup')">Backup</a>
+        <span>›</span>
+        <span style="color:var(--gray-800)">Importar programación</span>
+      </div>
+      <div class="page-header">
+        <div>
+          <div class="page-title">Importar programación — Backup</div>
+          <div class="page-subtitle">Cargá la programación semanal de vehículos backup por planilla.</div>
+        </div>
+      </div>
+
+      <div class="alert alert-orange">
+        <span>🔗</span>
+        <div><strong>Linking Travel incluido:</strong> El sistema generará automáticamente el viaje de retorno al facility de base para cada viaje de Backup importado. No es necesario declararlo en la planilla.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title" style="margin-bottom:16px">Subir planilla</div>
+        <div class="import-zone" onclick="showScreen('import-result-backup')">
+          <div class="import-icon">📋</div>
+          <div class="import-text"><strong>Seleccioná el archivo</strong> o arrastralo acá</div>
+          <div class="import-hint">Campos: facility_id · ruta (origen → destino) · fecha · ETA estimada · tipo flota · Formatos: .xlsx · .csv</div>
+        </div>
+        <button class="btn btn-ghost btn-sm">Descargar plantilla Backup</button>
+      </div>
+    </div>
+
+    <!-- SCREEN 4: IMPORT RESULT BACKUP -->
+    <div class="screen" id="screen-import-result-backup">
+      <div class="breadcrumb">
+        <a onclick="showScreen('landing')">Viajes especiales</a>
+        <span>›</span>
+        <a onclick="showScreen('backup')">Backup</a>
+        <span>›</span>
+        <span style="color:var(--gray-800)">Resultado de importación</span>
+      </div>
+      <div class="page-title" style="margin-bottom:20px">Resultado de importación — Backup</div>
+
+      <div class="alert alert-success">
+        <span>✅</span>
+        <div><strong>315 viajes de Backup creados</strong> + <strong>315 Linking Travels generados automáticamente.</strong> Todos con tarifa válida y kilometraje de retorno registrado.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title" style="margin-bottom:12px">Resumen</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
+          <div style="text-align:center;padding:16px;background:var(--gray-100);border-radius:var(--radius)">
+            <div style="font-size:24px;font-weight:800;color:var(--green)">315</div>
+            <div style="font-size:12px;color:var(--gray-400);margin-top:4px">Viajes Backup creados</div>
+          </div>
+          <div style="text-align:center;padding:16px;background:var(--gray-100);border-radius:var(--radius)">
+            <div style="font-size:24px;font-weight:800;color:var(--blue)">315</div>
+            <div style="font-size:12px;color:var(--gray-400);margin-top:4px">Linking Travels generados</div>
+          </div>
+          <div style="text-align:center;padding:16px;background:var(--gray-100);border-radius:var(--radius)">
+            <div style="font-size:24px;font-weight:800;color:var(--red)">0</div>
+            <div style="font-size:12px;color:var(--gray-400);margin-top:4px">Errores</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button class="btn btn-ghost" onclick="showScreen('landing')">Ver resumen semanal</button>
+        <button class="btn btn-orange" onclick="showScreen('backup')">Ver viajes Backup</button>
+      </div>
+    </div>
+
+    <!-- SCREEN 5: MWH -->
+    <div class="screen" id="screen-mwh">
+      <div class="breadcrumb">
+        <a onclick="showScreen('landing')">Viajes especiales</a>
+        <span>›</span>
+        <span style="color:var(--gray-800)">Multiwarehouse</span>
+      </div>
+      <div class="page-header">
+        <div>
+          <div class="page-title">Multiwarehouse</div>
+          <div class="page-subtitle">Transferencias Full-to-Full. Sin circuito rígido. Semana 10–16 Ago 2026.</div>
+        </div>
+        <div class="btn-group">
+          <button class="btn btn-ghost btn-sm">Importar programación</button>
+        </div>
+      </div>
+
+      <div class="alert alert-warning">
+        <span>⚠️</span>
+        <div><strong>Sin circuito asociado:</strong> Los viajes MWH no siguen un circuito fijo. Las rutas dependen de la necesidad operativa semanal. Los horarios son estimados y la operación puede editarlos o cancelarlos.</div>
+      </div>
+
+      <div class="alert alert-info">
+        <span>ℹ️</span>
+        <div><strong>Acceso de campo habilitado</strong> para modificar horarios y cancelar viajes individuales. Los planificadores tienen acceso completo a crear y editar programaciones.</div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr><th>Viaje</th><th>Origen</th><th>Destino</th><th>ETA estimada</th><th>Flota</th><th>Estado</th><th>Acciones campo</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>MWH-2026-0842</strong></td>
+              <td>BRRC01</td><td>BRSP11</td>
+              <td>10 Ago · 08:30</td>
+              <td><span class="chip">Carreta Sider</span></td>
+              <td><span class="badge badge-green">Creado</span></td>
+              <td><a style="color:var(--blue);font-size:12px;cursor:pointer;margin-right:8px">Editar horario</a><a style="color:var(--red);font-size:12px;cursor:pointer">Cancelar</a></td>
+            </tr>
+            <tr>
+              <td><strong>MWH-2026-0843</strong></td>
+              <td>BRRC01</td><td>BRSP06</td>
+              <td>10 Ago · 10:00</td>
+              <td><span class="chip">Carreta Sider</span></td>
+              <td><span class="badge badge-green">Creado</span></td>
+              <td><a style="color:var(--blue);font-size:12px;cursor:pointer;margin-right:8px">Editar horario</a><a style="color:var(--red);font-size:12px;cursor:pointer">Cancelar</a></td>
+            </tr>
+            <tr>
+              <td><strong>MWH-2026-1120</strong></td>
+              <td>BRSP06</td><td>BRRC03</td>
+              <td>14 Ago · 14:20</td>
+              <td><span class="chip">Carreta Sider</span></td>
+              <td><span class="badge badge-orange">Pre-programado</span></td>
+              <td><a style="color:var(--blue);font-size:12px;cursor:pointer;margin-right:8px">Editar horario</a><a style="color:var(--red);font-size:12px;cursor:pointer">Cancelar</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SCREEN 6: DROP HOOK -->
+    <div class="screen" id="screen-drophook">
+      <div class="breadcrumb">
+        <a onclick="showScreen('landing')">Viajes especiales</a>
+        <span>›</span>
+        <span style="color:var(--gray-800)">Drop Hook</span>
+      </div>
+      <div class="page-header">
+        <div>
+          <div class="page-title">Drop Hook</div>
+          <div class="page-subtitle">Transferencias desde Receiving Centers. Semana 10–16 Ago 2026.</div>
+        </div>
+        <div class="btn-group">
+          <button class="btn btn-ghost btn-sm">Importar programación</button>
+          <button class="btn btn-orange btn-sm">+ Agregar viaje</button>
+        </div>
+      </div>
+
+      <div class="alert alert-orange">
+        <span>🔗</span>
+        <div><strong>Linking Travel automático:</strong> Igual que Backup, cada viaje de Drop Hook genera un viaje de retorno al Receiving Center.</div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr><th>Viaje</th><th>RC Origen</th><th>Destino</th><th>ETA estimada</th><th>Estado</th><th>Linking Travel</th><th></th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>DH-RC02-001</strong></td>
+              <td>RC02 — São Paulo</td><td>BRSP06</td>
+              <td>10 Ago · 06:00</td>
+              <td><span class="badge badge-green">Creado</span></td>
+              <td><span class="badge badge-green">Generado ✓</span></td>
+              <td><a style="color:var(--blue);font-size:12px;cursor:pointer">Ver</a></td>
+            </tr>
+            <tr>
+              <td><strong>DH-RC02-002</strong></td>
+              <td>RC02</td><td>BRSP11</td>
+              <td>10 Ago · 08:30</td>
+              <td><span class="badge badge-green">Creado</span></td>
+              <td><span class="badge badge-green">Generado ✓</span></td>
+              <td><a style="color:var(--blue);font-size:12px;cursor:pointer">Ver</a></td>
+            </tr>
+            <tr>
+              <td><strong>DH-RC03-001</strong></td>
+              <td>RC03 — Barueri</td><td>BRSP06</td>
+              <td>11 Ago · 07:00</td>
+              <td><span class="badge badge-orange">Pre-programado</span></td>
+              <td><span class="badge badge-orange">Pendiente</span></td>
+              <td><a style="color:var(--blue);font-size:12px;cursor:pointer">Ver</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL: AGREGAR BACKUP -->
+<div class="modal-overlay" id="modal-backup">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Agregar viaje Backup</div>
+      <button class="modal-close" onclick="closeModal('modal-backup')">✕</button>
+    </div>
+    <div class="alert alert-orange" style="font-size:12px;padding:10px 14px">
+      <span>🔗</span>
+      <div>Se generará automáticamente un <strong>Linking Travel de retorno</strong> al facility de base.</div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Facility de base</label>
+      <select class="form-input form-select">
+        <option>BRSP06 — GLP Cajamar II</option>
+        <option>BRRC01 — São Paulo Norte</option>
+        <option>BRRJ02 — Rio XD</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Origen</label>
+        <select class="form-input form-select">
+          <option>BRSP06 — GLP Cajamar II</option>
+          <option>BRRC01</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Destino</label>
+        <select class="form-input form-select">
+          <option>BRRC01</option>
+          <option>BRSP11</option>
+          <option>BRRJ02</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Fecha</label>
+        <input type="date" class="form-input" value="2026-08-13">
+      </div>
+      <div class="form-group">
+        <label class="form-label">ETA estimada</label>
+        <input type="time" class="form-input" value="09:00">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Tipo de flota</label>
+      <select class="form-input form-select">
+        <option>Carreta Sider</option>
+        <option>Carreta Baú</option>
+      </select>
+    </div>
+    <div class="linking-row">
+      <div class="linking-icon">↩️</div>
+      <div>
+        <div class="linking-text">Linking Travel: BRRC01 → BRSP06</div>
+        <div class="linking-sub">Generado automáticamente · KM de retorno registrado para pago SRM</div>
+      </div>
+    </div>
+    <div class="form-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-backup')">Cancelar</button>
+      <button class="btn btn-orange" onclick="closeModal('modal-backup');showModal('modal-success')">Crear Backup + Linking Travel</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: SUCCESS -->
+<div class="modal-overlay" id="modal-success">
+  <div class="modal">
+    <div class="success-center">
+      <div class="success-icon">✅</div>
+      <div class="modal-title" style="margin-bottom:8px">Viaje creado exitosamente</div>
+      <div style="font-size:13px;color:var(--gray-600);margin-bottom:4px">BKP-2026-005 · BRSP06 → BRRC01</div>
+      <div style="font-size:12px;color:var(--gray-400)">+ Linking Travel generado automáticamente · TR–84305</div>
+    </div>
+    <div class="divider"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button class="btn btn-ghost" onclick="closeModal('modal-success');showScreen('backup')">Ver Backup</button>
+      <button class="btn btn-orange" onclick="closeModal('modal-success')">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<div class="proto-label">Hip B · Prototype</div>
+
+<script>
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen-' + id).classList.add('active');
+    window.scrollTo(0, 0);
+  }
+  function showModal(id) { document.getElementById(id).classList.add('open'); }
+  function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.remove('open'); });
+  });
+</script>
+</body>
+</html>
