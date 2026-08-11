@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DED Legacy — Análisis UX Ejecutivo v5</title>
+<style>
+  :root {
+    --bg: #0f1729;
+    --surface: #1a2540;
+    --surface2: #222f4a;
+    --surface3: #2a3a5c;
+    --border: #2d3f5e;
+    --text: #e8edf5;
+    --muted: #7b8db0;
+    --yellow: #FFE600;
+    --yellow-dark: #D4BF00;
+    --blue: #3490ff;
+    --blue-light: #5aabff;
+    --red: #ff4d5e;
+    --green: #00c97a;
+    --orange: #ff8c42;
+    --purple: #a78bfa;
+    --cyan: #38d9f5;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.65;
+  }
+
+  .lang-bar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 0;
+    display: flex; justify-content: center; align-items: center; gap: 12px;
+    font-size: 12px; color: var(--muted);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .lang-btn {
+    display: flex; align-items: center; gap: 6px;
+    padding: 5px 14px; border-radius: 20px;
+    font-size: 12px; font-weight: 700; cursor: pointer;
+    border: none; transition: all .2s;
+  }
+  .lang-btn.active { background: var(--yellow); color: #000; }
+  .lang-btn:not(.active) { background: var(--surface2); color: var(--muted); }
+
+  .hero {
+    background: linear-gradient(135deg, #0f1729 0%, #1a2a50 50%, #0f1729 100%);
+    padding: 72px 40px; text-align: center; position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 30% 50%, #3490ff15 0%, transparent 60%),
+                radial-gradient(ellipse at 70% 30%, #FFE60010 0%, transparent 60%);
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center;
+    background: #FFE60015; border: 1px solid #FFE60040;
+    color: var(--yellow); font-size: 11px; font-weight: 700;
+    letter-spacing: .1em; text-transform: uppercase;
+    padding: 5px 14px; border-radius: 20px; margin-bottom: 24px;
+  }
+  .hero h1 {
+    font-size: clamp(32px, 5vw, 52px); font-weight: 900;
+    line-height: 1.15; letter-spacing: -.03em; margin-bottom: 20px; position: relative;
+  }
+  .hero h1 span { color: var(--yellow); }
+  .hero-sub { font-size: 17px; color: var(--muted); max-width: 600px; margin: 0 auto 32px; line-height: 1.6; }
+  .hero-meta { display: flex; justify-content: center; gap: 28px; font-size: 13px; color: var(--muted); flex-wrap: wrap; }
+  .hero-meta strong { color: var(--text); }
+
+  .section { padding: 64px 40px; max-width: 1080px; margin: 0 auto; }
+  .section-dark { padding: 64px 40px; background: var(--surface); }
+  .section-dark > .inner { max-width: 1080px; margin: 0 auto; }
+
+  .eyebrow {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 11px; font-weight: 700; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--yellow); margin-bottom: 16px;
+  }
+  .eyebrow::before { content: '●'; font-size: 8px; }
+
+  h2.section-title {
+    font-size: clamp(26px, 4vw, 38px); font-weight: 900;
+    letter-spacing: -.02em; color: var(--text); margin-bottom: 12px;
+  }
+  .section-desc { font-size: 15px; color: var(--muted); margin-bottom: 40px; line-height: 1.6; }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px; }
+  .card-sm { padding: 18px 20px; border-radius: 12px; }
+  .card.yellow { background: #FFE60012; border-color: #FFE60030; }
+  .card.blue { background: #3490ff12; border-color: #3490ff30; }
+  .card.red { background: #ff4d5e12; border-color: #ff4d5e30; }
+  .card.green { background: #00c97a12; border-color: #00c97a30; }
+  .card.orange { background: #ff8c4212; border-color: #ff8c4230; }
+  .card.purple { background: #a78bfa12; border-color: #a78bfa30; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+
+  .sep { height: 1px; background: var(--border); }
+
+  .stats-row { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 32px; }
+  .stat-pill { background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; padding: 18px 24px; flex: 1; min-width: 160px; }
+  .stat-value { font-size: 28px; font-weight: 900; letter-spacing: -.02em; }
+  .stat-label { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .stat-value.yellow { color: var(--yellow); }
+  .stat-value.red { color: var(--red); }
+  .stat-value.blue { color: var(--blue-light); }
+  .stat-value.green { color: var(--green); }
+
+  .num-list { display: flex; flex-direction: column; }
+  .num-item { display: flex; gap: 20px; align-items: flex-start; padding: 20px 0; border-bottom: 1px solid var(--border); }
+  .num-item:last-child { border-bottom: none; }
+  .num-badge { width: 32px; height: 32px; border-radius: 50%; background: var(--red); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 900; flex-shrink: 0; }
+  .num-content strong { font-size: 15px; font-weight: 700; color: var(--text); display: block; margin-bottom: 6px; }
+  .num-content p { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+  /* PROPOSAL CARDS */
+  .proposal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .proposal-header {
+    padding: 24px 28px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: flex-start; gap: 16px;
+  }
+  .proposal-badge {
+    width: 40px; height: 40px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 900; flex-shrink: 0;
+  }
+  .proposal-badge.luis { background: #3490ff20; color: var(--blue-light); border: 1.5px solid #3490ff40; }
+  .proposal-badge.gustavo { background: #a78bfa20; color: var(--purple); border: 1.5px solid #a78bfa40; }
+  .proposal-badge.ux-a { background: #FFE60020; color: var(--yellow); border: 1.5px solid #FFE60040; }
+  .proposal-badge.ux-b { background: #00c97a20; color: var(--green); border: 1.5px solid #00c97a40; }
+  .proposal-title { font-size: 17px; font-weight: 800; color: var(--text); margin-bottom: 4px; }
+  .proposal-sub { font-size: 13px; color: var(--muted); }
+  .proposal-body { padding: 20px 28px; }
+  .proposal-desc { font-size: 14px; color: var(--muted); line-height: 1.7; margin-bottom: 20px; }
+  .proposal-desc strong { color: var(--text); }
+
+  /* PRO / CONTRA */
+  .pro-contra { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+  .pro-col { padding: 16px 20px; border-right: 1px solid var(--border); }
+  .contra-col { padding: 16px 20px; }
+  .pc-label {
+    font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase;
+    margin-bottom: 12px; display: flex; align-items: center; gap: 6px;
+  }
+  .pc-label.pro { color: var(--green); }
+  .pc-label.contra { color: var(--red); }
+  .pc-item {
+    display: flex; align-items: flex-start; gap: 8px;
+    font-size: 13px; color: var(--muted); line-height: 1.55;
+    margin-bottom: 10px;
+  }
+  .pc-item:last-child { margin-bottom: 0; }
+  .pc-icon { font-size: 13px; flex-shrink: 0; margin-top: 1px; }
+  .pc-icon.pro { color: var(--green); }
+  .pc-icon.contra { color: var(--red); }
+  .pc-icon.question { color: var(--yellow); }
+
+  /* ARTIFACT CARDS */
+  .artifact-card {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: 12px;
+    padding: 20px; display: flex; gap: 16px; align-items: flex-start;
+    text-decoration: none; color: inherit; transition: all .2s; cursor: pointer;
+  }
+  .artifact-card:hover { border-color: var(--yellow); background: #FFE60008; }
+  .artifact-icon { font-size: 24px; flex-shrink: 0; }
+  .artifact-name { font-size: 14px; font-weight: 800; color: var(--text); margin-bottom: 4px; }
+  .artifact-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+  .artifact-link { font-size: 11px; color: var(--yellow); font-weight: 700; margin-top: 8px; display: block; }
+
+  /* DECISION TABLE */
+  .decision-wrap { background: #0b1120; border: 1px solid var(--border); border-radius: 16px; overflow: hidden; margin-bottom: 28px; }
+  .decision-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .decision-table th { padding: 12px 16px; text-align: left; font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+  .decision-table th.var { color: var(--muted); width: 32%; }
+  .decision-table th.a { color: var(--yellow); }
+  .decision-table th.b { color: var(--green); }
+  .decision-table td { padding: 14px 16px; border-bottom: 1px solid var(--border); vertical-align: top; line-height: 1.5; }
+  .decision-table td.var { font-weight: 700; color: var(--text); }
+  .decision-table td.opt { color: var(--muted); font-size: 13px; }
+  .decision-table tr:last-child td { border-bottom: none; }
+
+  .callout {
+    background: linear-gradient(135deg, #FFE60010, #a78bfa10);
+    border: 1px solid #FFE60030; border-radius: 14px; padding: 28px 32px; margin: 28px 0;
+  }
+  .callout h3 { font-size: 16px; font-weight: 800; color: var(--yellow); margin-bottom: 10px; }
+  .callout p { font-size: 14px; color: var(--text); line-height: 1.7; }
+
+  .type-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 22px; }
+  .type-card .pct { font-size: 28px; font-weight: 900; margin-bottom: 6px; }
+  .type-card h4 { font-size: 15px; font-weight: 800; margin-bottom: 8px; }
+  .type-card p { font-size: 13px; color: var(--muted); line-height: 1.55; }
+
+  .impact-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  .impact-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; padding: 18px; }
+  .impact-title { font-size: 13px; font-weight: 800; color: var(--text); margin-bottom: 8px; }
+  .impact-body { font-size: 13px; color: var(--muted); line-height: 1.55; }
+
+  .bar-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .bar-label { font-size: 13px; color: var(--muted); width: 160px; flex-shrink: 0; text-align: right; }
+  .bar-wrap { flex: 1; background: var(--surface2); border-radius: 4px; height: 22px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 4px; display: flex; align-items: center; padding-left: 10px; font-size: 12px; font-weight: 800; }
+  .bar-val { font-size: 13px; font-weight: 700; color: var(--text); width: 60px; flex-shrink: 0; }
+  .bar-fill.red { background: #ff4d5e; color: #fff; }
+  .bar-fill.blue { background: #3490ff; color: #fff; }
+  .bar-fill.blue-dark { background: #1a5bbf; color: #fff; }
+  .bar-fill.orange { background: #ff8c42; color: #fff; }
+
+  code {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    background: var(--surface2); border: 1px solid var(--border);
+    padding: 2px 6px; border-radius: 4px; font-size: 12px; color: var(--yellow);
+  }
+
+  /* OWNER TAG */
+  .owner-tag {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px;
+    margin-bottom: 12px;
+  }
+  .owner-tag.luis { background: #3490ff20; color: var(--blue-light); border: 1px solid #3490ff40; }
+  .owner-tag.gustavo { background: #a78bfa20; color: var(--purple); border: 1px solid #a78bfa40; }
+  .owner-tag.ux { background: #FFE60020; color: var(--yellow); border: 1px solid #FFE60040; }
+
+  .footer { padding: 40px; text-align: center; font-size: 12px; color: var(--muted); border-top: 1px solid var(--border); line-height: 1.8; }
+
+  @media (max-width: 768px) {
+    .section, .section-dark { padding: 40px 20px; }
+    .grid-2, .grid-3, .impact-grid { grid-template-columns: 1fr; }
+    .pro-contra { grid-template-columns: 1fr; }
+    .pro-col { border-right: none; border-bottom: 1px solid var(--border); }
+    .hero { padding: 48px 24px; }
+    .stats-row { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LANG BAR -->
+<div class="lang-bar">
+  IDIOMA / IDIOMA
+  <button class="lang-btn active">🇲🇽 ES</button>
+  <button class="lang-btn">🇧🇷 PT</button>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge">Análisis UX · Executive Brief · v5</div>
+  <h1>¿Qué son los<br><span>DED Legacy</span><br>y por qué importa?</h1>
+  <p class="hero-sub">Un problema estructural donde miles de viajes de carga operan completamente desconectados del sistema — sin tarifas, sin trazabilidad, sin visibilidad.</p>
+  <div class="hero-meta">
+    <span><strong>Fecha:</strong> Agosto 2026</span>
+    <span><strong>Operaciones:</strong> México (MLM) · Brasil (MLB)</span>
+    <span><strong>Dominio:</strong> Middle Mile · Fixed Fleet</span>
+    <span><strong>Estado:</strong> En definición / Q3 2026</span>
+  </div>
+</div>
+
+<div class="sep"></div>
+
+<!-- QUÉ ES -->
+<div class="section">
+  <div class="card yellow" style="padding:28px 32px;margin-bottom:40px">
+    <div style="font-size:18px;font-weight:800;color:var(--text);margin-bottom:12px">📦 La analogía simple</div>
+    <p style="font-size:15px;color:var(--text);line-height:1.7">Un <strong>circuito</strong> es como una ruta de transporte fija: "el camión sale todos los días de Guadalajara a las 9am hacia CDMX". Un <strong>viaje</strong> es cada vez que ese camión efectivamente sale. El problema es que miles de viajes se crean <em>fuera de ese circuito</em>, como si fueran viajes fantasma — operan, se pagan, pero el sistema no los reconoce como parte de ninguna ruta registrada.</p>
+  </div>
+  <div class="grid-3">
+    <div class="card card-sm">
+      <div style="font-size:12px;font-weight:800;color:var(--blue-light);margin-bottom:8px">🗺 Qué es un Circuito</div>
+      <div style="font-size:14px;color:var(--muted);line-height:1.6">Una ruta de transporte configurada en el sistema, con vehículos asignados, puntos de origen y destino, y reglas tarifarias.</div>
+    </div>
+    <div class="card card-sm">
+      <div style="font-size:12px;font-weight:800;color:var(--yellow);margin-bottom:8px">🚛 Qué es un Viaje DED</div>
+      <div style="font-size:14px;color:var(--muted);line-height:1.6">Un viaje "Dedicado" de Middle Mile: camión de carga larga distancia con contrato negociado y tarifa fija.</div>
+    </div>
+    <div class="card card-sm" style="border-color:#ff4d5e40;background:#ff4d5e08">
+      <div style="font-size:12px;font-weight:800;color:var(--red);margin-bottom:8px">👻 Qué es un DED Legacy</div>
+      <div style="font-size:14px;color:var(--muted);line-height:1.6">Un viaje dedicado que <strong>se crea fuera del sistema de circuitos</strong>. El nombre del circuito aparece en el nombre del viaje, pero no hay vínculo real en el sistema.</div>
+    </div>
+  </div>
+</div>
+
+<div class="sep"></div>
+
+<!-- CÓMO SE GENERA -->
+<div class="section-dark">
+<div class="inner">
+  <div class="eyebrow">El proceso</div>
+  <h2 class="section-title">¿Cómo se genera un DED Legacy?</h2>
+  <p class="section-desc">El analista intenta crear un viaje vinculado al circuito correcto — pero el sistema no se lo permite, y termina creando un viaje desconectado.</p>
+  <div style="background:#0b1120;border:1px solid var(--border);border-radius:16px;padding:28px;margin-bottom:32px">
+    <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:14px">EJEMPLO REAL DE NOMBRE DE VIAJE DED LEGACY</div>
+    <code style="font-size:16px;display:block;padding:16px;background:var(--surface2);border-radius:8px;letter-spacing:.02em">LHN_B019_T53_DED_MXJC01-SGD1@MXJC01_ADD</code>
+    <div class="grid-3" style="margin-top:16px;gap:10px">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px"><div style="color:var(--blue-light);font-size:11px;font-weight:800;margin-bottom:4px">LHN</div><div style="font-size:12px;color:var(--muted)">Linehaul Night — tipo de servicio</div></div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px"><div style="color:var(--yellow);font-size:11px;font-weight:800;margin-bottom:4px">B019</div><div style="font-size:12px;color:var(--muted)">Nombre del circuito (embebido en el nombre)</div></div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px"><div style="color:var(--muted);font-size:11px;font-weight:800;margin-bottom:4px">T53</div><div style="font-size:12px;color:var(--muted)">Tipo de vehículo (camión 53 pies)</div></div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px"><div style="color:var(--red);font-size:11px;font-weight:800;margin-bottom:4px">DED</div><div style="font-size:12px;color:var(--muted)">Modelo de contrato Dedicado</div></div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px"><div style="color:var(--blue-light);font-size:11px;font-weight:800;margin-bottom:4px">MXJC01-SGD1</div><div style="font-size:12px;color:var(--muted)">Ruta: origen → destino</div></div>
+      <div style="background:#ff4d5e20;border:1px solid #ff4d5e40;border-radius:8px;padding:12px"><div style="color:var(--red);font-size:11px;font-weight:800;margin-bottom:4px">_ADD</div><div style="font-size:12px;color:var(--muted)">Sufijo Legacy: enrichment manual reactivo</div></div>
+    </div>
+  </div>
+  <div class="num-list">
+    <div class="num-item"><div class="num-badge">1</div><div class="num-content"><strong>El analista necesita un viaje adicional</strong><p>El plan del día no alcanza. Necesita agregar capacidad o corregir una ruta. Va a Scheduling a crear un viaje.</p></div></div>
+    <div class="num-item"><div class="num-badge">2</div><div class="num-content"><strong>Llena los campos manualmente</strong><p>Escribe el nombre del circuito en el nombre del viaje siguiendo la convención. Pero esto es solo texto — no hay vínculo real en el sistema.</p></div></div>
+    <div class="num-item"><div class="num-badge">3</div><div class="num-content"><strong>El sistema no ofrece el servicio dedicado del circuito</strong><p>Solo muestra el MelService spot. El MelService del circuito dedicado original <strong>no está disponible</strong>. El viaje queda conectado al contrato equivocado.</p></div></div>
+    <div class="num-item"><div class="num-badge">4</div><div class="num-content"><strong>El equipo de operaciones calcula el precio manualmente</strong><p>Como el viaje quedó vinculado al contrato spot, el equipo calcula a mano los km y declara la tarifa negociada. Fuente constante de errores de facturación.</p></div></div>
+    <div class="num-item"><div class="num-badge">5</div><div class="num-content"><strong>Los sistemas dependientes quedan ciegos</strong><p>DFP no puede incluirlo en su optimización. Billing no puede aplicar el contrato negociado. Rostering no puede agrupar choferes. El viaje opera, pero el ecosistema es invisible.</p></div></div>
+  </div>
+</div>
+</div>
+
+<div class="sep"></div>
+
+<!-- VOLUMEN -->
+<div class="section">
+  <div class="eyebrow">Datos operativos</div>
+  <h2 class="section-title">Volumen y patrones de creación</h2>
+  <div class="stats-row">
+    <div class="stat-pill"><div class="stat-value yellow">19.6%</div><div class="stat-label">Operación MM en MLM son DED Legacy</div></div>
+    <div class="stat-pill"><div class="stat-value blue">6.8%</div><div class="stat-label">Operación MM en MLB son DED Legacy</div></div>
+    <div class="stat-pill"><div class="stat-value red">P0</div><div class="stat-label">Prioridad institucional Fix Fleet</div></div>
+    <div class="stat-pill"><div class="stat-value green">Q3</div><div class="stat-label">Meta de lanzamiento</div></div>
+  </div>
+  <div class="grid-2" style="margin-bottom:28px">
+    <div class="card orange">
+      <div style="font-size:12px;font-weight:800;color:var(--orange);margin-bottom:8px">🇲🇽 México — Patrón reactivo</div>
+      <div style="font-size:14px;color:var(--muted);line-height:1.6">El 33% de viajes se crea con menos de 3 horas de anticipación. El 60% con menos de 12 horas. Operación altamente reactiva.</div>
+    </div>
+    <div class="card blue">
+      <div style="font-size:12px;font-weight:800;color:var(--blue-light);margin-bottom:8px">🇧🇷 Brasil — Patrón planificado pero igualmente Legacy</div>
+      <div style="font-size:14px;color:var(--muted);line-height:1.6">El 92% de viajes se crea con más de 24hs de anticipación. 9 mega-cargas semanales generan el 82% del volumen.</div>
+    </div>
+  </div>
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px">
+    <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:20px">CÓMO SE CREAN: ¿PLANILLA MASIVA O PANTALLA MANUAL?</div>
+    <div class="bar-row"><div class="bar-label">México — Planilla</div><div class="bar-wrap"><div class="bar-fill blue" style="width:77%">77%</div></div><div class="bar-val">8,574</div></div>
+    <div class="bar-row"><div class="bar-label">México — Pantalla</div><div class="bar-wrap"><div class="bar-fill blue-dark" style="width:23%">23%</div></div><div class="bar-val">2,554</div></div>
+    <div class="bar-row"><div class="bar-label">Brasil — Planilla</div><div class="bar-wrap"><div class="bar-fill orange" style="width:97.6%">97.6%</div></div><div class="bar-val">8,207</div></div>
+    <div class="bar-row"><div class="bar-label">Brasil — Pantalla</div><div class="bar-wrap"><div class="bar-fill red" style="width:2.4%"></div></div><div class="bar-val">203</div></div>
+  </div>
+</div>
+
+<div class="sep"></div>
+
+<!-- 3 TIPOS -->
+<div class="section-dark">
+<div class="inner">
+  <div class="eyebrow">Taxonomía</div>
+  <h2 class="section-title">Los 3 tipos de DED Legacy</h2>
+  <p class="section-desc">Clasificados por razón de creación. Cada tipo tiene una causa distinta y requiere una solución diferente.</p>
+  <div class="grid-3">
+    <div class="type-card" style="background:#3490ff10;border-color:#3490ff30"><div class="pct" style="color:var(--blue-light)">77.8%</div><h4>Planificado (_PLN)</h4><p>El viaje era parte del plan del día. Pero fue creado desde Scheduling, no desde el circuito. El más común y el más fácil de resolver.</p></div>
+    <div class="type-card" style="background:#ff8c4210;border-color:#ff8c4230"><div class="pct" style="color:var(--orange)">16.5%</div><h4>Enrichment Manual (_ADD)</h4><p>El plan no alcanzó. El analista detecta que hacen falta más viajes y los agrega manualmente. Si el sistema tuviera visibilidad, podrían anticiparse.</p></div>
+    <div class="type-card" style="background:#ff4d5e10;border-color:#ff4d5e30"><div class="pct" style="color:var(--red)">5.7%</div><h4>Edición Disfrazada (_FIX)</h4><p>El sistema no permite editar un viaje ya creado. El analista lo cancela y crea uno nuevo. Se pierde la tarifa negociada y se genera un registro duplicado.</p></div>
+  </div>
+</div>
+</div>
+
+<div class="sep"></div>
+
+<!-- IMPACTO -->
+<div class="section">
+  <div class="eyebrow">Impacto sistémico</div>
+  <h2 class="section-title">¿Qué sistemas quedan afectados?</h2>
+  <div class="impact-grid">
+    <div class="impact-card"><div class="impact-title" style="color:var(--red)">💸 Billing</div><div class="impact-body">No puede aplicar el contrato negociado. El viaje queda sin precio correcto o se gestiona fuera del sistema.</div></div>
+    <div class="impact-card"><div class="impact-title" style="color:var(--orange)">📊 DFP</div><div class="impact-body">No puede incluirlo en su optimización. Estos viajes son invisibles. La asignación de choferes queda ciega.</div></div>
+    <div class="impact-card"><div class="impact-title" style="color:var(--purple)">🔄 Rostering</div><div class="impact-body">La conexión carrier-servicio queda desconectada. Impide la migración a Rates 2.0 para estos viajes.</div></div>
+  </div>
+</div>
+
+<div class="sep"></div>
+
+<!-- PROPUESTAS -->
+<div class="section-dark">
+<div class="inner">
+  <div class="eyebrow">Propuestas de solución</div>
+  <h2 class="section-title">Propuestas en evaluación</h2>
+  <p class="section-desc">Cuatro propuestas identificadas. Ninguna ha sido elegida aún — la decisión requiere validación con usuarios y equipos dependientes.</p>
+
+  <!-- LUIS H1 -->
+  <div class="proposal">
+    <div class="proposal-header">
+      <div class="proposal-badge luis">H1</div>
+      <div>
+        <div class="owner-tag luis">Luis Regalado · Producto</div>
+        <div class="proposal-title">Creación unitaria de viajes desde Gestión de Circuitos</div>
+        <div class="proposal-sub">CDU 1 — Creación individual y reactiva desde pantalla</div>
+      </div>
+    </div>
+    <div class="proposal-body">
+      <p class="proposal-desc">Agregar la capacidad de crear un viaje dedicado directamente desde la pantalla de detalle de un circuito. El viaje adopta la nomenclatura y tarifa del circuito automáticamente. Resuelve los casos reactivos (_ADD, _FIX) donde el analista necesita crear un viaje de forma urgente.</p>
+      <div class="pro-contra" style="border-top:1px solid var(--border)">
+        <div class="pro-col">
+          <div class="pc-label pro">✓ Pros</div>
+          <div class="pc-item"><span class="pc-icon pro">✓</span>Scope acotado, autocontenido en Scheduling Fixed Fleet</div>
+          <div class="pc-item"><span class="pc-icon pro">✓</span>El contexto del circuito ya está dado — el usuario llega al viaje desde el lugar correcto</div>
+          <div class="pc-item"><span class="pc-icon pro">✓</span>Nomenclatura y tarifa correctas garantizadas por el contexto del circuito</div>
+          <div class="pc-item"><span class="pc-icon pro">✓</span>Resuelve los casos reactivos de México sin cambiar el ecosistema</div>
+        </div>
+        <div class="contra-col">
+          <div class="pc-label contra">✗ Contras</div>
+          <div class="pc-item"><span class="pc-icon contra">✗</span>No permite editar después de crear — hay que cancelar y recrear</div>
+          <div class="pc-item"><span class="pc-icon contra">✗</span>El escenario E4 (solapamiento con viajes DFP) no tiene approach definido — marcado como TBD en el DOR</div>
+          <div class="pc-item"><span class="pc-icon contra">✗</span>Linking Travel sigue siendo manual con el hack del <code>@@</code></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LUIS H2 -->
+  <div class="proposal">
+    <div class="proposal-header">
+      <div class="proposal-badge luis">H2</div>
+      <div>
+        <div class="owner-tag luis">Luis Regalado · Producto</div>
+        <div class="proposal-title">Import masivo de viajes por planilla desde Circuitos</div>
+        <div class="proposal-sub">CDU 2 — Carga en volumen via planilla estructurada</div>
+      </div>
+    </div>
+    <div class="proposal-body">
+      <p class="proposal-desc">Extender el flujo de carga por planilla para aceptar viajes standalone asociados a un circuito. La planilla incluye <code>circuit_id</code>, <code>fleet_profile_id</code>, ruta, horario y atributos. Los viajes se vinculan al circuito y adoptan su nomenclatura. Resuelve el volumen planificado de Brasil.</p>
+      <div class="pro-contra" style="border-top:1px solid var(--border)">
+        <div class="pro-col">
+          <div class="pc-label pro">✓ Pros</div>
+          <div class="pc-item"><span class="pc-icon pro">✓</span>Resuelve el volumen de Brasil — 9 mega-cargas semanales en un solo flujo</div>
+          <div class="pc-item"><span class="pc-icon pro">✓</span>Reutiliza la lógica de planilla que los usuarios ya conocen</div>
+          <div class="pc-item"><span class="pc-icon pro">✓</span>Escalable para cualquier circuito con volumen planificado</div>
+        </div>
+        <div class="contra-col">
+          <div class="pc-label contra">✗ Contras · ❓ Preguntas</div>
+          <div class="pc-item"><span class="pc-icon contra">✗</span>Requiere que el usuario conozca el <code>circuit_id</code> y <code>fleet_profile_id</code> — no natural para operación reactiva de México</div>
+          <div class="pc-item"><span class="pc-icon contra">✗</span>4 preguntas abiertas en el DOR sin respuesta que pueden afectar billing al lanzar (KM SRM, create_source, validación de tarifa, DFP warning)</div>
+          <div class="pc-item"><span class="pc-icon question">❓</span>¿Resuelve MWH, que es el mayor volumen y no tiene circuito estructurado?</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GUSTAVO 1 -->
+  <div class="proposal">
+    <div class="proposal-header">
+      <div class="proposal-badge gustavo">G1</div>
+      <div>
+        <div class="owner-tag gustavo">Gustavo Candido França · IT</div>
+        <div class="proposal-title">Circuit Itinerary Import — Vista day-by-day</div>
+        <div class="proposal-sub">Propuesta Grid · Itera sobre la pantalla existente de circuitos</div>
+      </div>
+    </div>
+    <div class="proposal-body">
+      <p class="proposal-desc">Vista day-by-day dentro del detalle del circuito existente, con fechas reales en lugar de template semanal. Agrega un botón "Import itineraries" en el header. Los itinerarios planificados se muestran por día con estado (Created / Planned) y los viajes asociados.</p>
+      <div class="pro-contra" style="border-top:1px solid var(--border)">
+        <div class="pro-col">
+          <div class="pc-label pro">✓ Pros</div>
+          <div class="pc-item"><span class="pc-icon pro">✓</span>Muestra el contexto del circuito en fechas reales — más legible que el template semanal actual</div>
+          <div class="pc-item"><span class="pc-icon pro">✓</span>Mantiene todo dentro de la pantalla existente — no hay nueva superficie</div>
+          <div class="pc-item"><span class="pc-icon pro">✓</span>Inspiró la vista day-by-day de la Hipótesis de Solución A</div>
+        </div>
+        <div class="contra-col">
+          <div class="pc-label contra">✗ Contras</div>
+          <div class="pc-item"><span class="pc-icon contra">✗</span>MWH no encaja en la lógica de circuito — la propuesta lo trata igual que Backup y eso no es correcto </div>
+          <div class="pc-item"><span class="pc-icon contra">✗</span>Empieza a convertirse en un mini planner — riesgo que Matheus nombró explícitamente: "no crear funcionalidades complejas difíciles de retirar"</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GUSTAVO 2 -->
+  <div class="proposal">
+    <div class="proposal-header">
+      <div class="proposal-badge gustavo">G2</div>
+      <div>
+        <div class="owner-tag gustavo">Gustavo Candido França · IT</div>
+        <div class="proposal-title">Pantalla nueva separada para Backup y MWH</div>
+        <div class="proposal-sub">Nueva sección con acceso diferenciado por rol</div>
+      </div>
+    </div>
+    <div class="proposal-body">
+      <p class="proposal-desc">Nueva sección específica para carga de Backup y Multiwarehouse, sin tocar la pantalla existente de circuitos. Con acceso diferenciado por rol: planificadores crean y editan, la operación solo modifica horarios y cancela viajes individuales.</p>
+      <div class="pro-contra" style="border-top:1px solid var(--border)">
+        <div class="pro-col">
+          <div class="pc-label pro">✓ Pros</div>
+          <div class="pc-item"><span class="pc-icon pro">✓</span>Resuelve el problema de seguridad — la operación no debería tener acceso a circuitos</div>
+          <div class="pc-item"><span class="pc-icon pro">✓</span>Separa dominios — Backup/MWH con su propia lógica sin contaminar circuitos</div>
+          <div class="pc-item"><span class="pc-icon pro">✓</span>Linking Travel automático para Backup y Drop Hook — elimina el hack del <code>@@</code></div>
+          <div class="pc-item"><span class="pc-icon pro">✓</span>Abre la puerta a crecer hacia Acuerdos y entrada de vehículos en el futuro</div>
+        </div>
+        <div class="contra-col">
+          <div class="pc-label contra">✗ Contras · ❓ Preguntas</div>
+          <div class="pc-item"><span class="pc-icon contra">✗</span>Nadie validó todavía con MLM si la operación realmente necesita acceso propio</div>
+          <div class="pc-item"><span class="pc-icon contra">✗</span>Sin bordes claros de scope, puede convertirse en la herramienta que absorbe todo lo que no encaja en otro lugar</div>
+          <div class="pc-item"><span class="pc-icon question">❓</span>¿Pantalla aparte es una herramienta fuera de las pantallas de gestión de circuitos o bien es una sección nueva?</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="sep"></div>
+
+<!-- HIPÓTESIS DE SOLUCIÓN UX -->
+<div class="section">
+  <div class="eyebrow">Hipótesis de Solución · UX</div>
+  <h2 class="section-title">Hipótesis de Solución A y B</h2>
+  <p class="section-desc">Iteraciones de UX sobre las propuestas del equipo. Cada una incluye flow completo y prototipo navegable.</p>
+
+  <!-- HIP A -->
+  <div class="proposal" style="margin-bottom:20px">
+    <div class="proposal-header">
+      <div class="proposal-badge ux-a">A</div>
+      <div>
+        <div class="owner-tag ux">UX · Iteración sobre H1 + H2 + G1</div>
+        <div class="proposal-title">Hipótesis de Solución A — Iterar sobre Gestión de Circuitos</div>
+        <div class="proposal-sub">CDU 1 (unitario) + CDU 2 (import masivo) desde el detalle del circuito · Vista day-by-day</div>
+      </div>
+    </div>
+    <div class="proposal-body">
+      <p class="proposal-desc">Agrega un CTA bar en el detalle del circuito con dos acciones: <strong>"Crear viaje"</strong> (modal con formulario, CDU 1) e <strong>"Importar planilla"</strong> (vista day-by-day con fechas reales, CDU 2). Los viajes adoptan la nomenclatura y tarifa del circuito al crearse. No se crea nueva superficie — se itera sobre lo que ya existe.</p>
+      <div class="pro-contra" style="border-top:1px solid var(--border)">
+        <div class="pro-col">
+          <div class="pc-label pro">✓ Pros</div>
+          <div class="pc-item"><span class="pc-icon pro">✓</span>Menor scope, más rápido de implementar, alineado al DOR actual</div>
+          <div class="pc-item"><span class="pc-icon pro">✓</span>El usuario parte desde el contexto del circuito — nomenclatura y tarifa correctas garantizadas</div>
+          <div class="pc-item"><span class="pc-icon pro">✓</span>Unifica CDU 1 y CDU 2 en una sola superficie — menos fricción cognitiva</div>
+        </div>
+        <div class="contra-col">
+          <div class="pc-label contra">✗ Contras</div>
+          <div class="pc-item"><span class="pc-icon contra">✗</span>Mezcla lógica de planeación dentro de una herramienta de configuración</div>
+          <div class="pc-item"><span class="pc-icon contra">✗</span>Puede convertirse en el workaround preferido sobre DFP si el flujo es más cómodo</div>
+          <div class="pc-item"><span class="pc-icon contra">✗</span>No resuelve el acceso diferenciado para la operación — todos ven la misma pantalla</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:12px;margin-top:20px;padding-top:16px;border-top:1px solid var(--border);flex-wrap:wrap">
+        <a class="artifact-card" href="https://www.figma.com/board/OVqzn2unxxNpN84zR6NJPl/Hip-A-%E2%80%94-Creacion-desde-Circuitos--horizontal-" target="_blank" style="flex:1;min-width:200px">
+          <div class="artifact-icon">📊</div>
+          <div><div class="artifact-name">Flow — FigJam</div><div class="artifact-desc">Flujo de producto completo con decisiones y estados de error</div><span class="artifact-link">Abrir en FigJam →</span></div>
+        </a>
+        <a class="artifact-card" href="https://drive.google.com/file/d/1iJNMysfpIr3OSOm231RqNGtfVujdBlik/view" target="_blank" style="flex:1;min-width:200px">
+          <div class="artifact-icon">🖥</div>
+          <div><div class="artifact-name">Prototipo navegable</div><div class="artifact-desc">Lista de circuitos → detalle → crear viaje / importar planilla</div><span class="artifact-link">Abrir prototipo →</span></div>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- HIP B -->
+  <div class="proposal">
+    <div class="proposal-header">
+      <div class="proposal-badge ux-b">B</div>
+      <div>
+        <div class="owner-tag ux">UX · Iteración sobre G2</div>
+        <div class="proposal-title">Hipótesis de Solución B — Pantalla nueva separada</div>
+        <div class="proposal-sub">Nueva sección "Viajes especiales" · Backup, Drop Hook y MWH con roles diferenciados</div>
+      </div>
+    </div>
+    <div class="proposal-body">
+      <p class="proposal-desc">Nueva sección en el menú de Fixed Fleet para Backup, Drop Hook y MWH — cada uno con su lógica propia. Acceso diferenciado: planificadores crean y editan, la operación solo modifica horarios y cancela. Linking Travel se genera automáticamente para Backup y Drop Hook.</p>
+      <div class="pro-contra" style="border-top:1px solid var(--border)">
+        <div class="pro-col">
+          <div class="pc-label pro">✓ Pros</div>
+          <div class="pc-item"><span class="pc-icon pro">✓</span>Resuelve el acceso diferenciado por rol — la operación tiene su propia vista acotada</div>
+          <div class="pc-item"><span class="pc-icon pro">✓</span>Más sostenible a futuro — evita contaminar la lógica de circuitos</div>
+          <div class="pc-item"><span class="pc-icon pro">✓</span>Linking Travel sistémico — no depende de la memoria del usuario</div>
+          <div class="pc-item"><span class="pc-icon pro">✓</span>Menor riesgo de adopción masiva no deseada sobre DFP</div>
+        </div>
+        <div class="contra-col">
+          <div class="pc-label contra">✗ Contras · ❓ Preguntas</div>
+          <div class="pc-item"><span class="pc-icon contra">✗</span>Mayor scope — más complejo de implementar dentro del timeline Q3</div>
+          <div class="pc-item"><span class="pc-icon contra">✗</span>Supuesto de acceso de la operación no validado todavía con usuarios de MLM</div>
+          <div class="pc-item"><span class="pc-icon question">❓</span>¿Pantalla aparte es una herramienta fuera de las pantallas de gestión de circuitos o bien es una sección nueva?</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:12px;margin-top:20px;padding-top:16px;border-top:1px solid var(--border);flex-wrap:wrap">
+        <a class="artifact-card" href="https://www.figma.com/board/7HpbbaZzF150KBxXFt5Ac0/Hip-B-%E2%80%94-Pantalla-nueva-separada-Backup-y-MWH--horizontal-" target="_blank" style="flex:1;min-width:200px">
+          <div class="artifact-icon">📊</div>
+          <div><div class="artifact-name">Flow — FigJam</div><div class="artifact-desc">Flujo de producto completo con roles diferenciados y Linking Travel automático</div><span class="artifact-link">Abrir en FigJam →</span></div>
+        </a>
+        <a class="artifact-card" href="https://drive.google.com/file/d/153zMu4iu-vhNwqZm2F4U-4dnggwlFQ8d/view" target="_blank" style="flex:1;min-width:200px">
+          <div class="artifact-icon">🖥</div>
+          <div><div class="artifact-name">Prototipo navegable</div><div class="artifact-desc">Landing con 3 tipos · Backup con Linking Travel · MWH con acceso diferenciado</div><span class="artifact-link">Abrir prototipo →</span></div>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="sep"></div>
+
+<!-- PROPUESTAS UX -->
+<div class="section">
+  <div class="eyebrow">Propuestas UX · Quick wins</div>
+  <h2 class="section-title">Propuestas desde la experiencia del usuario</h2>
+  <p class="section-desc">Dos propuestas que parten del comportamiento real del usuario — no del sistema. Pensadas como quick wins que pueden convivir con cualquiera de las hipótesis de solución anteriores.</p>
+
+  <!-- UX 1 -->
+  <div class="proposal">
+    <div class="proposal-header">
+      <div class="proposal-badge ux-a">U1</div>
+      <div>
+        <div class="owner-tag ux">UX · Quick win</div>
+        <div class="proposal-title">Ruta como punto de entrada</div>
+        <div class="proposal-sub">El usuario busca por ruta — el sistema resuelve el circuito automáticamente</div>
+      </div>
+    </div>
+    <div class="proposal-body">
+      <p class="proposal-desc">Todas las propuestas anteriores asumen que el usuario sabe a qué circuito pertenece el viaje. Pero Renato lo mostró con la Base Cero — él trabaja por rutas y facilities, no por circuitos. Esta propuesta invierte el flujo: <strong>el usuario declara origen → destino y el sistema identifica el circuito y perfil de flota correspondiente</strong>, preseleccionándolos. El usuario nunca necesita conocer el <code>circuit_id</code>.</p>
+      <div class="pro-contra" style="border-top:1px solid var(--border)">
+        <div class="pro-col">
+          <div class="pc-label pro">✓ Pros</div>
+          <div class="pc-item"><span class="pc-icon pro">✓</span>No requiere que el usuario conozca el circuito — trabaja desde la lógica que ya usa (ruta origen → destino)</div>
+          <div class="pc-item"><span class="pc-icon pro">✓</span>Reduce el error principal del DED Legacy: vinculación al contrato equivocado por no encontrar el MelService correcto</div>
+          <div class="pc-item"><span class="pc-icon pro">✓</span>Un solo punto de entrada desde cualquier lugar — no obliga a entrar por el detalle del circuito</div>
+          <div class="pc-item"><span class="pc-icon pro">✓</span>Bajo costo de desarrollo — campo de búsqueda con matching sobre datos ya existentes</div>
+        </div>
+        <div class="contra-col">
+          <div class="pc-label contra">✗ Contras · ❓ Preguntas</div>
+          <div class="pc-item"><span class="pc-icon contra">✗</span>Requiere que el sistema tenga las rutas mapeadas por circuito con datos limpios — si hay inconsistencias, el matching falla</div>
+          <div class="pc-item"><span class="pc-icon contra">✗</span>Si una ruta pertenece a más de un circuito vigente, el usuario tiene que elegir — y puede no saber cuál es el correcto</div>
+          <div class="pc-item"><span class="pc-icon question">❓</span>¿Qué pasa si la ruta que el usuario necesita no existe en ningún circuito vigente? ¿Puede crearla igualmente o queda bloqueado?</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:12px;margin-top:20px;padding-top:16px;border-top:1px solid var(--border);flex-wrap:wrap">
+        <a class="artifact-card" href="https://drive.google.com/file/d/15hPn0bE0-chPuTJ_4eEz7HAtwXvWoblx/view" target="_blank" style="flex:1;min-width:200px">
+          <div class="artifact-icon">🖥</div>
+          <div><div class="artifact-name">Prototipo navegable — UX 1</div><div class="artifact-desc">Buscador de ruta con resolución automática de circuito · Modal paso a paso</div><span class="artifact-link">Abrir prototipo →</span></div>
+        </a>
+        <a class="artifact-card" href="https://www.figma.com/board/OVqzn2unxxNpN84zR6NJPl/Hip-A-%E2%80%94-Creacion-desde-Circuitos--horizontal-" target="_blank" style="flex:1;min-width:200px">
+          <div class="artifact-icon">📊</div>
+          <div><div class="artifact-name">Flow — FigJam</div><div class="artifact-desc">Flujo completo con decisiones y estados de error</div><span class="artifact-link">Abrir en FigJam →</span></div>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- UX 2 -->
+  <div class="proposal">
+    <div class="proposal-header">
+      <div class="proposal-badge ux-b">U2</div>
+      <div>
+        <div class="owner-tag ux">UX · Quick win</div>
+        <div class="proposal-title">Visibilidad del estado semanal antes de crear</div>
+        <div class="proposal-sub">El usuario ve cuántos viajes ya existen esta semana antes de decidir si crear uno nuevo</div>
+      </div>
+    </div>
+    <div class="proposal-body">
+      <p class="proposal-desc">Hoy cuando alguien va a crear un viaje de Backup o MWH, no tiene visibilidad de cuántos viajes ya existen esa semana para ese circuito. Renato lo pidió sin saberlo: <em>"la mayor oportunidad es el control durante la semana"</em>. Esta propuesta agrega <strong>un bloque de estado semanal en el detalle del circuito</strong> — creados, ejecutados, cancelados, pendientes, con mini calendario por día — antes de que el usuario abra el formulario de creación.</p>
+      <div class="pro-contra" style="border-top:1px solid var(--border)">
+        <div class="pro-col">
+          <div class="pc-label pro">✓ Pros</div>
+          <div class="pc-item"><span class="pc-icon pro">✓</span>Responde directamente al pain que Renato articuló: "la mayor oportunidad es el control durante la semana"</div>
+          <div class="pc-item"><span class="pc-icon pro">✓</span>No cambia el flujo de creación — solo agrega contexto antes. Costo de implementación mínimo</div>
+          <div class="pc-item"><span class="pc-icon pro">✓</span>Puede reducir viajes duplicados — el usuario ve que ya hay capacidad antes de crear uno nuevo</div>
+          <div class="pc-item"><span class="pc-icon pro">✓</span>Sirve tanto para planificadores como para la operación — es información, no una acción</div>
+        </div>
+        <div class="contra-col">
+          <div class="pc-label contra">✗ Contras · ❓ Preguntas</div>
+          <div class="pc-item"><span class="pc-icon contra">✗</span>No resuelve el problema de trazabilidad del DED Legacy por sí solo — es un complemento, no una solución standalone</div>
+          <div class="pc-item"><span class="pc-icon contra">✗</span>Si los datos de estado no están en tiempo real, la información puede ser incorrecta y generar más confusión que claridad</div>
+          <div class="pc-item"><span class="pc-icon question">❓</span>¿Quién actualiza el estado de los viajes durante la semana — el sistema automáticamente o la operación manualmente?</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:12px;margin-top:20px;padding-top:16px;border-top:1px solid var(--border);flex-wrap:wrap">
+        <a class="artifact-card" href="https://drive.google.com/file/d/1_Ud7dCCxH7YeqlVuZo4Kk4eLVZtHSslX/view" target="_blank" style="flex:1;min-width:200px">
+          <div class="artifact-icon">🖥</div>
+          <div><div class="artifact-name">Prototipo navegable — UX 2</div><div class="artifact-desc">Estado semanal en detalle de circuito · Mini calendario · CTA contextual</div><span class="artifact-link">Abrir prototipo →</span></div>
+        </a>
+        <a class="artifact-card" href="https://www.figma.com/board/7HpbbaZzF150KBxXFt5Ac0/Hip-B-%E2%80%94-Pantalla-nueva-separada-Backup-y-MWH--horizontal-" target="_blank" style="flex:1;min-width:200px">
+          <div class="artifact-icon">📊</div>
+          <div><div class="artifact-name">Flow — FigJam</div><div class="artifact-desc">Flujo completo con camino de no-creación y actualización del contador</div><span class="artifact-link">Abrir en FigJam →</span></div>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="sep"></div>
+
+<!-- MATRIZ -->
+<div class="section-dark">
+<div class="inner">
+  <div class="eyebrow">Decisión de diseño</div>
+  <h2 class="section-title">Matriz de decisión — A vs B</h2>
+  <p class="section-desc">Las dos hipótesis de solución son válidas hoy. Lo que el usuario de MLM confirme define cuál tiene más fundamento.</p>
+  <div class="decision-wrap">
+    <table class="decision-table">
+      <thead>
+        <tr style="background:var(--surface2)">
+          <th class="var">Variable</th>
+          <th class="a">Hipótesis de Solución A</th>
+          <th class="b">Hipótesis de Solución B</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="var">¿Backup y MWH son operativamente distintos de un circuito?</td><td class="opt">Si son similares → A es suficiente, no hace falta separar</td><td class="opt">Si son distintos → B justifica la separación de dominio</td></tr>
+        <tr><td class="var">¿La operación necesita acceso propio a la herramienta?</td><td class="opt">No → la operación sigue dependiendo del planificador</td><td class="opt">Sí → B resuelve el problema de acceso y seguridad</td></tr>
+        <tr><td class="var">¿MLM planifica con anticipación o es reactivo?</td><td class="opt">Reactivo → CDU 1 es el flujo principal para México. A más directa.</td><td class="opt">Planifica → CDU 2 tiene sentido también para MLM. B puede escalar.</td></tr>
+        <tr><td class="var">¿El scope de Q3 aguanta una pantalla nueva?</td><td class="opt">Presión de tiempo → A itera sobre existente, menor fricción</td><td class="opt">Hay margen → B más sostenible, evita contaminar circuitos</td></tr>
+        <tr><td class="var">¿Riesgo de que el nuevo flujo desplace a DFP?</td><td class="opt">Alto — vive dentro de circuitos, puede volverse el camino default</td><td class="opt">Medio — sección separada, acceso acotado</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="callout">
+    <h3>La pregunta que define todo</h3>
+    <p>Si el usuario de MLM confirma que Backup y MWH son operativamente distintos de un circuito, y que la operación necesita acceso propio — <strong>la Hipótesis de Solución B tiene el argumento</strong>. Si son similares y la operación no accede sola — <strong>la Hipótesis de Solución A es más simple y más rápida de implementar</strong>. No hay respuesta correcta antes de esa conversación.</p>
+  </div>
+</div>
+</div>
+
+<div class="sep"></div>
+
+<!-- GLOSARIO -->
+<div class="section">
+  <div class="eyebrow">Glosario</div>
+  <h2 class="section-title">Diccionario de términos</h2>
+  <p class="section-desc">Todos los tecnicismos en lenguaje simple.</p>
+  <div class="grid-3">
+    <div class="card card-sm"><div style="font-size:12px;font-weight:800;color:var(--red);margin-bottom:8px">DED Legacy</div><div style="font-size:14px;color:var(--muted);line-height:1.6">Viaje Middle Mile que dice ser "dedicado" pero fue creado fuera del sistema de circuitos. El problema central.</div></div>
+    <div class="card card-sm"><div style="font-size:12px;font-weight:800;color:var(--blue-light);margin-bottom:8px">Circuito</div><div style="font-size:14px;color:var(--muted);line-height:1.6">Ruta de transporte configurada en el sistema con vehículos asignados, reglas tarifarias e itinerarios.</div></div>
+    <div class="card card-sm"><div style="font-size:12px;font-weight:800;color:var(--green);margin-bottom:8px">DFP</div><div style="font-size:14px;color:var(--muted);line-height:1.6"><em>Dedicated Fleet Planning</em>: sistema que planifica automáticamente los viajes de los circuitos.</div></div>
+    <div class="card card-sm"><div style="font-size:12px;font-weight:800;color:var(--yellow);margin-bottom:8px">FFM</div><div style="font-size:14px;color:var(--muted);line-height:1.6"><em>Fixed Fleet Management</em>: equipo y dominio que gestiona los circuitos dedicados de Middle Mile.</div></div>
+    <div class="card card-sm"><div style="font-size:12px;font-weight:800;color:var(--purple);margin-bottom:8px">Multiwarehouse (MWH)</div><div style="font-size:14px;color:var(--muted);line-height:1.6">Viaje dedicado entre dos warehouses Full. No sigue un circuito rígido — las rutas varían según necesidad semanal.</div></div>
+    <div class="card card-sm"><div style="font-size:12px;font-weight:800;color:var(--orange);margin-bottom:8px">Candado Tarifario D-48</div><div style="font-size:14px;color:var(--muted);line-height:1.6">Regla que impide modificar la tarifa con menos de 48 horas de anticipación. Principal consecuencia del DED Legacy.</div></div>
+    <div class="card card-sm"><div style="font-size:12px;font-weight:800;color:var(--cyan);margin-bottom:8px">MelService</div><div style="font-size:14px;color:var(--muted);line-height:1.6">Identificador interno del servicio contratado. Define si el contrato es spot o dedicado y de ahí se deriva la tarifa.</div></div>
+    <div class="card card-sm"><div style="font-size:12px;font-weight:800;color:var(--blue-light);margin-bottom:8px">Perfil de flota</div><div style="font-size:14px;color:var(--muted);line-height:1.6">Abstracción del contrato dedicado dentro de un circuito. Une el circuito con el contrato comercial.</div></div>
+    <div class="card card-sm"><div style="font-size:12px;font-weight:800;color:var(--muted);margin-bottom:8px">Middle Mile</div><div style="font-size:14px;color:var(--muted);line-height:1.6">Transporte de larga distancia entre bodegas, antes de que el paquete llegue al repartidor final.</div></div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <strong style="color:var(--text)">DED Legacy — Análisis UX Ejecutivo · v5</strong><br>
+  Actualizado el 10 de agosto de 2026 · Equipo Fixed Fleet · MercadoLibre<br>
+  Basado en: DOR DED Legacies Standalone · Discovery de Solución · Reuniones jul–ago 2026 · Entrevista MLB 07/08/2026
+</div>
+
+</body>
+</html>
