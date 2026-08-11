@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UX 1 — Ruta como punto de entrada</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --yellow: #FFE600;
+    --blue: #3483FA;
+    --blue-dark: #2968C8;
+    --green: #00A650;
+    --red: #F23D4F;
+    --gray-bg: #F5F5F5;
+    --gray-100: #EFEFEF;
+    --gray-200: #E0E0E0;
+    --gray-400: #999;
+    --gray-600: #666;
+    --gray-800: #333;
+    --white: #fff;
+    --border: #E0E0E0;
+    --radius: 6px;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  body { font-family: var(--font); background: var(--gray-bg); color: var(--gray-800); font-size: 14px; min-height: 100vh; }
+
+  /* TOPBAR */
+  .topbar { background: var(--yellow); height: 48px; display: flex; align-items: center; padding: 0 20px; justify-content: space-between; border-bottom: 1px solid #F0D800; position: sticky; top: 0; z-index: 100; }
+  .topbar-logo { display: flex; align-items: center; gap: 10px; }
+  .topbar-logo svg { width: 32px; height: 32px; }
+  .topbar-logo span { font-size: 15px; font-weight: 600; color: var(--gray-800); }
+  .topbar-right { display: flex; align-items: center; gap: 16px; font-size: 13px; color: var(--gray-800); }
+  .site-badge { background: var(--white); border-radius: 4px; padding: 3px 8px; font-weight: 600; font-size: 12px; display: flex; align-items: center; gap: 4px; }
+
+  /* LAYOUT */
+  .app { display: flex; min-height: calc(100vh - 48px); }
+  .sidebar { width: 220px; background: var(--white); border-right: 1px solid var(--border); padding: 20px 0; flex-shrink: 0; }
+  .sidebar-section { padding: 0 16px; margin-bottom: 20px; }
+  .sidebar-label { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--gray-400); margin-bottom: 8px; }
+  .sidebar-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: var(--radius); font-size: 13px; color: var(--gray-600); cursor: pointer; margin-bottom: 2px; transition: background .15s; }
+  .sidebar-item:hover { background: var(--gray-100); }
+  .sidebar-item.active { background: #EBF2FF; color: var(--blue); font-weight: 600; }
+
+  .main { flex: 1; padding: 28px 32px; }
+
+  /* SCREEN */
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* BREADCRUMB */
+  .breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 13px; margin-bottom: 20px; }
+  .breadcrumb a { color: var(--blue); cursor: pointer; text-decoration: none; }
+  .breadcrumb a:hover { text-decoration: underline; }
+  .breadcrumb span { color: var(--gray-400); }
+
+  /* PAGE HEADER */
+  .page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 24px; }
+  .page-title { font-size: 22px; font-weight: 700; }
+  .page-subtitle { font-size: 13px; color: var(--gray-400); margin-top: 4px; }
+
+  /* BUTTONS */
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: var(--radius); font-size: 13px; font-weight: 600; cursor: pointer; border: none; font-family: var(--font); transition: all .15s; }
+  .btn-primary { background: var(--blue); color: var(--white); }
+  .btn-primary:hover { background: var(--blue-dark); }
+  .btn-secondary { background: var(--white); color: var(--blue); border: 1.5px solid var(--blue); }
+  .btn-secondary:hover { background: #EBF2FF; }
+  .btn-ghost { background: var(--white); color: var(--gray-600); border: 1.5px solid var(--border); }
+  .btn-ghost:hover { background: var(--gray-100); }
+  .btn-sm { padding: 6px 12px; font-size: 12px; }
+  .btn-group { display: flex; gap: 8px; align-items: center; }
+
+  /* TABLE */
+  .table-wrap { background: var(--white); border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; }
+  .table { width: 100%; border-collapse: collapse; }
+  .table th { background: var(--gray-100); padding: 10px 14px; text-align: left; font-size: 12px; font-weight: 700; color: var(--gray-600); border-bottom: 1px solid var(--border); }
+  .table td { padding: 12px 14px; border-bottom: 1px solid var(--gray-100); font-size: 13px; vertical-align: middle; }
+  .table tr:last-child td { border-bottom: none; }
+  .table tr:hover td { background: #FAFAFA; cursor: pointer; }
+
+  /* BADGE */
+  .badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+  .badge-green { background: #E6F9F0; color: var(--green); }
+  .badge-gray { background: var(--gray-100); color: var(--gray-400); }
+  .badge-blue { background: #EBF2FF; color: var(--blue); }
+  .badge-version { background: #EBF2FF; color: var(--blue); font-size: 11px; font-weight: 700; padding: 1px 6px; border-radius: 4px; }
+  .chip { background: var(--gray-100); border-radius: 4px; padding: 2px 8px; font-size: 11px; font-weight: 600; color: var(--gray-600); display: inline-flex; align-items: center; }
+
+  /* CONTROLS */
+  .controls { display: flex; gap: 10px; margin-bottom: 20px; align-items: center; }
+  .search-box { display: flex; align-items: center; gap: 8px; background: var(--white); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 7px 12px; font-size: 13px; color: var(--gray-400); min-width: 200px; cursor: text; }
+
+  /* CARD */
+  .card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; }
+
+  /* MODAL */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 200; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--white); border-radius: 10px; width: 560px; max-width: 95vw; box-shadow: 0 8px 32px rgba(0,0,0,.15); overflow: hidden; animation: modalIn .18s ease; }
+  @keyframes modalIn { from { transform: translateY(12px); opacity: 0; } to { transform: none; opacity: 1; } }
+  .modal-header { padding: 20px 24px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .modal-title { font-size: 16px; font-weight: 700; }
+  .modal-close { width: 28px; height: 28px; border-radius: 50%; border: none; background: var(--gray-100); cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; color: var(--gray-600); }
+  .modal-body { padding: 20px 24px; }
+  .modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; gap: 10px; justify-content: flex-end; }
+
+  /* FORM */
+  .form-group { margin-bottom: 16px; }
+  .form-label { font-size: 12px; font-weight: 700; color: var(--gray-600); margin-bottom: 6px; display: block; }
+  .form-input { width: 100%; padding: 9px 12px; border: 1.5px solid var(--border); border-radius: var(--radius); font-size: 13px; font-family: var(--font); color: var(--gray-800); transition: border-color .15s; outline: none; }
+  .form-input:focus { border-color: var(--blue); }
+  .form-select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23999' stroke-width='1.5' fill='none'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .form-hint { font-size: 11px; color: var(--gray-400); margin-top: 4px; }
+
+  /* ── UX 1: ROUTE SEARCH ── */
+  .route-search-wrap { position: relative; margin-bottom: 8px; }
+  .route-search-input {
+    width: 100%; padding: 10px 14px 10px 36px;
+    border: 2px solid var(--blue); border-radius: var(--radius);
+    font-size: 14px; font-family: var(--font); color: var(--gray-800);
+    outline: none; background: #EBF2FF08;
+  }
+  .route-search-icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--blue); font-size: 15px; }
+  .route-dropdown {
+    position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+    background: var(--white); border: 1.5px solid var(--border);
+    border-radius: var(--radius); box-shadow: 0 4px 16px rgba(0,0,0,.1);
+    z-index: 10; overflow: hidden;
+  }
+  .route-dropdown-header { padding: 8px 14px; font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--gray-400); background: var(--gray-100); border-bottom: 1px solid var(--border); }
+  .route-option { display: flex; align-items: center; gap: 12px; padding: 12px 14px; cursor: pointer; border-bottom: 1px solid var(--gray-100); transition: background .1s; }
+  .route-option:last-child { border-bottom: none; }
+  .route-option:hover { background: #EBF2FF; }
+  .route-option.selected { background: #EBF2FF; }
+  .route-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+  .route-option-main { font-size: 13px; font-weight: 600; color: var(--gray-800); }
+  .route-option-meta { font-size: 11px; color: var(--gray-400); margin-top: 2px; }
+  .route-option-right { margin-left: auto; text-align: right; }
+  .route-circuit-badge { font-size: 11px; font-weight: 700; background: #EBF2FF; color: var(--blue); padding: 2px 8px; border-radius: 4px; }
+
+  /* CIRCUIT RESOLVED */
+  .circuit-resolved {
+    background: #E6F9F0; border: 1.5px solid var(--green);
+    border-radius: var(--radius); padding: 14px 16px;
+    display: flex; align-items: center; gap: 12px; margin-bottom: 16px;
+  }
+  .circuit-resolved-icon { font-size: 18px; flex-shrink: 0; }
+  .circuit-resolved-text { flex: 1; }
+  .circuit-resolved-text strong { font-size: 13px; font-weight: 700; color: var(--gray-800); display: block; }
+  .circuit-resolved-text span { font-size: 12px; color: var(--gray-600); }
+  .circuit-resolved-change { font-size: 12px; color: var(--blue); cursor: pointer; font-weight: 600; flex-shrink: 0; }
+
+  /* ALERT */
+  .alert { border-radius: var(--radius); padding: 12px 16px; margin-bottom: 16px; display: flex; gap: 10px; align-items: flex-start; font-size: 13px; }
+  .alert-info { background: #EBF2FF; border: 1px solid #C0D7FF; color: #1A4FA0; }
+  .alert-warning { background: #FFFBE6; border: 1px solid #FFE600; color: #7A6000; }
+  .alert-success { background: #E6F9F0; border: 1px solid #00A650; color: #005C2D; }
+
+  /* STEP INDICATOR */
+  .steps { display: flex; align-items: center; gap: 0; margin-bottom: 24px; }
+  .step { display: flex; align-items: center; gap: 8px; }
+  .step-num { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; flex-shrink: 0; }
+  .step-num.active { background: var(--blue); color: var(--white); }
+  .step-num.done { background: var(--green); color: var(--white); }
+  .step-num.pending { background: var(--gray-200); color: var(--gray-400); }
+  .step-label { font-size: 12px; font-weight: 600; }
+  .step-label.active { color: var(--blue); }
+  .step-label.done { color: var(--green); }
+  .step-label.pending { color: var(--gray-400); }
+  .step-line { flex: 1; height: 1px; background: var(--gray-200); margin: 0 8px; min-width: 24px; }
+  .step-line.done { background: var(--green); }
+
+  /* SUCCESS */
+  .success-icon { width: 56px; height: 56px; background: #E6F9F0; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 26px; }
+  .success-center { text-align: center; padding: 16px 0 8px; }
+
+  /* PROTO LABEL */
+  .proto-label { position: fixed; bottom: 16px; right: 16px; background: var(--blue); color: var(--white); font-size: 11px; font-weight: 700; padding: 6px 12px; border-radius: 20px; letter-spacing: .04em; text-transform: uppercase; opacity: .8; pointer-events: none; }
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-logo">
+    <svg viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="20" fill="#fff"/><path d="M8 20c0-6.627 5.373-12 12-12s12 5.373 12 12-5.373 12-12 12S8 26.627 8 20z" fill="#3483FA"/><path d="M14 20l4 4 8-8" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <span>Fixed fleet · Circuits</span>
+  </div>
+  <div class="topbar-right">
+    <div class="site-badge">MLB <span style="color:#ccc">›</span> ✕</div>
+    <span>Leonardo ˅</span>
+  </div>
+</div>
+
+<div class="app">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Planning</div>
+      <div class="sidebar-item">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5" height="5" rx="1" fill="currentColor"/><rect x="9" y="2" width="5" height="5" rx="1" fill="currentColor" opacity=".4"/><rect x="2" y="9" width="5" height="5" rx="1" fill="currentColor" opacity=".4"/><rect x="9" y="9" width="5" height="5" rx="1" fill="currentColor" opacity=".4"/></svg>
+        Overview
+      </div>
+      <div class="sidebar-item active">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/><path d="M8 5v3l2 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Circuits
+      </div>
+      <div class="sidebar-item">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M5 7h6M5 10h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Calendar
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Operations</div>
+      <div class="sidebar-item">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h12M8 2l4 6-4 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Travel activity
+      </div>
+      <div class="sidebar-item">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 2h8a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V3a1 1 0 011-1z" stroke="currentColor" stroke-width="1.5"/><path d="M6 6h4M6 9h2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Imports
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- SCREEN: LISTA -->
+    <div class="screen active" id="screen-list">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Gestión de circuitos</div>
+          <div class="page-subtitle">Haz seguimiento de los circuitos y sus estados.</div>
+        </div>
+        <div class="btn-group">
+          <button class="btn btn-ghost">Crear circuito</button>
+          <button class="btn btn-primary" onclick="showModal('modal-ux1')">+ Crear viaje</button>
+        </div>
+      </div>
+
+      <div class="controls">
+        <div class="search-box">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.5"/><path d="M11 11l3 3" stroke="#999" stroke-width="1.5" stroke-linecap="round"/></svg>
+          Buscar
+        </div>
+        <button class="btn btn-ghost btn-sm">⚙ Filtros</button>
+      </div>
+
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th><input type="checkbox"></th>
+              <th>Circuito</th>
+              <th>Perfil de flota</th>
+              <th>Transportadora</th>
+              <th>Costo fijo</th>
+              <th>Saving semanal</th>
+              <th>Vigencia</th>
+              <th>Estado</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><input type="checkbox"></td>
+              <td><div style="font-weight:700">CE04 <span class="badge-version">V3</span></div><div style="font-size:11px;color:var(--gray-400)">ID 1682</div></td>
+              <td><div style="font-size:12px">34 Carreta <span style="color:var(--gray-400)">+4</span></div><div style="font-size:11px;color:var(--gray-400)">1 conductor</div></td>
+              <td style="font-size:13px">Lemar</td>
+              <td>R$ 0,00</td><td>R$ 0,00</td><td>11/08/2026</td>
+              <td><div style="font-weight:700;font-size:12px">Configurado</div><div style="margin-top:2px"><span class="badge badge-green">Vigente</span></div></td>
+              <td>⚠️</td>
+            </tr>
+            <tr>
+              <td><input type="checkbox"></td>
+              <td><div style="font-weight:700">C414.3 <span class="badge-version">V7</span></div><div style="font-size:11px;color:var(--gray-400)">ID 1633</div></td>
+              <td><div style="font-size:12px">6 Carreta</div><div style="font-size:11px"><span class="chip">Diesel</span></div></td>
+              <td style="font-size:13px">MARONItransp</td>
+              <td>R$ 48.200,40</td><td>R$ 84.755,80</td><td>10/08/2026</td>
+              <td><div style="font-weight:700;font-size:12px">Configurado</div><div style="margin-top:2px"><span class="badge badge-green">Vigente</span></div></td>
+              <td></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox"></td>
+              <td><div style="font-weight:700">C415.1 <span class="badge-version">V2</span></div><div style="font-size:11px;color:var(--gray-400)">ID 1632</div></td>
+              <td><div style="font-size:12px">5 Carreta</div><div style="font-size:11px"><span class="chip">Diesel</span></div></td>
+              <td style="font-size:13px">MARONItransp</td>
+              <td>R$ 40.167,00</td><td>R$ 63.952,79</td><td>10/08/2026</td>
+              <td><div style="font-weight:700;font-size:12px">Configurado</div><div style="margin-top:2px"><span class="badge badge-green">Vigente</span></div></td>
+              <td></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox"></td>
+              <td><div style="font-weight:700">C366.7 <span class="badge-version">V1</span></div><div style="font-size:11px;color:var(--gray-400)">ID 1686</div></td>
+              <td><div style="font-size:12px">6 Carreta_Al...</div><div style="font-size:11px"><span class="chip">GNV</span></div></td>
+              <td style="font-size:13px">MARONItransp</td>
+              <td>R$ 65.852,52</td><td>-R$ 1.980,13</td><td>03/08/2026</td>
+              <td><div style="font-weight:700;font-size:12px">Configurado</div><div style="margin-top:2px"><span class="badge badge-green">Vigente</span></div></td>
+              <td></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- CALLOUT UX 1 -->
+      <div class="alert alert-info" style="margin-top:16px">
+        <span>💡</span>
+        <div><strong>Nuevo:</strong> Ahora podés crear un viaje buscando directamente por ruta — el sistema identifica el circuito correspondiente automáticamente. Hacé clic en <strong>+ Crear viaje</strong> para probarlo.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL UX 1: PASO 1 — BÚSQUEDA POR RUTA -->
+<div class="modal-overlay" id="modal-ux1">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Crear viaje dedicado</div>
+      <button class="modal-close" onclick="closeModal('modal-ux1')">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-num active">1</div>
+          <div class="step-label active">Ruta</div>
+        </div>
+        <div class="step-line"></div>
+        <div class="step">
+          <div class="step-num pending">2</div>
+          <div class="step-label pending">Circuito</div>
+        </div>
+        <div class="step-line"></div>
+        <div class="step">
+          <div class="step-num pending">3</div>
+          <div class="step-label pending">Detalles</div>
+        </div>
+        <div class="step-line"></div>
+        <div class="step">
+          <div class="step-num pending">4</div>
+          <div class="step-label pending">Confirmar</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">¿Desde dónde hasta dónde va el viaje?</label>
+        <div class="route-search-wrap">
+          <span class="route-search-icon">🔍</span>
+          <input type="text" class="route-search-input" placeholder="Escribí el origen o destino, ej: BRRC01, BRSP06..." value="BRRC01 → BRSP" oninput="handleRouteInput(this)" onfocus="showDropdown()" id="route-input">
+          <div class="route-dropdown" id="route-dropdown">
+            <div class="route-dropdown-header">Rutas encontradas — 3 resultados</div>
+            <div class="route-option" onclick="selectRoute('BRRC01 → BRSP06', 'CE04', 'V3', 'Lemar · FP-501')">
+              <div class="route-dot"></div>
+              <div>
+                <div class="route-option-main">BRRC01 → BRSP06</div>
+                <div class="route-option-meta">São Paulo Norte → GLP Cajamar II · 52 km</div>
+              </div>
+              <div class="route-option-right">
+                <div class="route-circuit-badge">CE04</div>
+                <div style="font-size:10px;color:var(--gray-400);margin-top:3px">Vigente</div>
+              </div>
+            </div>
+            <div class="route-option" onclick="selectRoute('BRRC01 → BRSP11', 'C414.3', 'V7', 'MARONItransp · FP-42294')">
+              <div class="route-dot"></div>
+              <div>
+                <div class="route-option-main">BRRC01 → BRSP11</div>
+                <div class="route-option-meta">São Paulo Norte → Jundiaí · 71 km</div>
+              </div>
+              <div class="route-option-right">
+                <div class="route-circuit-badge">C414.3</div>
+                <div style="font-size:10px;color:var(--gray-400);margin-top:3px">Vigente</div>
+              </div>
+            </div>
+            <div class="route-option" onclick="selectRoute('BRRC01 → BRSP02', 'C415.1', 'V2', 'MARONItransp · FP-42280')">
+              <div class="route-dot"></div>
+              <div>
+                <div class="route-option-main">BRRC01 → BRSP02</div>
+                <div class="route-option-meta">São Paulo Norte → GLP Cajamar I · 48 km</div>
+              </div>
+              <div class="route-option-right">
+                <div class="route-circuit-badge">C415.1</div>
+                <div style="font-size:10px;color:var(--gray-400);margin-top:3px">Vigente</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="form-hint">El sistema busca entre las rutas de circuitos vigentes. Seleccioná una para continuar.</div>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-ux1')">Cancelar</button>
+      <button class="btn btn-primary" onclick="closeModal('modal-ux1');showModal('modal-ux1-paso2')" disabled id="btn-next-1">Continuar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL UX 1: PASO 2 — CIRCUITO RESUELTO -->
+<div class="modal-overlay" id="modal-ux1-paso2">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Crear viaje dedicado</div>
+      <button class="modal-close" onclick="closeModal('modal-ux1-paso2')">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <div class="steps">
+        <div class="step"><div class="step-num done">✓</div><div class="step-label done">Ruta</div></div>
+        <div class="step-line done"></div>
+        <div class="step"><div class="step-num done">✓</div><div class="step-label done">Circuito</div></div>
+        <div class="step-line"></div>
+        <div class="step"><div class="step-num active">3</div><div class="step-label active">Detalles</div></div>
+        <div class="step-line"></div>
+        <div class="step"><div class="step-num pending">4</div><div class="step-label pending">Confirmar</div></div>
+      </div>
+
+      <!-- CIRCUITO RESUELTO AUTOMÁTICAMENTE -->
+      <div class="circuit-resolved">
+        <div class="circuit-resolved-icon">✅</div>
+        <div class="circuit-resolved-text">
+          <strong>Circuito identificado: C414.3 V7 · FP-42294</strong>
+          <span>MARONItransp · Carreta Diesel · BRRC01 → BRSP11 · Vigente hasta 10/08/2026</span>
+        </div>
+        <div class="circuit-resolved-change" onclick="closeModal('modal-ux1-paso2');showModal('modal-ux1')">Cambiar</div>
+      </div>
+
+      <div class="alert alert-info" style="margin-bottom:16px">
+        <span>ℹ️</span>
+        <div>El viaje adoptará la nomenclatura y tarifa de <strong>C414.3</strong>. No clasificará como DED Legacy.</div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">ETA Origen</label>
+          <input type="datetime-local" class="form-input" value="2026-08-11T08:30">
+        </div>
+        <div class="form-group">
+          <label class="form-label">ETD Origen</label>
+          <input type="datetime-local" class="form-input" value="2026-08-11T09:00">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Atributo</label>
+        <select class="form-input form-select">
+          <option>MWH — Multiwarehouse</option>
+          <option>ADD — Adicional</option>
+          <option>BKP — Backup</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Perfil de flota</label>
+        <select class="form-input form-select">
+          <option>FP-42294 · Carreta Vehículo 0Km Diesel 2M (preseleccionado)</option>
+        </select>
+        <div class="form-hint">Único perfil activo para este circuito.</div>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-ux1-paso2');showModal('modal-ux1')">← Atrás</button>
+      <button class="btn btn-primary" onclick="closeModal('modal-ux1-paso2');showModal('modal-ux1-paso3')">Continuar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL UX 1: PASO 3 — CONFIRMACIÓN -->
+<div class="modal-overlay" id="modal-ux1-paso3">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Crear viaje dedicado</div>
+      <button class="modal-close" onclick="closeModal('modal-ux1-paso3')">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <div class="steps">
+        <div class="step"><div class="step-num done">✓</div><div class="step-label done">Ruta</div></div>
+        <div class="step-line done"></div>
+        <div class="step"><div class="step-num done">✓</div><div class="step-label done">Circuito</div></div>
+        <div class="step-line done"></div>
+        <div class="step"><div class="step-num done">✓</div><div class="step-label done">Detalles</div></div>
+        <div class="step-line"></div>
+        <div class="step"><div class="step-num active">4</div><div class="step-label active">Confirmar</div></div>
+      </div>
+
+      <div style="background:var(--gray-100);border-radius:var(--radius);padding:16px;margin-bottom:16px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--gray-400);margin-bottom:12px">Resumen del viaje</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div><div style="font-size:11px;color:var(--gray-400)">Ruta</div><div style="font-size:13px;font-weight:600">BRRC01 → BRSP11</div></div>
+          <div><div style="font-size:11px;color:var(--gray-400)">Circuito</div><div style="font-size:13px;font-weight:600">C414.3 V7</div></div>
+          <div><div style="font-size:11px;color:var(--gray-400)">ETA Origen</div><div style="font-size:13px;font-weight:600">11 Ago · 08:30</div></div>
+          <div><div style="font-size:11px;color:var(--gray-400)">Perfil de flota</div><div style="font-size:13px;font-weight:600">FP-42294 · Diesel</div></div>
+          <div><div style="font-size:11px;color:var(--gray-400)">Atributo</div><div style="font-size:13px;font-weight:600">MWH</div></div>
+          <div><div style="font-size:11px;color:var(--gray-400)">Transportadora</div><div style="font-size:13px;font-weight:600">MARONItransp</div></div>
+        </div>
+      </div>
+
+      <div style="background:var(--gray-100);border-radius:var(--radius);padding:12px 16px;margin-bottom:16px">
+        <div style="font-size:11px;color:var(--gray-400);margin-bottom:4px">Nomenclatura del viaje</div>
+        <div style="font-family:'SF Mono',monospace;font-size:13px;color:var(--gray-800);font-weight:600">BRRC01-BRSP11@BRRC01.DED.C414.3.MWH</div>
+      </div>
+
+      <div class="alert alert-success">
+        <span>✅</span>
+        <div>Este viaje <strong>no clasificará como DED Legacy</strong>. Tarifa válida garantizada por el contexto del circuito C414.3.</div>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-ux1-paso3');showModal('modal-ux1-paso2')">← Atrás</button>
+      <button class="btn btn-primary" onclick="closeModal('modal-ux1-paso3');showModal('modal-ux1-success')">Crear viaje</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL UX 1: SUCCESS -->
+<div class="modal-overlay" id="modal-ux1-success">
+  <div class="modal">
+    <div class="modal-body">
+      <div class="success-center">
+        <div class="success-icon">✅</div>
+        <div style="font-size:16px;font-weight:700;margin-bottom:8px">Viaje creado exitosamente</div>
+        <div style="font-size:13px;color:var(--gray-600);margin-bottom:4px">BRRC01-BRSP11@BRRC01.DED.C414.3.MWH</div>
+        <div style="font-size:12px;color:var(--gray-400)">C414.3 · FP-42294 · TR–84310</div>
+      </div>
+    </div>
+    <div class="modal-footer" style="justify-content:center">
+      <button class="btn btn-ghost" onclick="closeModal('modal-ux1-success')">Ver circuito</button>
+      <button class="btn btn-primary" onclick="closeModal('modal-ux1-success');showModal('modal-ux1')">Crear otro viaje</button>
+    </div>
+  </div>
+</div>
+
+<div class="proto-label">UX 1 · Ruta como entrada</div>
+
+<script>
+  let routeSelected = false;
+
+  function showModal(id) { document.getElementById(id).classList.add('open'); }
+  function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+  document.querySelectorAll('.modal-overlay').forEach(o => {
+    o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
+  });
+
+  function showDropdown() {
+    document.getElementById('route-dropdown').style.display = 'block';
+  }
+
+  function handleRouteInput(input) {
+    const dd = document.getElementById('route-dropdown');
+    dd.style.display = input.value.length > 2 ? 'block' : 'none';
+    if (routeSelected && input.value !== document.getElementById('route-input').dataset.selected) {
+      routeSelected = false;
+      document.getElementById('btn-next-1').disabled = true;
+    }
+  }
+
+  function selectRoute(route, circuit, version, meta) {
+    const input = document.getElementById('route-input');
+    input.value = route;
+    input.dataset.selected = route;
+    document.getElementById('route-dropdown').style.display = 'none';
+    routeSelected = true;
+    document.getElementById('btn-next-1').disabled = false;
+  }
+
+  document.addEventListener('click', e => {
+    const dd = document.getElementById('route-dropdown');
+    if (dd && !e.target.closest('.route-search-wrap')) {
+      dd.style.display = 'none';
+    }
+  });
+</script>
+</body>
+</html>
