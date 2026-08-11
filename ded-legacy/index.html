@@ -252,6 +252,17 @@
   }
 </style>
 </head>
+<script>
+(function(){
+  try {
+    window.parent.addEventListener('message', function _gpl(e){
+      if(e.data && e.data.type==='openProto' && e.data.url){
+        window.parent.open(e.data.url,'_blank');
+      }
+    }, false);
+  } catch(ex) {}
+})();
+</script>
 <body>
 
 <!-- LANG BAR -->
